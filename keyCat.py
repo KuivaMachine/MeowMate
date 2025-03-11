@@ -38,7 +38,7 @@ class MouseTrackerThread(QThread):
 class TransparentWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        windowSize=200
+        self.windowSize=300
         # Создаем и запускаем поток для отслеживания мыши
         self.mouse_tracker = MouseTrackerThread()
         self.mouse_tracker.mouse_moved.connect(self.update_mouse_position)
@@ -52,7 +52,7 @@ class TransparentWindow(QMainWindow):
         # Настройки окна
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, taskbar_y-windowSize, windowSize, windowSize))  # Размещаем окно над панелью задач
+        self.setGeometry(QRect(1500, taskbar_y-self.windowSize, self.windowSize, self.windowSize))  # Размещаем окно над панелью задач
 
         # Определяем путь к каталогу с данными в зависимости от режима исполнения
         if getattr(sys, 'frozen', False):
@@ -87,12 +87,13 @@ class TransparentWindow(QMainWindow):
         self.eye2 = QPixmap("D://py/cat/eye2.png")  # Укажите путь к изображению глаза
         self.eye_big = QPixmap("D://py/cat/eye_big.png")  # Укажите путь к изображению глаза
         self.eye2_big = QPixmap("D://py/cat/eye2_big.png")  # Укажите путь к изображению глаза
+        self.cat_fly = QPixmap("D://py/cat/cat_fly.png")  # Укажите путь к изображению глаза
 
 
         # Создаем 1 глаз
         self.eye_l = QLabel(self)
         self.eye_l.setPixmap(self.eye)
-        self.eye_l.setGeometry(0, 0, windowSize,windowSize)
+        self.eye_l.setGeometry(0, 0, self.windowSize,self.windowSize)
 
         #Анимации для плавного движения глаз
         self.eye_l_animation = QPropertyAnimation(self.eye_l, b"pos")
@@ -103,7 +104,7 @@ class TransparentWindow(QMainWindow):
          # Создаем 2 глаз
         self.eye_r = QLabel(self)
         self.eye_r.setPixmap(self.eye2)
-        self.eye_r.setGeometry(0, 0, windowSize,windowSize)
+        self.eye_r.setGeometry(0, 0, self.windowSize,self.windowSize)
         self.eye_r_animation = QPropertyAnimation(self.eye_r, b"pos")
         self.eye_r_animation.setDuration(200)  # Длительность анимации: 200 мс
         
@@ -115,12 +116,15 @@ class TransparentWindow(QMainWindow):
         self.max_offset_y = 5  # Глаза могут двигаться на 50 пикселей от центра
 
           # Загружаем изображение
-        self.label = QLabel(self)
+        self.cat = QLabel(self)
         pixmap = QPixmap("D://py/cat/PET.png") 
-        self.label.setGeometry(0, 0, windowSize, windowSize) 
-        self.label.setPixmap(pixmap)
-        self.label.setAlignment(Qt.AlignCenter)
+        self.cat.setGeometry(0, 0, self.windowSize, self.windowSize) 
+        self.cat.setPixmap(pixmap)
+        self.cat.setAlignment(Qt.AlignCenter)
 
+        self.move_cat_animation=  QPropertyAnimation(self, b"pos")
+        self.move_cat_animation.setDuration(50)
+        
         # Флаг для отслеживания состояния клавиши
         self.key_pressed = False
         self.catTap = True
@@ -139,7 +143,7 @@ class TransparentWindow(QMainWindow):
 
         #Таймер для длительного зажатия на коте
         self.long_drag_timer = QTimer(self)
-        self.long_drag_timer.setInterval(700)
+        self.long_drag_timer.setInterval(600)
         self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
         
         #self.listener.start()
@@ -148,7 +152,6 @@ class TransparentWindow(QMainWindow):
         window_rect = self.frameGeometry()
         if left_pressed:
             if window_rect.contains(QPoint(x, y)):
-                print("EBATT")
                 self.long_drag_timer.start()
         else:
             self.long_tap = False
@@ -157,7 +160,6 @@ class TransparentWindow(QMainWindow):
 
     def on_long_drag_timer_out(self):
         self.long_tap = True
-        print("LONG DRAG")
         self.long_drag_timer.stop()
         
     def on_timer_out(self):
@@ -170,6 +172,22 @@ class TransparentWindow(QMainWindow):
         self.bigyeys_timer.stop()
         
     def update_mouse_position(self, mouse_x, mouse_y):
+        self.move_cat_animation.setStartValue(self.pos())
+        self.move_cat_animation.setEndValue(QPoint(mouse_x-int(self.windowSize/2), mouse_y-int(self.windowSize/3)))
+ 
+        window_rect = self.frameGeometry()
+        if window_rect.contains(QPoint(mouse_x, mouse_y)):
+            if self.long_tap:
+                self.eye_l.setVisible(False)
+                self.eye_r.setVisible(False)
+                self.is_window_dragging = True
+                self.cat.setPixmap( self.cat_fly)
+                self.move_cat_animation.start()
+       
+
+        if self.is_window_dragging:
+            self.eye_l.setVisible(False)
+            self.move_cat_animation.start()
 
         # Преобразуем глобальные координаты мыши в координаты относительно окна
         mouse_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
@@ -178,10 +196,7 @@ class TransparentWindow(QMainWindow):
         distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
                             (mouse_pos.y() - self.center_l.y()) ** 2)
         
-        window_rect = self.frameGeometry()
-        if self.long_tap and window_rect.contains(QPoint(mouse_x, mouse_y)):
-            self.is_window_dragging = True
-            print("WINDOW")
+        
                                                    
 
 
@@ -239,10 +254,10 @@ class TransparentWindow(QMainWindow):
         try:
             if not self.key_pressed:  # Нажатие клавиши
                 if self.catTap:
-                    self.label.setPixmap(self.cat_1)  # Меняем изображение на третье
+                    self.cat.setPixmap(self.cat_1)  # Меняем изображение на третье
                     self.catTap = False
                 else:
-                    self.label.setPixmap(self.cat_2)  # Меняем изображение на второе
+                    self.cat.setPixmap(self.cat_2)  # Меняем изображение на второе
                     self.catTap = True
                 self.key_pressed = True
         except AttributeError:
@@ -251,7 +266,7 @@ class TransparentWindow(QMainWindow):
     # Обработка отпускания клавиши
     def on_release(self, key):
         if self.key_pressed:
-            self.label.setPixmap(self.cat)  # Возвращаемся к первому изображению
+            self.cat.setPixmap(self.cat)  # Возвращаемся к первому изображению
             self.key_pressed = False
 
 # Запуск приложения
