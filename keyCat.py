@@ -1,7 +1,7 @@
 import sys, os, math
 import win32gui
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
-from PyQt5.QtGui import QPixmap,  QCursor
+from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QPropertyAnimation,Qt, QRect, QPoint, QTimer, QThread, pyqtSignal
 from pynput import keyboard,  mouse
 
@@ -15,14 +15,22 @@ def get_taskbar_info():
 class MouseTrackerThread(QThread):
     # Сигнал для передачи координат мыши
     mouse_moved = pyqtSignal(int, int)  # x, y
+    left_clicked = pyqtSignal(int, int, bool)      # Левая кнопка
+   
 
     def run(self):
         # Функция, которая вызывается при движении мыши
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
 
+         # Функция, которая вызывается при нажатии/отпускании кнопки мыши
+        def on_click(x, y, button, pressed):
+            if button == mouse.Button.left:
+                self.left_clicked.emit(x,y,pressed)
+        
+
         # Создаем слушатель мыши
-        with mouse.Listener(on_move=on_move) as listener:
+        with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
 
 
@@ -30,13 +38,13 @@ class MouseTrackerThread(QThread):
 class TransparentWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-
+        windowSize=200
         # Создаем и запускаем поток для отслеживания мыши
         self.mouse_tracker = MouseTrackerThread()
         self.mouse_tracker.mouse_moved.connect(self.update_mouse_position)
         self.mouse_tracker.start()
 
-
+        self.mouse_tracker.left_clicked.connect(self.handle_left_click)
         # Получаем информацию о панели задач
         taskbar_rect = get_taskbar_info()
         taskbar_y = taskbar_rect[1]
@@ -44,7 +52,7 @@ class TransparentWindow(QMainWindow):
         # Настройки окна
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, taskbar_y-250, 250, 250))  # Размещаем окно над панелью задач
+        self.setGeometry(QRect(1500, taskbar_y-windowSize, windowSize, windowSize))  # Размещаем окно над панелью задач
 
         # Определяем путь к каталогу с данными в зависимости от режима исполнения
         if getattr(sys, 'frozen', False):
@@ -84,7 +92,8 @@ class TransparentWindow(QMainWindow):
         # Создаем 1 глаз
         self.eye_l = QLabel(self)
         self.eye_l.setPixmap(self.eye)
-        self.eye_l.setGeometry(0, 0, 250,250)
+        self.eye_l.setGeometry(0, 0, windowSize,windowSize)
+
         #Анимации для плавного движения глаз
         self.eye_l_animation = QPropertyAnimation(self.eye_l, b"pos")
         self.eye_l_animation.setDuration(200)  # Длительность анимации: 200 мс
@@ -94,58 +103,97 @@ class TransparentWindow(QMainWindow):
          # Создаем 2 глаз
         self.eye_r = QLabel(self)
         self.eye_r.setPixmap(self.eye2)
-        self.eye_r.setGeometry(0, 0, 250,250)
+        self.eye_r.setGeometry(0, 0, windowSize,windowSize)
         self.eye_r_animation = QPropertyAnimation(self.eye_r, b"pos")
         self.eye_r_animation.setDuration(200)  # Длительность анимации: 200 мс
         
 
-
         self.center_l = self.eye_l.geometry().center() # Центр левого глаза
         self.center_r = self.eye_r.geometry().center() # Центр левого глаза
 
-        self.max_offset_x = 6  # Глаза могут двигаться на 50 пикселей от центра
+        self.max_offset_x = 10  # Глаза могут двигаться на 50 пикселей от центра
         self.max_offset_y = 5  # Глаза могут двигаться на 50 пикселей от центра
 
           # Загружаем изображение
         self.label = QLabel(self)
         pixmap = QPixmap("D://py/cat/PET.png") 
-        self.label.setGeometry(0, 0, 250, 250) 
+        self.label.setGeometry(0, 0, windowSize, windowSize) 
         self.label.setPixmap(pixmap)
         self.label.setAlignment(Qt.AlignCenter)
 
         # Флаг для отслеживания состояния клавиши
         self.key_pressed = False
         self.catTap = True
-
+        self.long_tap = False
+        self.is_window_dragging = False
         # Создание слушателя событий клавиатуры
         self.listener = keyboard.Listener(
             on_press=self.on_press,
             on_release=self.on_release
         )
-        self.timer = QTimer(self)
-        self.timer.setInterval(2000)  # 1.5 секунды
-        self.timer.timeout.connect(self.on_timer_out)
-        self.isEyesBig =False
+        #Таймер для установки больших глаз
+        self.bigyeys_timer = QTimer(self)
+        self.bigyeys_timer.setInterval(1000)
+        self.bigyeys_timer.timeout.connect(self.on_timer_out)
+        self.isEyesBig=False
+
+        #Таймер для длительного зажатия на коте
+        self.long_drag_timer = QTimer(self)
+        self.long_drag_timer.setInterval(700)
+        self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
+        
         #self.listener.start()
 
+    def handle_left_click(self, x,y,left_pressed):
+        window_rect = self.frameGeometry()
+        if left_pressed:
+            if window_rect.contains(QPoint(x, y)):
+                print("EBATT")
+                self.long_drag_timer.start()
+        else:
+            self.long_tap = False
+            self.is_window_dragging = False
+            self.long_drag_timer.stop()
 
+    def on_long_drag_timer_out(self):
+        self.long_tap = True
+        print("LONG DRAG")
+        self.long_drag_timer.stop()
+        
     def on_timer_out(self):
-        print("SIZE!")
-        self.timer.stop()
+        if self.isEyesBig:
+            self.eye_l.setPixmap(self.eye_big)
+            self.eye_r.setPixmap(self.eye2_big)
+        else:
+            self.eye_l.setPixmap(self.eye)
+            self.eye_r.setPixmap(self.eye2)
+        self.bigyeys_timer.stop()
         
     def update_mouse_position(self, mouse_x, mouse_y):
+
         # Преобразуем глобальные координаты мыши в координаты относительно окна
         mouse_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
 
          # Вычисляем расстояние от мыши до центра окна
         distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
                             (mouse_pos.y() - self.center_l.y()) ** 2)
+        
+        window_rect = self.frameGeometry()
+        if self.long_tap and window_rect.contains(QPoint(mouse_x, mouse_y)):
+            self.is_window_dragging = True
+            print("WINDOW")
+                                                   
+
 
         # Если мышь в пределах 200 пикселей
-        if distance <= 200 and not self.isEyesBig:
-            print('TIMER!')
-            self.timer.start()
-            self.isEyesBig = True
+        if self.isEyesBig:
+            if distance > 200:
+                self.bigyeys_timer.start()
+                self.isEyesBig = False
+        else:
+            if distance <= 200:
+                self.bigyeys_timer.start()
+                self.isEyesBig = True
 
         # Обновляем положение левого глаза
         self.move_eye(self.eye_l, self.center_l, mouse_pos,self.eye_l_animation)
@@ -185,8 +233,6 @@ class TransparentWindow(QMainWindow):
         animation.setStartValue(eye_label.pos())
         animation.setEndValue(new_pos)
         animation.start()
-
-
 
     # Обработка нажатия клавиши
     def on_press(self, key):
