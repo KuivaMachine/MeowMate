@@ -48,7 +48,7 @@ class MouseTrackerThread(QThread):
 class TransparentWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.windowSize=300
+        self.cat_window_size=300
 
         # Создаем и запускаем поток для отслеживания мыши
         self.mouse_tracker = MouseTrackerThread()
@@ -68,7 +68,7 @@ class TransparentWindow(QMainWindow):
         # Настройки окна
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, taskbar_y-self.windowSize, self.windowSize, self.windowSize))  # Размещаем окно над панелью задач
+        self.setGeometry(QRect(1500, taskbar_y-self.cat_window_size, self.cat_window_size, self.cat_window_size))  # Размещаем окно над панелью задач
 
         # Определяем путь к каталогу с данными в зависимости от режима исполнения
         if getattr(sys, 'frozen', False):
@@ -110,7 +110,7 @@ class TransparentWindow(QMainWindow):
         # Создаем 1 глаз
         self.eye_l = QLabel(self)
         self.eye_l.setPixmap(self.eye)
-        self.eye_l.setGeometry(0, 0, self.windowSize,self.windowSize)
+        self.eye_l.setGeometry(0, 0, self.cat_window_size,self.cat_window_size)
 
         #Анимации для плавного движения глаз
         self.eye_l_animation = QPropertyAnimation(self.eye_l, b"pos")
@@ -121,7 +121,7 @@ class TransparentWindow(QMainWindow):
          # Создаем 2 глаз
         self.eye_r = QLabel(self)
         self.eye_r.setPixmap(self.eye2)
-        self.eye_r.setGeometry(0, 0, self.windowSize,self.windowSize)
+        self.eye_r.setGeometry(0, 0, self.cat_window_size,self.cat_window_size)
         self.eye_r_animation = QPropertyAnimation(self.eye_r, b"pos")
         self.eye_r_animation.setDuration(200)  # Длительность анимации: 200 мс
         
@@ -129,12 +129,12 @@ class TransparentWindow(QMainWindow):
         self.center_l = self.eye_l.geometry().center() # Центр левого глаза
         self.center_r = self.eye_r.geometry().center() # Центр левого глаза
 
-        self.max_offset_x = 10  # Глаза могут двигаться на 50 пикселей от центра
-        self.max_offset_y = 5  # Глаза могут двигаться на 50 пикселей от центра
+        self.max_offset_x = 10  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
+        self.max_offset_y = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
 
           # Загружаем изображение
         self.cat = QLabel(self)
-        self.cat.setGeometry(0, 0, self.windowSize, self.windowSize) 
+        self.cat.setGeometry(0, 0, self.cat_window_size, self.cat_window_size) 
         self.cat.setPixmap(self.main_cat)
         self.cat.setAlignment(Qt.AlignCenter)
 
@@ -151,9 +151,11 @@ class TransparentWindow(QMainWindow):
         self.cat_comming_animation=  QPropertyAnimation(self, b"pos")
         self.cat_comming_animation.setDuration(500)
         
-        
+        #АНИМАЦИЯ СКРЫВАЮЩЕГОСЯ КОТА
+        self.hiding_cat_animation=  QPropertyAnimation(self, b"pos")
+        self.hiding_cat_animation.finished.connect(self.cat_preparing)
+        self.hiding_cat_animation.setDuration(300)
       
-        
 
         # Флаг для отслеживания состояния клавиши
         self.cat_position=CatState.BOTTOM
@@ -210,7 +212,7 @@ class TransparentWindow(QMainWindow):
         values = []
         match(direction):
             case CatState.TOP:
-                random_x = random.randint(0, self.monitor_width-self.windowSize) 
+                random_x = random.randint(0, self.monitor_width-self.cat_window_size) 
 
                 #ПРОВЕРКА И ПОВОРОТ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕГО ПОЛОЖЕНИЯ 
                 match(current_position):
@@ -228,11 +230,11 @@ class TransparentWindow(QMainWindow):
                 eye2_180=self.eye2.transformed(transform)
                 eye_big_180=self.eye_big.transformed(transform)
                 eye2_big_180=self.eye2_big.transformed(transform)
-                values=[main_cat_180, eye_180, eye2_180, eye_big_180, eye2_big_180, QPoint(random_x,0-self.windowSize), QPoint(random_x,0)]
+                values=[main_cat_180, eye_180, eye2_180, eye_big_180, eye2_big_180, QPoint(random_x,0-self.cat_window_size), QPoint(random_x,0)]
                 self.cat_position=CatState.TOP
 
             case CatState.BOTTOM:
-                random_x = random.randint(0, self.monitor_width-self.windowSize) 
+                random_x = random.randint(0, self.monitor_width-self.cat_window_size) 
 
                 #ПРОВЕРКА И ПОВОРОТ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕГО ПОЛОЖЕНИЯ 
                 match(current_position):
@@ -250,11 +252,11 @@ class TransparentWindow(QMainWindow):
                 eye2_0=self.eye2.transformed(transform)
                 eye_big_0=self.eye_big.transformed(transform)
                 eye2_big_0=self.eye2_big.transformed(transform)
-                values=[main_cat_0, eye_0, eye2_0, eye_big_0, eye2_big_0, QPoint(random_x,self.monitor_height), QPoint(random_x,self.monitor_height-self.windowSize)]
+                values=[main_cat_0, eye_0, eye2_0, eye_big_0, eye2_big_0, QPoint(random_x,self.monitor_height), QPoint(random_x,self.monitor_height-self.cat_window_size)]
                 self.cat_position=CatState.BOTTOM
 
             case CatState.LEFT:
-                random_y = random.randint(0, self.monitor_height-self.windowSize) 
+                random_y = random.randint(0, self.monitor_height-self.cat_window_size) 
 
                 #ПРОВЕРКА И ПОВОРОТ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕГО ПОЛОЖЕНИЯ 
                 match(current_position):
@@ -272,11 +274,13 @@ class TransparentWindow(QMainWindow):
                 eye2_90=self.eye2.transformed(transform)
                 eye_big_90=self.eye_big.transformed(transform)
                 eye2_big_90=self.eye2_big.transformed(transform)
-                values=[main_cat_90, eye_90, eye2_90, eye_big_90, eye2_big_90, QPoint(0-self.windowSize, random_y), QPoint(0,random_y)]
+                values=[main_cat_90, eye_90, eye2_90, eye_big_90, eye2_big_90, QPoint(0-self.cat_window_size, random_y), QPoint(0,random_y)]
+                self.max_offset_x = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
+                self.max_offset_y = 10  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
                 self.cat_position=CatState.LEFT
 
             case CatState.RIGHT:
-                random_y = random.randint(0, self.monitor_height-self.windowSize) 
+                random_y = random.randint(0, self.monitor_height-self.cat_window_size) 
 
                 #ПРОВЕРКА И ПОВОРОТ В ЗАВИСИМОСТИ ОТ ТЕКУЩЕГО ПОЛОЖЕНИЯ 
                 match(current_position):
@@ -294,7 +298,9 @@ class TransparentWindow(QMainWindow):
                 eye2_270=self.eye2.transformed(transform)
                 eye_big_270=self.eye_big.transformed(transform)
                 eye2_big_270=self.eye2_big.transformed(transform)
-                values=[main_cat_270, eye_270, eye2_270, eye_big_270, eye2_big_270, QPoint(self.monitor_width, random_y), QPoint(self.monitor_width-self.windowSize,random_y)]
+                values=[main_cat_270, eye_270, eye2_270, eye_big_270, eye2_big_270, QPoint(self.monitor_width, random_y), QPoint(self.monitor_width-self.cat_window_size,random_y)]
+                self.max_offset_x = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
+                self.max_offset_y = 10  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
                 self.cat_position=CatState.RIGHT
 
         return values
@@ -304,6 +310,27 @@ class TransparentWindow(QMainWindow):
     #СЛУШАТЕЛЬ ЛЕВОГО КЛИКА МЫШИ
     def handle_left_click(self, x,y,left_pressed):
         
+        #РАМКИ ОКНА КОТА
+        window_rect = self.frameGeometry()
+
+        #СРАБАТЫВАЕТ ПРИ ПРОСТОМ КЛИКЕ НА КОТА
+        if not self.is_window_dragging and not left_pressed and window_rect.contains(QPoint(x, y)):
+          
+            self.hiding_cat_animation.setStartValue(self.pos())
+            match(self.cat_position):
+                case(CatState.BOTTOM):
+                     self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(),self.pos().y()+self.cat_window_size))
+                case(CatState.TOP):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(),self.pos().y()-self.cat_window_size))
+                case(CatState.LEFT):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x()-self.cat_window_size,self.pos().y()))
+                case(CatState.RIGHT):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x()+self.cat_window_size,self.pos().y()))
+             
+            self.hiding_cat_animation.start()
+        
+
+        #СРАБАТЫВАЕТ КОГДА КОТ ПЕРЕМЕЩАЕТСЯ ЗА КУРСОРОМ И ЛЕВАЯ КНОПКА ОТПУСКАЕТСЯ
         if self.is_window_dragging:
            if not left_pressed:
                 self.cat.setPixmap(self.cat_fall)
@@ -311,8 +338,7 @@ class TransparentWindow(QMainWindow):
                 self.fall_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y()+self.monitor_height))
                 self.fall_cat_animation.start()
                 
-
-        window_rect = self.frameGeometry()
+        #СРАБАТЫВАЕТ КОГДА ЛЕВАЯ КНОПКА НАЖАТА В ОБЛАСТИ КОТА
         if left_pressed:
             if window_rect.contains(QPoint(x, y)):
                 self.long_drag_timer.start()
@@ -340,7 +366,7 @@ class TransparentWindow(QMainWindow):
     def update_mouse_position(self, mouse_x, mouse_y):
     
         self.move_cat_animation.setStartValue(self.pos())
-        self.move_cat_animation.setEndValue(QPoint(mouse_x-int(self.windowSize/2), mouse_y-int(self.windowSize/3)))
+        self.move_cat_animation.setEndValue(QPoint(mouse_x-int(self.cat_window_size/2), mouse_y-int(self.cat_window_size/3)))
 
         #ПРЯМОУГОЛЬНИК ОКНА КОТА
         window_rect = self.frameGeometry()
@@ -372,8 +398,8 @@ class TransparentWindow(QMainWindow):
                 self.isEyesBig = True
 
         # Обновляем положение левого глаза
-        self.move_eye(self.eye_l, self.center_l, mouse_pos,self.eye_l_animation)
-        self.move_eye(self.eye_r, self.center_r, mouse_pos,self.eye_r_animation)
+        self.move_eye(self.eye_l, self.center_l, mouse_pos, self.eye_l_animation)
+        self.move_eye(self.eye_r, self.center_r, mouse_pos, self.eye_r_animation)
        
 
 
@@ -436,5 +462,4 @@ if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TransparentWindow()
     window.show()
-    print("Программа стартовала!")
     sys.exit(app.exec_())
