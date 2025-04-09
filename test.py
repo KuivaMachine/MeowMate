@@ -1,84 +1,100 @@
-import sys, os, math
-import win32gui
+import sys
+import math
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from PyQt5.QtGui import QPixmap, QTransform
-from PyQt5.QtCore import QPropertyAnimation,Qt, QRect, QPoint, QTimer, QThread, pyqtSignal
-from pynput import keyboard,  mouse
-from enum import Enum
-import random
+from PyQt5.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve
+from PyQt5.QtWidgets import QApplication, QLabel, QMainWindow
+from PyQt5.QtGui import QPixmap, QCursor
+from PyQt5.QtCore import Qt, QPoint, QTimer, QPropertyAnimation, QEasingCurve
 
-# Поток для отслеживания движения мыши
-class MouseTrackerThread(QThread):
-    # Сигнал для передачи координат мыши
-    mouse_moved = pyqtSignal(int, int)  # x, y
-    left_clicked = pyqtSignal(int, int, bool)      # Левая кнопка
-   
-
-    def run(self):
-        # Функция, которая вызывается при движении мыши
-        def on_move(x, y):
-            self.mouse_moved.emit(x, y)
-
-         # Функция, которая вызывается при нажатии/отпускании кнопки мыши
-        def on_click(x, y, button, pressed):
-            if button == mouse.Button.left:
-                self.left_clicked.emit(x,y,pressed)
-
-        # Создаем слушатель мыши
-        with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
-            listener.join()
-
-
-
-class TransparentWindow(QMainWindow):
+class FallingCatWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.cat_window_size=171
-
-         # Создаем и запускаем поток для отслеживания мыши
-        self.mouse_tracker = MouseTrackerThread()
-        self.mouse_tracker.mouse_moved.connect(self.update_mouse_position)
-        self.mouse_tracker.start()
-        self.mouse_tracker.left_clicked.connect(self.handle_left_click)
-
-        #РАЗМЕРЫ ОКНА МОНИТОРА 
-        self.monitor_width=QApplication.primaryScreen().geometry().width()
-        self.monitor_height=QApplication.primaryScreen().geometry().height()
-
-
+        
+          # РАЗМЕРЫ ОКНА МОНИТОРА
+        self.monitor_width = QApplication.primaryScreen().geometry().width()
+        self.monitor_height = QApplication.primaryScreen().geometry().height()
+        self.cat_window_size = 300
         # Настройки окна
         self.setWindowFlags(Qt.FramelessWindowHint | Qt.WindowStaysOnTopHint)
         self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, 500, self.cat_window_size, self.cat_window_size)) 
-
+        self.setGeometry(QRect(0, 0, 1000,
+                               1000))
+        
+        # Кот
+       
         self.cat = QLabel(self)
-        self.cat.setGeometry(0, 0, self.cat_window_size, self.cat_window_size) 
-        self.cat.setPixmap(QPixmap("D://py/cat/test.png"))
+        self.cat.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
+        self.main_cat = QPixmap("./cat/PET_stat.png").scaled(self.cat_window_size, self.cat_window_size, 
+                                                Qt.KeepAspectRatio, Qt.SmoothTransformation)
+        self.cat.setPixmap(self.main_cat)
         self.cat.setAlignment(Qt.AlignCenter)
-           
- #СЛУШАТЕЛЬ МЫШИ
-    def update_mouse_position(self, mouse_x, mouse_y):
-         #ПРЯМОУГОЛЬНИК ОКНА КОТА
-        window_rect = self.frameGeometry()
-        self.original_size = self.cat.size()
-        #ЕСЛИ МЫШЬ НАХОДИТСЯ В ПРЕДЕЛАХ ОКНА КОТА
-        if window_rect.contains(QPoint(mouse_x, mouse_y)):
-            print("SSSSS")
-
-
- #СЛУШАТЕЛЬ ЛЕВОГО КЛИКА МЫШИ
-    def handle_left_click(self,mouse_x,mouse_y,left_pressed):
-          #ПРЯМОУГОЛЬНИК ОКНА КОТА
-        window_rect = self.frameGeometry()
-        self.original_size = self.cat.size()
-        #ЕСЛИ МЫШЬ НАХОДИТСЯ В ПРЕДЕЛАХ ОКНА КОТА
-        if left_pressed and window_rect.contains(QPoint(mouse_x, mouse_y)):
-            print("qqqqqq")
-
+        
+        # Физика падения
+        self.is_dragging = False
+        self.initial_pos = None
+        self.fall_timer = QTimer(self)
+        self.fall_timer.timeout.connect(self.update_fall_position)
+        self.velocity_x = 0
+        self.velocity_y = 0
+        self.gravity = 0.5
+        self.initial_velocity = 3  # Начальная горизонтальная скорость
+        
+    def mousePressEvent(self, event):
+        if event.button() == Qt.LeftButton and self.cat.geometry().contains(event.pos()):
+            self.is_dragging = True
+            self.initial_pos = event.pos()
+            self.fall_timer.stop()  # Останавливаем предыдущее падение
+            event.accept()
+    
+    def mouseMoveEvent(self, event):
+        if self.is_dragging and self.initial_pos:
+            delta = event.pos() - self.initial_pos
+            self.cat.move(self.cat.x() + delta.x(), self.cat.y() + delta.y())
+            self.initial_pos = event.pos()
+            event.accept()
+    
+    def mouseReleaseEvent(self, event):
+        if self.is_dragging:
+            self.is_dragging = False
+            
+            # Рассчитываем начальную скорость на основе движения мыши
+            if self.initial_pos:
+                delta = event.pos() - self.initial_pos
+                self.velocity_x = delta.x() * 0.1  # Чувствительность инерции
+                self.velocity_y = 0  # Начинаем с 0 по вертикали
+            
+            # Запускаем анимацию падения
+            self.start_falling()
+            event.accept()
+    
+    def start_falling(self):
+        """Запускает физическое падение с таймером"""
+        self.fall_timer.start(16)  # ~60 FPS
+    
+    def update_fall_position(self):
+        """Обновляет позицию кота с учётом физики"""
+        # Применяем гравитацию
+        self.velocity_y += self.gravity
+        
+        # Обновляем позицию
+        new_x = self.cat.x() + self.velocity_x
+        new_y = self.cat.y() + self.velocity_y
+        
+        # Проверка на выход за нижнюю границу
+        if new_y >= self.monitor_height - self.cat_window_size:
+            new_y = self.monitor_height - self.cat_window_size
+            self.velocity_y *= -0.5  # Отскок с потерей энергии
+            self.velocity_x *= 0.8   # Трение о "землю"
+            
+            # Если скорость маленькая, останавливаем анимацию
+            if abs(self.velocity_y) < 1 and abs(self.velocity_x) < 0.5:
+                self.fall_timer.stop()
+        
+        self.cat.move(int(new_x), int(new_y))
 
 if __name__ == "__main__":
-
     app = QApplication(sys.argv)
-    window = TransparentWindow()
+    window = FallingCatWindow()
     window.show()
     sys.exit(app.exec_())
