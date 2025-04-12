@@ -50,7 +50,10 @@ class TransparentWindow(QMainWindow):
         self.dragging = False
         self.initial_pos = None
         self.isOne = False
-        self.eyes_distance=200
+        self.eyes_distance=250
+        self.isLapaOut = False
+        self.isEyesBig = False
+        self.isTimerStarted= False
 
         # Флаги для отслеживания
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
@@ -114,6 +117,7 @@ class TransparentWindow(QMainWindow):
         self.eye_l = QLabel(self)
         self.eye_l.setPixmap(self.eye)
         self.eye_l.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
+        
         # АНИМАЦИЯ ДВИЖЕНИЯ ЛЕВОГО ГЛАЗА
         self.eye_l_animation = QPropertyAnimation(self.eye_l, b"pos")
         self.eye_l_animation.setDuration(200)
@@ -123,6 +127,7 @@ class TransparentWindow(QMainWindow):
         self.eye_r = QLabel(self)
         self.eye_r.setPixmap(self.eye2)
         self.eye_r.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
+        
         # АНИМАЦИЯ ДВИЖЕНИЯ ПРАВОГО ГЛАЗА
         self.eye_r_animation = QPropertyAnimation(self.eye_r, b"pos")
         self.eye_r_animation.setDuration(200)
@@ -136,7 +141,7 @@ class TransparentWindow(QMainWindow):
         self.cat.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
         self.cat.setPixmap(self.main_cat)
         self.cat.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
+        
         # АНИМАЦИЯ ПЕРЕТАСКИВАНИЯ КОТА МЫШКОЙ
         self.move_cat_animation = QPropertyAnimation(self, b"pos")
         self.move_cat_animation.setDuration(20)
@@ -160,11 +165,16 @@ class TransparentWindow(QMainWindow):
         self.bounce_animation.setDuration(800)
         self.bounce_animation.setEasingCurve(QEasingCurve.Type.OutElastic)
 
-        #ТАЙМЕР НА БОЛЬШИЕ ГЛАЗА (1 секунда)
-        self.bigyeys_timer = QTimer(self)
-        self.bigyeys_timer.setInterval(700)
-        self.bigyeys_timer.timeout.connect(self.on_timer_out)
-        self.isEyesBig = False
+        #ТАЙМЕР НА РАСШИРЕНИЕ ГЛАЗ (300 мс)
+        self.bigeyes_timer = QTimer(self)
+        self.bigeyes_timer.setInterval(300)
+        self.bigeyes_timer.timeout.connect(self.do_big_eyes)
+
+        #ТАЙМЕР НА СУЖЕНИЕ ГЛАЗ (500 мс)
+        self.small_eyes_timer = QTimer(self)
+        self.small_eyes_timer.setInterval(500)
+        self.small_eyes_timer.timeout.connect(self.do_small_eyes)
+        
 
         #ТАЙМЕР НА LONG TAP НА КОТЕ (2 секунды)
         self.long_drag_timer = QTimer(self)
@@ -176,17 +186,29 @@ class TransparentWindow(QMainWindow):
             on_press=self.on_press,
             on_release=self.on_release
         )
-        #self.listener.start()\
-        self.label = QLabel(self)
-        movie = QMovie("./cat/lapa.gif")  # Укажите путь к GIF
-        movie.setScaledSize(QSize(120,140)) 
-        self.label.setMovie(movie)
-        self.label.setGeometry(5, 175, 111, 111)
-        self.label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-       # movie.start()
+        #self.listener.start()
+
+        self.lapa = QLabel(self)
+        self.lapa_gif = QMovie("./cat/lapa.gif")  # Укажите путь к GIF
+        self.lapa_gif.setScaledSize(QSize(120,140)) 
+        self.lapa.setMovie(self.lapa_gif)
+        self.lapa.setGeometry(5, 150, 111, 111)
+        self.lapa.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        
+       
+        self.lapa_animation = QPropertyAnimation(self.lapa, b"pos")
+        self.lapa_animation.setDuration(200)
+        self.lapa_animation.setStartValue(QPoint(self.lapa.pos().x(),self.lapa.pos().y()+100))
+        self.lapa_animation.setEndValue(self.lapa.pos())
+       
+        self.hide_lapa_animation= QPropertyAnimation(self.lapa, b"pos")
+        self.hide_lapa_animation.setDuration(200)
+        self.hide_lapa_animation.setStartValue(self.lapa.pos())
+        self.hide_lapa_animation.setEndValue(QPoint(self.lapa.pos().x(),self.lapa.pos().y()+100))
 
 
-    
+
+  
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton and self.cat.geometry().contains(event.pos()):
@@ -201,6 +223,7 @@ class TransparentWindow(QMainWindow):
             super().mousePressEvent(event)
 
     def mouseMoveEvent(self, event):
+       
         if self.dragging and self.initial_pos is not None:
             match self.cat_position:
                 case (CatState.TOP):
@@ -394,21 +417,36 @@ class TransparentWindow(QMainWindow):
         self.long_drag_timer.stop()
 
     # ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ БОЛЬШИХ И МАЛЕНЬКИХ ГЛАЗ
-    def on_timer_out(self):
-        if self.isEyesBig:
-            self.eye_l.setPixmap(self.eye_big)
-            self.eye_r.setPixmap(self.eye2_big)
-        else:
-            self.eye_l.setPixmap(self.eye)
-            self.eye_r.setPixmap(self.eye2)
-        self.bigyeys_timer.stop()
+    def do_big_eyes(self):
+        self.isEyesBig=True
+        self.eye_l.setPixmap(self.eye_big)
+        self.eye_r.setPixmap(self.eye2_big)
+        self.bigeyes_timer.stop()
+
+    def do_small_eyes(self):
+        self.isEyesBig=False
+        self.eye_l.setPixmap(self.eye)
+        self.eye_r.setPixmap(self.eye2)
+        self.small_eyes_timer.stop()
+
+
+    def throwLapa(self):
+        if not self.isLapaOut:
+            self.lapa_gif.start()  
+            self.lapa_animation.start() 
+            self.isLapaOut = True
+
+    def hideLapa(self):
+        if self.isLapaOut: 
+            self.hide_lapa_animation.start() 
+            self.isLapaOut = False
+         
+        
 
     # СЛУШАТЕЛЬ МЫШИ
     def update_mouse_position(self, mouse_x, mouse_y):
+  
 
-
-        # if not self.dragging:
-        #     self.cat.setPixmap(self.main_cat)
         self.move_cat_animation.setStartValue(self.pos())
         self.move_cat_animation.setEndValue(
             QPoint(mouse_x - int(self.cat_window_size / 2), mouse_y - int(self.cat_window_size / 3)))
@@ -417,6 +455,9 @@ class TransparentWindow(QMainWindow):
         window_rect = self.frameGeometry()
         # ЕСЛИ МЫШЬ НАХОДИТСЯ В ПРЕДЕЛАХ ОКНА КОТА
         if window_rect.contains(QPoint(mouse_x, mouse_y)):
+            
+            if((mouse_x in range(1500,1600)) and (mouse_y in range(980,1060)) and self.isEyesBig):
+                self.throwLapa()
 
             # ЕСЛИ ДОЛГОЕ НАЖАТИЕ (2000 мс)
             if self.long_tap:
@@ -427,23 +468,24 @@ class TransparentWindow(QMainWindow):
                 self.cat.setPixmap(self.cat_dragged)
                 self.cat.setGeometry((self.cat_window_size-self.cat_dragged.width()), 0, self.cat_window_size, self.cat_window_size)
                 self.move_cat_animation.start()
-
+        else:
+            self.hideLapa()
         # Преобразуем глобальные координаты мыши в координаты относительно окна
         mouse_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
 
         # Вычисляем расстояние от мыши до центра окна
         distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
                              (mouse_pos.y() - self.center_l.y()) ** 2)
-
+        print(distance)
         # Если мышь в пределах 200 пикселей
+        
         if self.isEyesBig:
             if distance > self.eyes_distance:
-                self.bigyeys_timer.start()
-                self.isEyesBig = False
+                    self.small_eyes_timer.start()
         else:
             if distance <= self.eyes_distance:
-                self.bigyeys_timer.start()
-                self.isEyesBig = True
+                    self.bigeyes_timer.start()
+               
 
         # Обновляем положение левого глаза
         self.move_eye(self.eye_l, self.center_l, mouse_pos, self.eye_l_animation)
