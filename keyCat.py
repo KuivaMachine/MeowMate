@@ -165,9 +165,9 @@ class TransparentWindow(QMainWindow):
         self.bounce_animation.setDuration(800)
         self.bounce_animation.setEasingCurve(QEasingCurve.Type.OutElastic)
 
-        #ТАЙМЕР НА РАСШИРЕНИЕ ГЛАЗ (300 мс)
+        #ТАЙМЕР НА РАСШИРЕНИЕ ГЛАЗ (500 мс)
         self.bigeyes_timer = QTimer(self)
-        self.bigeyes_timer.setInterval(300)
+        self.bigeyes_timer.setInterval(500)
         self.bigeyes_timer.timeout.connect(self.do_big_eyes)
 
         #ТАЙМЕР НА СУЖЕНИЕ ГЛАЗ (500 мс)
@@ -476,15 +476,15 @@ class TransparentWindow(QMainWindow):
         # Вычисляем расстояние от мыши до центра окна
         distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
                              (mouse_pos.y() - self.center_l.y()) ** 2)
-        print(distance)
+       
         # Если мышь в пределах 200 пикселей
         
-        if self.isEyesBig:
-            if distance > self.eyes_distance:
-                    self.small_eyes_timer.start()
-        else:
-            if distance <= self.eyes_distance:
-                    self.bigeyes_timer.start()
+       
+        if distance > self.eyes_distance and not self.small_eyes_timer.isActive():
+                self.small_eyes_timer.start()
+      
+        if distance <= self.eyes_distance and not self.bigeyes_timer.isActive():
+                self.bigeyes_timer.start()
                
 
         # Обновляем положение левого глаза
