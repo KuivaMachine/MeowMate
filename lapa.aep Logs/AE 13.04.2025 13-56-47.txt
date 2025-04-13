@@ -1,8 +1,0 @@
-  13.04.2025 13:56:47: Starting composition “lapa 2”.
-
-  Output To: C:\Users\Александр\Desktop\lapa_2\PngSeq_GifGun\lapa_2_[##########].png    13.04.2025 13:56:49: Finished composition “lapa 2”.
-
-
-  Total Time Elapsed: 2 Seconds
-Log closed on 13.04.2025 at 13:56:49
-
