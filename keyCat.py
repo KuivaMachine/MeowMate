@@ -36,7 +36,32 @@ class MouseTrackerThread(QThread):
             listener.join()
 
 
-# Основное окно
+class Pacman(QLabel):
+    def __init__(self):
+        super().__init__()
+        self.monitor_width = QApplication.primaryScreen().geometry().width()
+         # Настройки окна
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setGeometry(QRect(0, 745,self.monitor_width,300))
+
+        # PACMAN
+        self.pacman = QLabel(self)
+        self.pacman_gif = QMovie("./cat/pacman.gif")
+        self.pacman_gif.setScaledSize(QSize(800,300))
+        self.pacman.setMovie(self.pacman_gif)
+        self.pacman.setGeometry(700, 0, self.monitor_width, 300)
+        self.pacman.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.pacman_gif.start()
+
+        self.pacman_animation = QPropertyAnimation(self.pacman, b"pos")
+        self.pacman_animation.setDuration(17000)
+        self.pacman_animation.setStartValue(self.pacman.pos())
+        self.pacman_animation.setEndValue(QPoint(self.pacman.pos().x()-2500,self.pacman.pos().y()) )
+        self.pacman_animation.start()
+
+
+
 class TransparentWindow(QMainWindow):
     def __init__(self):
         super().__init__()
@@ -163,6 +188,8 @@ class TransparentWindow(QMainWindow):
         self.lapa.setGeometry(5, 150, 111, 111)
         self.lapa.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.lapa.setMouseTracking(True)
+
+        
 
         # АНИМАЦИЯ ПЕРЕТАСКИВАНИЯ КОТА МЫШКОЙ
         self.move_cat_animation = QPropertyAnimation(self, b"pos")
@@ -750,5 +777,8 @@ class TransparentWindow(QMainWindow):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     window = TransparentWindow()
-    window.show()
+    # window.show()
+
+    pacman = Pacman()
+    pacman.show()
     sys.exit(app.exec())
