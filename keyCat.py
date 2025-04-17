@@ -36,9 +36,6 @@ class MouseTrackerThread(QThread):
         with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
 
-
-
-
 class Pacman(QLabel):
     def __init__(self):
         super().__init__()
@@ -58,23 +55,23 @@ class Pacman(QLabel):
         self.pacman_label = QLabel(self)
         self.pacman_label.setGeometry(700, 0, 800, 300)
         
-        self.movie = QMovie("./cat/pacman.gif")
-        self.movie.setScaledSize(QSize(800, 300))
-        self.pacman_label.setMovie(self.movie)
-        self.movie.start()
+        self.pacman_gif = QMovie("./cat/pacman.gif")
+        self.pacman_gif.setScaledSize(QSize(800, 300))
+        self.pacman_label.setMovie(self.pacman_gif)
+        self.pacman_gif.start()
 
-        self.animation = QPropertyAnimation(self.pacman_label, b"pos")
-        self.animation.setDuration(17000)
-        self.animation.setStartValue(QPoint(self.monitor_width, 0))
-        self.animation.setEndValue(QPoint(0-self.pacman_label.width(), 0))
-        self.animation.finished.connect(self.remove_pacman)
+        self.pacman_animation = QPropertyAnimation(self.pacman_label, b"pos")
+        self.pacman_animation.setDuration(17000)
+        self.pacman_animation.setStartValue(QPoint(self.monitor_width, 0))
+        self.pacman_animation.setEndValue(QPoint(0-self.pacman_label.width(), 0))
+        self.pacman_animation.finished.connect(self.remove_pacman)
         
 
     def remove_pacman(self):
-        self.animation.stop()
-        self.animation.deleteLater()
-        self.movie.stop()
-        self.movie.deleteLater()
+        self.pacman_animation.stop()
+        self.pacman_animation.deleteLater()
+        self.pacman_gif.stop()
+        self.pacman_gif.deleteLater()
         self.pacman_label.deleteLater()
         self.hide()
         self.deleteLater()
@@ -82,42 +79,122 @@ class Pacman(QLabel):
 
     def show_and_start(self):
         self.show()
-        self.animation.start()
+        self.pacman_animation.start()
 
 
 
-class FlyTracker(QObject):
-    position_changed = pyqtSignal(int, int)  # Сигнал для глобальных координат
 
-class Fly(QLabel):
-    def __init__(self):
+
+class CatRun(QLabel):
+    def __init__(self, cat_instance):
         super().__init__()
-        
-        # Настройка окна
+        self.cat = cat_instance
+        self.setup_ui()
+        self.setup_animation()
+
+    def setup_ui(self):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint |
             Qt.WindowType.WindowTransparentForInput
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        
+        screen = QApplication.primaryScreen().geometry()
+        self.setGeometry(self.cat.pos().x()+140, screen.height()-450, 1900, 450)
+
+        # Оптимизация QLabel для анимации
+        self.crazy_label = QLabel(self)
+        self.crazy_label.setGeometry(0, 0, 900, 450)
+        self.crazy_label.setAttribute(Qt.WidgetAttribute.WA_OpaquePaintEvent)
+        self.crazy_label.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
+
+        # Оптимизация загрузки GIF
+        self.crazy_gif = QMovie("./cat/cat_crazy.gif")
+        self.crazy_gif.setCacheMode(QMovie.CacheMode.CacheAll)
+        self.crazy_label.setMovie(self.crazy_gif)
+
+    def setup_animation(self):
+        # Анимация движения
+        self.cat_run_animation = QPropertyAnimation(self.crazy_label, b"pos")
+        self.cat_run_animation.setDuration(1800)
+        self.cat_run_animation.setEasingCurve(QEasingCurve.Type.Linear)
+        self.cat_run_animation.setStartValue(QPoint(0, 0))
+        self.cat_run_animation.setEndValue(QPoint(1200, 0))
+        self.cat_run_animation.finished.connect(self.cleanup)
+
+    def run_crazy_start(self):
+        # Предварительная буферизация
+        if self.crazy_gif.state() != QMovie.MovieState.Running:
+            self.crazy_gif.jumpToFrame(0)
+            QApplication.processEvents()  # Принудительная обработка событий
+            
+        self.show()
+        self.raise_()
+        self.crazy_gif.start()
+        self.cat_run_animation.start()
+
+    def cleanup(self):
+        # Плавное завершение
+        self.crazy_gif.stop()
+        self.hide()
+        
+        # Отложенное удаление
+        QTimer.singleShot(100, lambda: (
+            self.crazy_label.deleteLater(),
+            self.crazy_gif.deleteLater(),
+            self.cat.cat_preparing(),
+            self.cat.show(),
+            self.deleteLater()
+        ))
+
+
+
+
+class Fly(QLabel):
+    def __init__(self,cat_instance):
+        super().__init__()
+        
+        # Настройка окна
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint 
+            #|Qt.WindowType.WindowTransparentForInput
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(0, 0, QApplication.primaryScreen().geometry().width(), QApplication.primaryScreen().geometry().height()-50)
-        self.last_position = QPointF(500, 500)
-        self.path = self.create_complex_path()
+        self.start_position = QPointF(random.randint(0,1980), -50)
+        # self.start_position = QPointF(200, 200)
+        self.last_position =  self.start_position 
+        
+        
+        
         # Настройка QLabel с мухой
         self.fly = QLabel(self)
         self.fly.setPixmap(QPixmap("./cat/fly.png"))
-        self.fly.setGeometry(500, 500, 50, 50)
+        self.fly.setGeometry(int(self.start_position.x()), int(self.start_position.y()), 50, 50)
+        self.setMouseTracking(True)
+        self.fly.setMouseTracking(True)
         
         # Инициализация трекера
         self.tracker = FlyTracker()
         
         self.anim = QVariantAnimation()
-        self.anim.setDuration(7000)
+        self.anim.setDuration(9000)
         self.anim.setStartValue(0.0)
         self.anim.setEndValue(1.0)
         self.anim.setEasingCurve(QEasingCurve.Type.InOutSine)
         self.anim.valueChanged.connect(self.update_pos)
         self.anim.finished.connect(self.save_last_position)
+
+        self.fly_move = QPropertyAnimation(self.fly, b"pos")
+        self.fly_move.setDuration(20)
+
+        
+        self.isFlying = False
+        self.cat = cat_instance 
+        self.path = QPainterPath()
+        QTimer.singleShot(100, self.fly_path_init)  # Отложенная инициализация
 
        
         
@@ -126,49 +203,105 @@ class Fly(QLabel):
         point = self.path.pointAtPercent(progress)
         x, y = round(point.x()), round(point.y())
         self.fly.move(x, y)
-        global_pos = self.fly.mapToGlobal(QPoint(x, y))
-        self.tracker.position_changed.emit(global_pos.x(), global_pos.y())
+        self.tracker.position_changed.emit(x, y)
+        self.last_position = QPointF(self.fly.pos().x(), self.fly.pos().y())
+
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+           print(self.cat.pos())
+        else:
+            super().mousePressEvent(event)
 
 
-
+    def mouseMoveEvent(self, event):
+        super().mouseMoveEvent(event)
+        event.accept()
+        self.fly_move.setStartValue(self.fly.pos())
+        self.fly_move.setEndValue(QPoint(event.pos().x(), event.pos().y()))
+        # self.fly_move.start()
+        
+    def fly_path_init(self):
+        self.path = self.create_complex_path()
         
     def create_complex_path(self):
         path = QPainterPath()
         
         # Стартовая точка
         path.moveTo(self.last_position)
-        
-        # Дуга (эллиптическая)
-        # path.arcTo(100, 100, 200, 350, 0, 180)  # Полуокружность
-        
-        # Петля (квадратная)
-        # path.lineTo(300, 250)
-        # path.lineTo(400, 150)
-        # path.lineTo(300, 50)
-        # path.lineTo(200, 150)
-        
-        # # Спираль
+
         for i in range(1, random.randint(6,10)):
-            
             radius = 50 * random.randint(3,6)
             path.arcTo(700 - radius, 300 - radius, 
                     2 * radius, 2 * radius, 
                     0, random.randint(60,300) * (i % 2 == 0 and 1 or -1))
             
-       
+        start_point = QPointF(200,200)
+        end_point = QPointF(self.cat.pos().x()+self.cat.cat_window_size,self.cat.pos().y()-self.cat.cat_window_size/4)
+        width = abs(end_point.x() - start_point.x())
+        height = abs(end_point.y() - start_point.y())
+        
+
+
+        control1 = QPointF(start_point.x() + width/2, start_point.y() - height)
+        control2 = QPointF(end_point.x() - width/2, end_point.y() + height)
+        path.cubicTo(control1, control2, end_point)
+
+
+        path.addPath(self.create_sine_wave_path(end_point, 60, 800, 3))
+
+
         return path
     
+    def create_sine_wave_path(self,
+        start_point: QPointF, 
+        amplitude: float, 
+        wavelength: float, 
+        num_oscillations: int, 
+        step_pixels: int = 10
+    ) -> QPainterPath:
+        
+        """
+        Создает QPainterPath в виде синусоиды.
+        
+        :param start_point: Начальная точка (QPointF)
+        :param amplitude: Амплитуда (высота волны)
+        :param wavelength: Длина волны (расстояние между пиками)
+        :param num_oscillations: Количество полных колебаний
+        :param step_pixels: Шаг аппроксимации (чем меньше, тем плавнее кривая)
+        :return: QPainterPath, представляющий синусоиду
+        """
+
+        path = QPainterPath()
+        path.moveTo(start_point)
+        total_length = wavelength * num_oscillations
+        x_start = start_point.x()
+        y_start = start_point.y()
+        
+        for x in range(0, int(total_length), step_pixels):
+            # Вычисляем y по формуле синуса: y = amplitude * sin(2πx / wavelength)
+            relative_x = x / wavelength * (2 * math.pi)  # Переводим в радианы
+            y_offset = amplitude * math.sin(relative_x)
+            
+            current_x = x_start + x
+            current_y = y_start + y_offset
+            
+            path.lineTo(QPointF(current_x, current_y))
+        
+        return path
+    
+
 
     def save_last_position(self):
         self.last_position = QPointF(self.fly.pos().x(), self.fly.pos().y())
         self.path = self.create_complex_path()
-        self.anim.start()
+        self.isFlying=False
+        # self.anim.start()
 
 
         
 
 
-class TransparentWindow(QMainWindow):
+class Cat(QMainWindow):
     def __init__(self):
         super().__init__()
 
@@ -191,8 +324,8 @@ class TransparentWindow(QMainWindow):
         self.max_offset_x = 11  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
         self.max_offset_y = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
         self.pointer = 0
-        
-        self.fly = Fly()
+        self.crazy = CatRun(self)
+        self.fly = Fly(self)
         self.fly.tracker.position_changed.connect(self.on_fly_update)
         self.fly.show()
 
@@ -221,7 +354,7 @@ class TransparentWindow(QMainWindow):
         # Настройки окна
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
+        self.setGeometry(QRect(100, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
                                self.cat_window_size))
 
         # Определяем путь к каталогу с данными в зависимости от режима исполнения
@@ -365,20 +498,31 @@ class TransparentWindow(QMainWindow):
             on_press=self.on_press,
             on_release=self.on_release
         )
-        self.listener.start()
-
+        # self.listener.start()
         
+
+        self.fly.anim.start()
+        self.fly.isFlying=True
+        self.bigeyes_timer.start()
         
 
 
     def on_fly_update(self, x,y):
         
-        mouse_pos = self.mapFromGlobal(QPoint(x, y))
+        mouse_pos = self.cat.mapFromGlobal(QPoint(x, y))
         self.move_eye(self.eye_l, self.center_l, QPoint(mouse_pos.x(),mouse_pos.y()), self.eye_l_animation)
         self.move_eye(self.eye_r, self.center_r,  QPoint(mouse_pos.x(),mouse_pos.y()), self.eye_r_animation)
 
+        window_rect = self.cat.frameGeometry()
+        if(window_rect.contains(mouse_pos)):
+            # self.hiding_cat_animation.start()
+            self.hide()
+            
+            self.crazy.run_crazy_start()
+
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mousePressEvent(self, event):
+       
         if event.button() == Qt.MouseButton.LeftButton and self.cat.geometry().contains(event.pos()):
             self.dragging = True
             self.isOne = not self.isOne
@@ -387,7 +531,12 @@ class TransparentWindow(QMainWindow):
             self.original_y = self.cat.y()
             self.bounce_animation.stop()
             event.accept()
-            self.fly.anim.start()  
+
+           
+            
+           
+            
+
         else:
             super().mousePressEvent(event)
 
@@ -542,8 +691,8 @@ class TransparentWindow(QMainWindow):
    
     # СЛУШАТЕЛЬ ЛЕВОГО КЛИКА МЫШИ
     def handle_left_click(self, x, y, left_pressed):
-        if not left_pressed:
-            print (f"{x}  {y}")
+        # if not left_pressed:
+        #     print (f"{x}  {y}")
 
           
   
@@ -671,7 +820,6 @@ class TransparentWindow(QMainWindow):
                              (mouse_pos.y() - self.center_l.y()) ** 2)
        
         # Если мышь в пределах 200 пикселей
-        
         if distance > self.eyes_distance and not self.small_eyes_timer.isActive():
                 self.small_eyes_timer.start()
       
@@ -679,15 +827,15 @@ class TransparentWindow(QMainWindow):
                 self.bigeyes_timer.start()
                
 
-        
-        self.move_eye(self.eye_l, self.center_l, mouse_pos, self.eye_l_animation)
-        self.move_eye(self.eye_r, self.center_r, mouse_pos, self.eye_r_animation)
+        if not self.fly.isFlying:
+            self.move_eye(self.eye_l, self.center_l, mouse_pos, self.eye_l_animation)
+            self.move_eye(self.eye_r, self.center_r, mouse_pos, self.eye_r_animation)
      
-    
     # ФУНКЦИЯ ПЕРЕВОРОТА И ПОЯВЛЕНИЯ КОТА
     def cat_preparing(self):
         all_cat_states = list(CatState)
-        values = self.random_rotate(self.cat_position,random.choice(all_cat_states))
+        # random.choice(all_cat_states)
+        values = self.random_rotate(self.cat_position,CatState.BOTTOM)
         self.main_cat = values[0]
         self.eye = values[1]
         self.eye2 = values[2]
@@ -859,6 +1007,7 @@ class TransparentWindow(QMainWindow):
 
     # ФУНКЦИЯ ДВИЖЕНИЯ ГЛАЗ  
     def move_eye(self, eye_label, center, mouse_pos, animation):
+
         delta_x = mouse_pos.x() - center.x()
         delta_y = mouse_pos.y() - center.y()
 
@@ -922,7 +1071,7 @@ class TransparentWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    cat = TransparentWindow()
+    cat = Cat()
     cat.show()
 
     
