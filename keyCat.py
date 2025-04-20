@@ -1,12 +1,12 @@
-import sys, os, math
+import sys, os, math,win32api,random
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
-from PyQt6.QtGui import QPixmap, QTransform,QMovie, QColor, QPalette
+from PyQt6.QtGui import QPixmap, QTransform,QMovie
 from PyQt6.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve,QSize,QVariantAnimation,QObject
 from pynput import keyboard, mouse
 from PyQt6.QtGui import QPainterPath
 from PyQt6.QtCore import QPointF
 from enum import Enum
-import random
+
 
 class CatState(Enum):
     TOP = "top"
@@ -71,10 +71,8 @@ class Pacman(QLabel):
         self.pacman_animation.stop()
         self.pacman_animation.deleteLater()
         self.pacman_gif.stop()
-        self.pacman_gif.deleteLater()
-        self.pacman_label.deleteLater()
         self.hide()
-        self.deleteLater()
+       
 
 
     def show_and_start(self):
@@ -498,26 +496,22 @@ class Cat(QMainWindow):
             on_press=self.on_press,
             on_release=self.on_release
         )
-        # self.listener.start()
+        self.listener.start()
         
 
         self.fly.anim.start()
         self.fly.isFlying=True
-        self.bigeyes_timer.start()
         
 
 
     def on_fly_update(self, x,y):
-        
         mouse_pos = self.cat.mapFromGlobal(QPoint(x, y))
         self.move_eye(self.eye_l, self.center_l, QPoint(mouse_pos.x(),mouse_pos.y()), self.eye_l_animation)
         self.move_eye(self.eye_r, self.center_r,  QPoint(mouse_pos.x(),mouse_pos.y()), self.eye_r_animation)
 
         window_rect = self.cat.frameGeometry()
         if(window_rect.contains(mouse_pos)):
-            # self.hiding_cat_animation.start()
             self.hide()
-            
             self.crazy.run_crazy_start()
 
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
@@ -1042,22 +1036,25 @@ class Cat(QMainWindow):
 
     # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
     def on_press(self, key):
-        word = 'pacman'
+        
+        try:
+            layout_id =  'ru' if win32api.GetKeyboardLayout(0) & 0xFFFF ==0x0419 else 'en'
+        except:
+            layout_id =  'en'  
+
         try:
              char = key.char.lower()
-
-          
         except AttributeError:
             return
         
-       
+        word = 'пакмен' if layout_id == 'ru' else 'pacman'
+
         if char == word[self.pointer]:
             self.pointer+=1
         else:
             self.pointer=0
 
         if self.pointer==len(word):
-            # Запуск в основном потоке через QTimer
             QTimer.singleShot(0, self.safe_start_pacman)
             self.pointer = 0
 
