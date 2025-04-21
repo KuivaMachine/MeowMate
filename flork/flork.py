@@ -3,7 +3,7 @@ from pynput import keyboard
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
 from PyQt6.QtCore import QPropertyAnimation, Qt,QSize
 from PyQt6.QtGui import QPixmap, QTransform,QMovie
-import sys
+import sys, os, math,win32api,random
 from PyQt6.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve,QVariantAnimation,QObject
 
 
@@ -20,12 +20,12 @@ class Flork(QMainWindow):
         self.setGeometry(1200, screen.height()-240, 200, 200)
         self.setMouseTracking(True)
         
-        self.flork_gif = QMovie("./flork/flork_shy.gif")
+        self.flork_gif = QMovie("./cat/flork/flork_shy.gif")
         self.flork_gif.setScaledSize(QSize(200,200))
   
-        self.flork_main_pixmap = QPixmap("./flork/flork_main.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.flork_left_pixmap = QPixmap("./flork/flork_left.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.flork_right_pixmap = QPixmap("./flork/flork_right.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_main_pixmap = QPixmap("./cat/flork/flork_main.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_left_pixmap = QPixmap("./cat/flork/flork_left.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_right_pixmap = QPixmap("./cat/flork/flork_right.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
       
         self.flork_main = QLabel(self)
         self.flork_main.setMouseTracking(True)
@@ -63,13 +63,22 @@ class Flork(QMainWindow):
     def mousePressEvent(self, event):
         super().mousePressEvent(event)
         if event.button() == Qt.MouseButton.LeftButton:
-      
+            
            if not self.isAnimationPlaying:
+                random_int = random.randint(0,1)
+                self.playAnimation(1)
+
+
+    def playAnimation(self, number):     
+        match number:
+            case (1):
                 self.flork_gif.start()
                 self.flork_main.setMovie(self.flork_gif)
-                QTimer.singleShot(3800, self.on_gif_finished)  
-                self.isAnimationPlaying = True
-           
+        QTimer.singleShot(3800, self.on_gif_finished)  
+        self.isAnimationPlaying = True
+
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
