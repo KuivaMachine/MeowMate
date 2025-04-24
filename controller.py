@@ -1,4 +1,4 @@
-from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,QApplication,QGraphicsDropShadowEffect
+from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,QApplication,QGraphicsDropShadowEffect,QGraphicsBlurEffect
 from PyQt6.QtCore import Qt, QSize, QRect, pyqtSignal,QTimer,QPointF
 from PyQt6.QtGui import QColor, QPainter, QPen, QMovie, QCursor,QPixmap
 import sys, os, math,win32api,random
@@ -106,11 +106,17 @@ class AnimalCart(QLabel):
         self.setFixedSize(200, 200)
         self.angle = 0 
         self.shadow = QGraphicsDropShadowEffect()
-        self.shadow.setBlurRadius(15)
+        self.shadow.setBlurRadius(0)
         self.shadow.setColor(QColor(255, 153, 102, 150))
-        self.shadow.setOffset(0, 0)
+        self.shadow.setOffset(6, 6)
         self.setGraphicsEffect(self.shadow) 
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        self.blur_effect = QGraphicsBlurEffect()
+        self.blur_effect.setBlurRadius(4)  # Начальное значение - нет размытия
+        
+        # Применяем эффект ко всему виджету
+        # self.setGraphicsEffect(self.blur_effect)
 
 
         # Таймер для анимации
@@ -260,12 +266,12 @@ class CustomWindow(QWidget):
         gif_layout = QHBoxLayout(gif_container)
         
         # Первая гифка
-        gif1 = AnimalCart("./cat/flork/flork_shy.gif", QSize(160, 160))
+        gif1 = AnimalCart("./cat/drawable/flork/flork_shy.gif", QSize(160, 160))
         # gif1.clicked.connect(lambda: print("GIF 1 clicked"))
         gif_layout.addWidget(gif1)
         
         # Вторая гифка
-        gif2 = AnimalCart("./cat/lapa.gif", QSize(160, 160))
+        gif2 = AnimalCart("./cat/drawable/cat/lapa.gif", QSize(160, 160))
         # gif2.clicked.connect(lambda: print("GIF 2 clicked"))
         gif_layout.addWidget(gif2)
         

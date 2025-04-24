@@ -55,7 +55,7 @@ class Pacman(QLabel):
         self.pacman_label = QLabel(self)
         self.pacman_label.setGeometry(700, 0, 800, 300)
         
-        self.pacman_gif = QMovie("./cat/pacman.gif")
+        self.pacman_gif = QMovie("./cat/drawable/pacman/pacman.gif")
         self.pacman_gif.setScaledSize(QSize(800, 300))
         self.pacman_label.setMovie(self.pacman_gif)
         self.pacman_gif.start()
@@ -108,7 +108,7 @@ class CatRun(QLabel):
         self.crazy_label.setAttribute(Qt.WidgetAttribute.WA_NoSystemBackground)
 
         # Оптимизация загрузки GIF
-        self.crazy_gif = QMovie("./cat/cat_crazy.gif")
+        self.crazy_gif = QMovie("./cat/drawable/cat/cat_crazy.gif")
         self.crazy_gif.setCacheMode(QMovie.CacheMode.CacheAll)
         self.crazy_label.setMovie(self.crazy_gif)
 
@@ -169,7 +169,7 @@ class Fly(QLabel):
         
         # Настройка QLabel с мухой
         self.fly = QLabel(self)
-        self.fly.setPixmap(QPixmap("./cat/fly.png"))
+        self.fly.setPixmap(QPixmap("./cat/drawable/fly/fly.png"))
         self.fly.setGeometry(int(self.start_position.x()), int(self.start_position.y()), 50, 50)
         self.setMouseTracking(True)
         self.fly.setMouseTracking(True)
@@ -381,19 +381,19 @@ class Cat(QMainWindow):
             print(f"Ошибка при загрузке изображения cat2.png: {e}")
 
         # ЗАГРУЖАЕМ ИЗОБРАЖЕНИЯ
-        self.eye = QPixmap("./cat/eye.png")
-        self.eye2 = QPixmap("./cat/eye2.png")
-        self.eye_big = QPixmap("./cat/eye_big.png")
-        self.eye2_big = QPixmap("./cat/eye2_big.png")
-        self.cat_dragged = QPixmap("./cat/cat_dragged.png")
-        self.cat_fall = QPixmap("./cat/cat_fall.png")
-        self.main_cat = QPixmap("./cat/PET_t.png")
-        self.cat_pixmap_stat = QPixmap("./cat/PET_stat.png")
+        self.eye = QPixmap("./cat/drawable/cat/eye.png")
+        self.eye2 = QPixmap("./cat/drawable/cat/eye2.png")
+        self.eye_big = QPixmap("./cat/drawable/cat/eye_big.png")
+        self.eye2_big = QPixmap("./cat/drawable/cat/eye2_big.png")
+        self.cat_dragged = QPixmap("./cat/drawable/cat/cat_dragged.png")
+        self.cat_fall = QPixmap("./cat/drawable/cat/cat_fall.png")
+        self.main_cat = QPixmap("./cat/drawable/cat/PET_t.png")
+        self.cat_pixmap_stat = QPixmap("./cat/drawable/cat/PET_stat.png")
         
-        self.top_lapa_gif = QMovie("./cat/lapa_top.gif")
-        self.bottom_lapa_gif = QMovie("./cat/lapa.gif")
-        self.left_lapa_gif = QMovie("./cat/lapa_left.gif")
-        self.right_lapa_gif=QMovie("./cat/lapa_right.gif")
+        self.top_lapa_gif = QMovie("./cat/drawable/cat/lapa_top.gif")
+        self.bottom_lapa_gif = QMovie("./cat/drawable/cat/lapa.gif")
+        self.left_lapa_gif = QMovie("./cat/drawable/cat/lapa_left.gif")
+        self.right_lapa_gif=QMovie("./cat/drawable/cat/lapa_right.gif")
 
         
 

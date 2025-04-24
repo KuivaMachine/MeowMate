@@ -20,12 +20,12 @@ class Flork(QMainWindow):
         self.setGeometry(1200, screen.height()-240, 200, 200)
         self.setMouseTracking(True)
         
-        self.flork_gif = QMovie("./cat/drawable/flork/flork_shy.gif")
+        self.flork_gif = QMovie("./cat/flork/flork_shy.gif")
         self.flork_gif.setScaledSize(QSize(200,200))
   
-        self.flork_main_pixmap = QPixmap("./cat/drawable/flork/flork_main.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.flork_left_pixmap = QPixmap("./cat/drawable/flork/flork_left.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
-        self.flork_right_pixmap = QPixmap("./cat/drawable/flork/flork_right.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_main_pixmap = QPixmap("./cat/flork/flork_main.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_left_pixmap = QPixmap("./cat/flork/flork_left.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
+        self.flork_right_pixmap = QPixmap("./cat/flork/flork_right.png").scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
       
         self.flork_main = QLabel(self)
         self.flork_main.setMouseTracking(True)
