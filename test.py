@@ -1,44 +1,149 @@
-from PyQt6.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,QApplication,QScrollArea,QGraphicsDropShadowEffect
-from PyQt6.QtCore import Qt, QSize, QRect, pyqtSignal,Qt, QTimer, QPointF
-from PyQt6.QtGui import QColor, QPainter, QPen, QMovie, QCursor,QPixmap,QPainter, QBrush, QColor, QConicalGradient, QPen, QPolygonF
+from PyQt6.QtWidgets import QStackedLayout,QApplication, QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QVBoxLayout, QHBoxLayout, QLabel, QPushButton,QScrollArea,QGraphicsDropShadowEffect
+from PyQt6.QtCore import Qt, QSize, QRect, pyqtSignal,Qt, QTimer, QPointF,pyqtProperty,QPropertyAnimation, QPoint,QRectF
+from PyQt6.QtGui import QColor, QPainter, QPen, QMovie, QCursor,QPixmap,QPainter, QBrush, QColor, QConicalGradient, QPen, QPolygonF,QFontDatabase, QFont, QPainterPath, QRegion
 import sys, os, math,win32api,random
 
 import sys, os, math,win32api,random
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel,QGraphicsBlurEffect
-from PyQt6.QtGui import QPixmap, QTransform,QMovie
-from PyQt6.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve,QSize,QVariantAnimation,QObject
 from pynput import keyboard, mouse
-from PyQt6.QtGui import QPainterPath
-from PyQt6.QtCore import QPointF
 
 
 
-from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtProperty
 
 
-from PyQt6.QtWidgets import QWidget, QApplication
+class CircularLabel(QLabel):
+    def __init__(self,parent,gif_path,color ):
+        super().__init__(parent)
+        self.setFixedSize(50, 50)
+        self.color = color
+        # Убираем стандартную рамку и фон
+        self.setStyleSheet("""
+            QLabel {
+                background-color: #FFF2D6;
+                border-radius: 25px;
+                border-width:0px;
+               
+            }
+        """)
+        
+        self.movie = QMovie(gif_path)
+        self.movie.setScaledSize(QSize(50,50))
+        self.setMovie(self.movie)
+        self.movie.start()
+        self.movie.stop()
 
-from PyQt6.QtGui import QPainter, QBrush, QColor, QLinearGradient, QPen
+ 
+
+class CustomAnimatedButton(QPushButton):
+    def __init__(self, text, gif_path, parent):
+        super().__init__(parent)
+        self.setFixedSize(230, 70)
+        self.setText(text)
+        self.menu_window =parent
+        
+        self._angle = 0
+        self._hover = False
+        self._radius_inner = self.height() // 2
+        self._radius_upper = (self.height()+4) // 2
+        # Настройка шрифта
+        self.font = QFont("JetBrains Mono",18)
+        self.font.setWeight(QFont.Weight.ExtraBold)
+        self.setFont(self.font)
 
 
+        # Настройка гифки в круге
+        self.gif_label = CircularLabel(self, gif_path,"#FFF2D6")
+        self.gif_label.move(self.width() - 60, (self.height() -50) // 2)
+
+        
+        # Тень при наведении
+        self.shadow_effect = QGraphicsDropShadowEffect()
+        self.shadow_effect.setBlurRadius(0)
+        self.shadow_effect.setColor(QColor(0, 0, 0, 250))
+        self.shadow_effect.setOffset(0, 0)
+        self.setGraphicsEffect(self.shadow_effect)
+        
+        
+        # Анимация тени
+        self.shadow_animation = QPropertyAnimation(self.shadow_effect, b"blurRadius")
+        self.shadow_animation.setDuration(120)
+        
+    
+    def update_angle(self):
+        self._angle = (self._angle + 2) % 360
+        if self._hover:  # Обновляем только при наведении
+            self.update()
+    
+    def enterEvent(self, event):
+        self._hover = True
+        # Анимация появления тени
+        self.shadow_animation.stop()
+        self.shadow_animation.setStartValue(0)
+        self.shadow_animation.setEndValue(15)
+        self.shadow_animation.start()
+        self.gif_label.movie.start()
+        self.menu_window.startGearsAnimation()
+
+
+        super().enterEvent(event)
+    
+    def leaveEvent(self, event):
+        self._hover = False
+        # Анимация исчезновения тени
+        self.shadow_animation.stop()
+        self.shadow_animation.setStartValue(15)
+        self.shadow_animation.setEndValue(0)
+        self.shadow_animation.start()
+        self.gif_label.movie.stop()
+        self.menu_window.hideGearsAnimation()
+
+        super().leaveEvent(event)
+    
+    def paintEvent(self, event):
+        painter = QPainter(self)
+        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
+        
+      
+        
+        # 2. Анимированная обводка при наведении
+        if self._hover:
+            painter.setPen(Qt.PenStyle.NoPen)
+            painter.setBrush(QBrush(QColor("#000000")))
+            painter.drawRoundedRect(0, 0, self.width(), self.height(),  self._radius_upper,  self._radius_upper)
+        
+          # 1. Рисуем фон
+        painter.setPen(Qt.PenStyle.NoPen)
+        painter.setBrush(QBrush(QColor("#FFBC75")))
+        painter.drawRoundedRect(3, 3, self.width()-6, self.height()-6, self._radius_inner, self._radius_inner)
+
+        # 4. Рисуем текст слева
+        painter.setPen(QPen(QColor("black")))
+        text_rect = self.rect().adjusted(25, 0, 0, 0)
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self.text())
 
 
 class AnimalGallery(QMainWindow):
     def __init__(self):
         super().__init__()
         self.setWindowTitle("Animal Cards Gallery")
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint
+        )
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(100, 100, 800, 600)
-        self.setStyleSheet("""
+
+       
+        # Создаем главный виджет и макет
+        self.main_widget = QWidget()
+        self.main_widget.setStyleSheet("""
             QWidget {
-                background-color: #1e1e1e;
-                border: 2px solid #4a4a4a;
+                background-color: #FFF2D6;
+                border: 2px solid #000000;
                 border-radius: 20px;
             }
         """)
+        self.main_widget.setFixedSize(800,500)
         
-        # Создаем главный виджет и макет
-        self.main_widget = QWidget()
-        self.main_layout = QVBoxLayout(self.main_widget)
         
         # Создаем скроллируемую область
         self.scroll_area = QScrollArea()
@@ -71,8 +176,35 @@ class AnimalGallery(QMainWindow):
             
         
         """)
-        
+        self.stack = QStackedLayout(self.main_widget)
+
+        self.stack.setStackingMode(QStackedLayout.StackingMode.StackAll)
+         
+        # 2. Добавляем кнопку (будет спереди)
+        self.button = CustomAnimatedButton("ЗАПУСТИТЬ","./cat/drawable/menu/gears_mini.gif",self)
+        self.button2 = CustomAnimatedButton("ЗАПУСТИТЬ","./cat/drawable/menu/gears_mini.gif",self)
+        self.button_layout = QWidget()
+        self.button_layout.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.main_layout = QVBoxLayout(self.button_layout)
+        self.main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.main_layout.addWidget(self.button)
+        self.main_layout.addWidget(self.button2)
+
+        self.stack.addWidget(self.button_layout)
+
+        self.gears= QLabel()
+        self.movie = QMovie("cat/drawable/menu/rockets.gif")
+        self.movie.setScaledSize(QSize(350,190))
+        self.gears.setMovie(self.movie)
+        self.gears.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        self.gears.hide()
+
+        self.stack.addWidget(self.gears)
+       
       
+
+        
+
         # Контейнер для карточек
         self.cards_container = QWidget()
         self.cards_layout = QVBoxLayout(self.cards_container)
@@ -82,18 +214,32 @@ class AnimalGallery(QMainWindow):
         self.scroll_area.setWidget(self.cards_container)
         
         # Добавляем скролл-область в главный макет
-        self.main_layout.addWidget(self.scroll_area)
+        # self.main_layout.addWidget(self.scroll_area)
+       
+
         
         # Устанавливаем главный виджет
         self.setCentralWidget(self.main_widget)
         
         # Добавляем тестовые карточки
         self.add_cards([
-            "./cat/drawable/flork/flork_shy.gif", "./cat/drawable/flork/flork_shy.gif", 
-            "./cat/drawable/flork/flork_shy.gif", "./cat/drawable/flork/flork_shy.gif",
-            "./cat/drawable/flork/flork_shy.gif"  # Для демонстрации скролла
+            "./cat/drawable/flork/flork_shy.gif", 
+            "./cat/drawable/flork/flork_shy.gif", 
+            "./cat/drawable/flork/flork_shy.gif", 
+            "./cat/drawable/flork/flork_shy.gif",
+            "./cat/drawable/flork/flork_shy.gif"
         ])
-    
+
+    def startGearsAnimation(self):
+        self.movie.start()
+        self.gears.show()
+
+    def hideGearsAnimation(self):
+        self.gears.hide()
+        self.movie.stop()
+        
+        
+        
     def add_cards(self, gif_paths):
         # Очищаем предыдущие карточки
         while self.cards_layout.count():

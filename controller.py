@@ -126,8 +126,6 @@ class AnimalCart(QLabel):
 
        
 
-
-        
     def update_angle(self):
         self.angle = (self.angle + 2) % 360  # Плавное изменение угла
         self.update()
