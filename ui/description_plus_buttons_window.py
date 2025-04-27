@@ -1,6 +1,6 @@
 
-from PyQt6.QtCore import QSize, Qt
-from PyQt6.QtGui import QMovie
+from PyQt6.QtCore import QSize, Qt, QRect
+from PyQt6.QtGui import QMovie, QPixmap
 from PyQt6.QtWidgets import QStackedLayout, QWidget, QVBoxLayout, QLabel
 
 from ui.custom_button import CustomAnimatedButton
@@ -11,6 +11,7 @@ class DescriptionWindow(QWidget):
         super().__init__()
         self.name = name
         self.description = text_description
+
         self.setMaximumWidth(260)
         self.setStyleSheet("""
                 QWidget {
@@ -66,7 +67,6 @@ class DescriptionWindow(QWidget):
         button_layout.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         main_layout = QVBoxLayout(button_layout)
         main_layout.setContentsMargins(0, 0, 0, 0)  # Убираем отступы
-        # main_layout.setSpacing(30)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(start_button)
         main_layout.addWidget(setting_button)
@@ -107,11 +107,10 @@ class DescriptionWindow(QWidget):
                 border-radius: 15px;
             }
         """)
-        description_layout = QVBoxLayout(description_container)
+
 
         name_label  = QLabel(self.name)
         name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
         name_label.setStyleSheet("""
         QLabel{
         color: #000000;
@@ -121,7 +120,7 @@ class DescriptionWindow(QWidget):
         border: none;
         }
         """)
-        description_layout.addWidget(name_label, stretch=2)
+
 
         description_label = QLabel(self.description)
         description_label.setWordWrap(True)
@@ -136,7 +135,8 @@ class DescriptionWindow(QWidget):
                 }
                 """)
 
-
+        description_layout = QVBoxLayout(description_container)
+        description_layout.addWidget(name_label, stretch=2)
         description_layout.addWidget(description_label, stretch=8)
 
         return description_container
