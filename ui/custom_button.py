@@ -1,9 +1,10 @@
-from PyQt6.QtCore import QSize, Qt, QPropertyAnimation
+from PyQt6.QtCore import QSize, Qt, QPropertyAnimation, pyqtSignal
 from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QPen, QFont
 from PyQt6.QtWidgets import QLabel, QPushButton, QGraphicsDropShadowEffect
 
 
 class CircularLabel(QLabel):
+
     def __init__(self, parent, gif_path, color):
         super().__init__(parent)
         size = QSize(40,40)

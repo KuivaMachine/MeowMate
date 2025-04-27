@@ -5,8 +5,8 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QApplication, \
     QStackedLayout
 
-from ui.cart import AnimalCart
 from ui.description_plus_buttons_window import DescriptionWindow
+from ui.scroll_area import CharactersGallery
 from utils.utils import svg_to_icon
 
 
@@ -64,25 +64,42 @@ class CustomWindow(QMainWindow):
         self.main_vbox.addWidget(self.setup_content())
 
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
-        self.bg_label = QLabel(self.main_container)
-        self.bg_label.setStyleSheet("QLabel { background: transparent; border: none; }")
-        self.bg_label.setPixmap(QPixmap("./drawable/menu/bg.png").scaled(
+        self.right_shadow = QLabel(self.main_container)
+        self.right_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
+        self.right_shadow.setPixmap(QPixmap("drawable/menu/right_shadow.png").scaled(
             260, 380,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         ))
-        self.bg_label.lower()
+        self.right_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
+        # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
+        self.left_shadow = QLabel(self.main_container)
+        self.left_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
+        self.left_shadow.setPixmap(QPixmap("drawable/menu/left_shadow.png").scaled(
+            450,485,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        ))
+        self.left_shadow.lower()
+        QTimer.singleShot(50, self.update_bg_position)
+
+    def on_start_button_push(self):
+        print(self.left_panel.selected_card.character)
+
+    def on_settings_button_push(self):
+        print(self.left_panel.selected_card.character)
+
     def update_bg_position(self):
+        # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
         global_pos = self.right_panel.mapToGlobal(QPoint(0, 0))
         local_pos = self.main_container.mapFromGlobal(global_pos)
-        self.bg_label.setGeometry(
-            local_pos.x()-5,
-            local_pos.y()+10,
-            260,
-            345
-        )
+        self.right_shadow.setGeometry(local_pos.x() - 5,local_pos.y() + 10,260,345)
+        # УСТАНОВКА КООРДИНАТ  ДЛЯ CHARACTERS
+        global_pos = self.left_panel.mapToGlobal(QPoint(0, 0))
+        local_pos = self.main_container.mapFromGlobal(global_pos)
+        self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
 
     # ЗАГОЛОВОК
     def setup_header(self):
@@ -149,38 +166,25 @@ class CustomWindow(QMainWindow):
         content_layout = QHBoxLayout(content)
         content_layout.setSpacing(15)
 
-        left_panel = self.setup_gif_container()
-        self.right_panel = DescriptionWindow("НАЗВАНИЕ", "Современные технологии кардинально меняют нашу жизнь. Интернет, смартфоны, искусственный интеллект – всё это упрощает повседневные задачи. Однако важно помнить о балансе: цифровизация не должна заменять живое общение. Исследования показывают, что долгий экранный время вредит здоровью и снижает продуктивность.")
-
-        content_layout.addWidget(left_panel, stretch=6)
+        self.left_panel = self.setup_gif_container()
+        self.right_panel = DescriptionWindow(self,"НАЗВАНИЕ",
+                                             "Современные технологии кардинально меняют нашу жизнь. Интернет, смартфоны, искусственный интеллект – всё это упрощает повседневные задачи. Однако важно помнить о балансе: цифровизация не должна заменять живое общение. Исследования показывают, что долгий экранный время вредит здоровью и снижает продуктивность.")
+        self.right_panel.start_button_clicked.connect(self.on_start_button_push)
+        self.right_panel.settings_button_clicked.connect(self.on_settings_button_push)
+        content_layout.addWidget(self.left_panel, stretch=6)
         content_layout.addWidget(self.right_panel, stretch=4)
 
         return content
 
     def setup_gif_container(self):
-        # Контейнер для гифок с рамкой
-        gif_container = QWidget()
-        gif_container.setStyleSheet("""
-            QWidget {
-                background-color: #FFE5BD;
-                border: 2px solid #000000;
-                border-radius: 15px;
-            }
-        """)
+        characters = CharactersGallery([
+            "./drawable/flork/flork_shy.gif", "./drawable/flork/flork_shy.gif", "./drawable/flork/flork_shy.gif"
+            ])
+        characters.character_signal.connect(self.update_character_info)
+        return characters
 
-        gif_layout = QHBoxLayout(gif_container)
-
-        # Первая гифка
-        gif1 = AnimalCart("./drawabDle/flork/flork_shy.gif", QSize(160, 160))
-        # gif1.clicked.connect(lambda: print("GIF 1 clicked"))
-        gif_layout.addWidget(gif1)
-
-        # Вторая гифка
-        gif2 = AnimalCart("./draDwable/cat/lapa.gif", QSize(160, 160))
-        # gif2.clicked.connect(lambda: print("GIF 2 clicked"))
-        gif_layout.addWidget(gif2)
-
-        return gif_container
+    def update_character_info(self, character):
+        self.right_panel.update_info(character)
 
     # Обработчики событий для перемещения окна
     def mousePressEvent(self, event):
@@ -195,18 +199,9 @@ class CustomWindow(QMainWindow):
     def mouseReleaseEvent(self, event):
         self.drag_pos = None
 
-    # Методы меню
-    def start_game(self):
-        print("Starting game...")
-
-    def open_settings(self):
-        print("Opening settings...")
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    app.setStyle("Fusion")  # Для лучшего отображения
-
     window = CustomWindow()
     window.show()
 
