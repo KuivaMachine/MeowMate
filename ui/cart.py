@@ -61,6 +61,7 @@ class CharacterCart(QLabel):
 
 
         if self.isSelected:
+            self.movie.start()
             # 1. Рисуем фон карточки
             painter.setPen(Qt.PenStyle.NoPen)
             painter.setBrush(QBrush(QColor("#20ffffff")))

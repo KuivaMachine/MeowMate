@@ -111,7 +111,7 @@ class CustomWindow(QMainWindow):
         global_pos = self.right_panel.mapToGlobal(QPoint(0, 0))
         local_pos = self.main_container.mapFromGlobal(global_pos)
         self.right_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 10, 260, 345)
-        # УСТАНОВКА КООРДИНАТ  ДЛЯ CHARACTERS
+        # УСТАНОВКА КООРДИНАТ ДЛЯ CHARACTERS
         global_pos = self.left_panel.mapToGlobal(QPoint(0, 0))
         local_pos = self.main_container.mapFromGlobal(global_pos)
         self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
@@ -183,7 +183,7 @@ class CustomWindow(QMainWindow):
 
         self.left_panel = self.setup_gif_container()
         self.right_panel = DescriptionWindow(self, "НАЗВАНИЕ",
-                                             "Современные технологии кардинально меняют нашу жизнь. Интернет, смартфоны, искусственный интеллект – всё это упрощает повседневные задачи. Однако важно помнить о балансе: цифровизация не должна заменять живое общение. Исследования показывают, что долгий экранный время вредит здоровью и снижает продуктивность.")
+                                             "ОПИСАНИЕ")
         self.right_panel.start_button_clicked.connect(self.on_start_button_push)
         self.right_panel.settings_button_clicked.connect(self.on_settings_button_push)
         content_layout.addWidget(self.left_panel, stretch=6)

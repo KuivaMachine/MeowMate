@@ -1,4 +1,4 @@
-from PyQt6.QtCore import QSize, Qt,pyqtSignal
+from PyQt6.QtCore import QSize, Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea
 
 from ui.cart import CharacterCart
@@ -7,10 +7,11 @@ from utils.enums import Characters
 
 class CharactersGallery(QWidget):
     character_signal = pyqtSignal(Characters)
+
     def __init__(self, characters):
         super().__init__()
         self.cards = []
-        self.selected_card= None
+        self.selected_card = None
         self.setStyleSheet("""
             QWidget {
                 background-color: transparent;
@@ -67,12 +68,11 @@ class CharactersGallery(QWidget):
         # Добавляем контейнер в скролл-область
         self.scroll_area.setWidget(self.cards_container)
 
-
         self.add_cards(characters)
 
     def add_cards(self, characters):
         row = None
-        i=0
+        i = 0
         for character, gif_path in characters.items():
             if i % 2 == 0:
                 row = QWidget()
@@ -86,18 +86,18 @@ class CharactersGallery(QWidget):
                 layout.setSpacing(20)
                 self.cards_layout.addWidget(row)
 
-            card = CharacterCart(character,gif_path, QSize(100, 100))
+            card = CharacterCart(character, gif_path, QSize(100, 100))
             card.clicked.connect(lambda checked, c=card: self.handle_card_click(c))
             row.layout().addWidget(card)
             self.cards.append(card)
-            if i==0:
+            if i == 0:
                 self.selected_card = card
                 card.isSelected = True
-            i+=1
+            i += 1
 
     def handle_card_click(self, clicked_card):
         for card in self.cards:
             card.isSelected = False
-        clicked_card.isSelected =True
-        self.selected_card =clicked_card
+        clicked_card.isSelected = True
+        self.selected_card = clicked_card
         self.character_signal.emit(clicked_card.character)
