@@ -10,3 +10,6 @@ class Characters(Enum):
     CAT = "cat"
     FLORK = "flork"
     BONGO_CAT= "bongo_cat"
+class Direction(Enum):
+    POSITIVE = "POSITIVE"
+    NEGATIVE = "NEGATIVE"

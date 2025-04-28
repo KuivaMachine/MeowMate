@@ -1,15 +1,31 @@
 import math
 import random
+import sys
+from pathlib import Path
 
 from PyQt6.QtCore import QPointF, pyqtSignal
-from PyQt6.QtCore import QPropertyAnimation, Qt, QPoint, QTimer, QEasingCurve, QVariantAnimation
+from PyQt6.QtCore import QPropertyAnimation, Qt, QTimer, QEasingCurve, QVariantAnimation
 from PyQt6.QtGui import QPainterPath
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QApplication, QLabel
 
+from utils.enums import Direction
+
 
 class Fly(QLabel):
     position_changed = pyqtSignal(int, int)
+    finished = pyqtSignal()
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+        # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable' / 'fly'
+
     def __init__(self, cat_instance):
         super().__init__()
 
@@ -17,23 +33,19 @@ class Fly(QLabel):
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
-            # |Qt.WindowType.WindowTransparentForInput
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(0, 0, QApplication.primaryScreen().geometry().width(),
                          QApplication.primaryScreen().geometry().height() - 50)
-        self.start_position = QPointF(random.randint(0, 1980), -50)
-        # self.start_position = QPointF(200, 200)
+        self.start_position = self.init_start_position()
         self.last_position = self.start_position
 
         # Настройка QLabel с мухой
         self.fly = QLabel(self)
-        self.fly.setPixmap(QPixmap("./drawable/fly/fly.png"))
+        self.fly.setPixmap(QPixmap(str(self.resource_path / "fly.png")))
         self.fly.setGeometry(int(self.start_position.x()), int(self.start_position.y()), 50, 50)
         self.setMouseTracking(True)
         self.fly.setMouseTracking(True)
-
-
 
         self.anim = QVariantAnimation()
         self.anim.setDuration(9000)
@@ -41,15 +53,17 @@ class Fly(QLabel):
         self.anim.setEndValue(1.0)
         self.anim.setEasingCurve(QEasingCurve.Type.InOutSine)
         self.anim.valueChanged.connect(self.update_pos)
-        self.anim.finished.connect(self.save_last_position)
+        self.anim.finished.connect(self.cleanup)
 
         self.fly_move = QPropertyAnimation(self.fly, b"pos")
         self.fly_move.setDuration(20)
-
-        self.isFlying = False
         self.cat = cat_instance
         self.path = QPainterPath()
         QTimer.singleShot(100, self.fly_path_init)  # Отложенная инициализация
+
+
+    def init_start_position(self):
+       return  QPointF(random.randint(0, 1980), -50)
 
     def update_pos(self, progress):
         point = self.path.pointAtPercent(progress)
@@ -58,18 +72,7 @@ class Fly(QLabel):
         self.position_changed.emit(x, y)
         self.last_position = QPointF(self.fly.pos().x(), self.fly.pos().y())
 
-    def mousePressEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton:
-            print(self.cat.pos())
-        else:
-            super().mousePressEvent(event)
 
-    def mouseMoveEvent(self, event):
-        super().mouseMoveEvent(event)
-        event.accept()
-        self.fly_move.setStartValue(self.fly.pos())
-        self.fly_move.setEndValue(QPoint(event.pos().x(), event.pos().y()))
-        # self.fly_move.start()
 
     def fly_path_init(self):
         self.path = self.create_complex_path()
@@ -78,7 +81,7 @@ class Fly(QLabel):
         path = QPainterPath()
 
         # Стартовая точка
-        path.moveTo(self.last_position)
+        path.moveTo(self.init_start_position())
 
         for i in range(1, random.randint(6, 10)):
             radius = 50 * random.randint(3, 6)
@@ -96,8 +99,10 @@ class Fly(QLabel):
         control2 = QPointF(end_point.x() - width / 2, end_point.y() + height)
         path.cubicTo(control1, control2, end_point)
 
-        path.addPath(self.create_sine_wave_path(end_point, 60, 800, 3))
-
+        if self.cat.pos().x()<QApplication.primaryScreen().geometry().width()/2:
+            path.addPath(self.create_sine_wave_path( end_point, 60, 1500, 2, direction=Direction.POSITIVE))
+        else:
+            path.addPath(self.create_sine_wave_path(end_point, 60, 1500, 2, direction=Direction.NEGATIVE))
         return path
 
     def create_sine_wave_path(self,
@@ -105,12 +110,14 @@ class Fly(QLabel):
                               amplitude: float,
                               wavelength: float,
                               num_oscillations: int,
-                              step_pixels: int = 10
+                              step_pixels: int = 10,
+                              direction: Direction = Direction.POSITIVE
                               ) -> QPainterPath:
 
         """
         Создает QPainterPath в виде синусоиды.
 
+        :param direction: Направление синусоиды
         :param start_point: Начальная точка (QPointF)
         :param amplitude: Амплитуда (высота волны)
         :param wavelength: Длина волны (расстояние между пиками)
@@ -133,12 +140,19 @@ class Fly(QLabel):
             current_x = x_start + x
             current_y = y_start + y_offset
 
-            path.lineTo(QPointF(current_x, current_y))
+            match direction:
+                case(Direction.POSITIVE):
+                    path.lineTo(QPointF(current_x, current_y))
+                case (Direction.NEGATIVE):
+                    path.lineTo(QPointF(-current_x, current_y))
 
         return path
 
-    def save_last_position(self):
-        self.last_position = QPointF(self.fly.pos().x(), self.fly.pos().y())
-        self.path = self.create_complex_path()
-        self.isFlying = False
-        # self.anim.start()
+
+
+
+
+    def cleanup(self):
+        self.finished.emit()
+        self.hide()
+        # self.deleteLater()

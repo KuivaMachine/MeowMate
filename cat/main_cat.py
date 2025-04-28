@@ -1,9 +1,9 @@
 import math
-import os
 import random
 import sys
-import win32api
+from pathlib import Path
 
+import win32api
 from PyQt6.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve, QSize
 from PyQt6.QtGui import QPixmap, QTransform, QMovie
 from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
@@ -40,6 +40,7 @@ class Cat(QMainWindow):
         super().__init__()
 
         # ПЕРЕМЕННЫЕ
+        self.isFlying = False
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
         self.cat_window_size = 300
         self.CAT_GAP = 40
@@ -59,9 +60,7 @@ class Cat(QMainWindow):
         self.max_offset_y = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
         self.pointer = 0
         self.crazy = CatRun(self)
-        self.fly = Fly(self)
-        self.fly.position_changed.connect(self.on_fly_update)
-        self.fly.show()
+
 
         # ФЛАГИ
         self.isOne = False
@@ -70,10 +69,10 @@ class Cat(QMainWindow):
         self.isTimerStarted = False
         self.setMouseTracking(True)
         self.dragging = False
-        self.key_pressed = False  # КЛАВИША КЛАВИАТУРЫ НАЖАТА
-        self.long_tap = False  # ФЛАГ ДОЛГОГО ЗАЖАТИЯ
+        self.key_pressed = False         # КЛАВИША КЛАВИАТУРЫ НАЖАТА
+        self.long_tap = False            # ФЛАГ ДОЛГОГО ЗАЖАТИЯ
         self.is_window_dragging = False  # КОТ ПЕРЕМЕЩАЕТСЯ
-        self.is_stretching = False  # ФЛАГ РАССТЯГИВАНИЯ КОТА
+        self.is_stretching = False       # ФЛАГ РАССТЯГИВАНИЯ КОТА
 
         # ПОТОК ДЛЯ ОТСЛЕЖИВАНИЯ МЫШИ
         self.mouse_tracker = MouseTrackerThread()
@@ -88,48 +87,34 @@ class Cat(QMainWindow):
         # Настройки окна
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setGeometry(QRect(1500, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
+        self.setGeometry(QRect(100, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
                                self.cat_window_size))
 
         # Определяем путь к каталогу с данными в зависимости от режима исполнения
-        if getattr(sys, 'frozen', False):
-            # Выполнение из собранного исполняемого файла
-            datadir = sys._MEIPASS
+        base_path = getattr(sys, '_MEIPASS', None)
+        if base_path is not None:
+            # Мы находимся в упакованном виде (PyInstaller)
+            app_directory = Path(base_path)
         else:
-            # Выполнение в режиме разработки
-            datadir = '.'
-        try:
-            self.cat = QPixmap(os.path.join("D://py/cat/", "cat.png"))
-            print("Изображение cat.png успешно загружено.")
-        except Exception as e:
-            print(f"Ошибка при загрузке изображения cat.png: {e}")
-
-        try:
-            self.cat_1 = QPixmap(os.path.join("D://py/cat/", "cat1.png"))
-            print("Изображение cat1.png успешно загружено.")
-        except Exception as e:
-            print(f"Ошибка при загрузке изображения cat1.png: {e}")
-
-        try:
-            self.cat_2 = QPixmap(os.path.join("D://py/cat/", "cat2.png"))
-            print("Изображение cat2.png успешно загружено.")
-        except Exception as e:
-            print(f"Ошибка при загрузке изображения cat2.png: {e}")
+            # Обычный режим разработки
+            app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+        resource_path = app_directory / 'drawable' / 'cat'
 
         # ЗАГРУЖАЕМ ИЗОБРАЖЕНИЯ
-        self.eye = QPixmap("./drawable/cat/eye.png")
-        self.eye2 = QPixmap("./drawable/cat/eye2.png")
-        self.eye_big = QPixmap("./drawable/cat/eye_big.png")
-        self.eye2_big = QPixmap("./drawable/cat/eye2_big.png")
-        self.cat_dragged = QPixmap("./drawable/cat/cat_dragged.png")
-        self.cat_fall = QPixmap("./drawable/cat/cat_fall.png")
-        self.main_cat = QPixmap("./drawable/cat/PET_t.png")
-        self.cat_pixmap_stat = QPixmap("./drawable/cat/PET_stat.png")
+        self.eye = QPixmap(str(resource_path / "eye.png"))
+        self.eye2 = QPixmap(str(resource_path / "eye2.png"))
+        self.eye_big = QPixmap(str(resource_path / "eye_big.png"))
+        self.eye2_big = QPixmap(str(resource_path / "eye2_big.png"))
+        self.cat_dragged = QPixmap(str(resource_path / "cat_dragged.png"))
+        self.cat_fall = QPixmap(str(resource_path / "cat_fall.png"))
+        self.main_cat = QPixmap(str(resource_path / 'PET_t.png'))
+        self.cat_pixmap_stat = QPixmap(str(resource_path / "PET_stat.png"))
 
-        self.top_lapa_gif = QMovie("./drawable/cat/lapa_top.gif")
-        self.bottom_lapa_gif = QMovie("./drawable/cat/lapa.gif")
-        self.left_lapa_gif = QMovie("./drawable/cat/lapa_left.gif")
-        self.right_lapa_gif = QMovie("./drawable/cat/lapa_right.gif")
+        # ЗАГРУЖАЕМ ГИФКИ
+        self.top_lapa_gif = QMovie(str(resource_path / "lapa_top.gif"))
+        self.bottom_lapa_gif = QMovie(str(resource_path / "lapa.gif"))
+        self.left_lapa_gif = QMovie(str(resource_path / "lapa_left.gif"))
+        self.right_lapa_gif = QMovie(str(resource_path / "lapa_right.gif"))
 
         # ЛЕВЫЙ ГЛАЗ
         self.eye_l = QLabel(self)
@@ -224,20 +209,31 @@ class Cat(QMainWindow):
             on_press=self.on_press,
             on_release=self.on_release
         )
-        # self.listener.start()
+        self.listener.start()
 
-        # self.fly.anim.start()
-        # self.fly.isFlying = True
+
+    def start_fly(self):
+        self.fly = Fly(self)
+        self.fly.position_changed.connect(self.on_fly_update)
+        self.fly.finished.connect(self.on_fly_finished)
+        self.fly.show()
+        self.fly.anim.start()
+        self.isFlying = True
+
+    def on_fly_finished(self):
+        self.isFlying = False
+        self.fly.deleteLater()
 
     def on_fly_update(self, x, y):
         mouse_pos = self.cat.mapFromGlobal(QPoint(x, y))
         self.move_eye(self.eye_l, self.center_l, QPoint(mouse_pos.x(), mouse_pos.y()), self.eye_l_animation)
         self.move_eye(self.eye_r, self.center_r, QPoint(mouse_pos.x(), mouse_pos.y()), self.eye_r_animation)
-
         window_rect = self.cat.frameGeometry()
-        if (window_rect.contains(mouse_pos)):
+        if window_rect.contains(mouse_pos) and not self.isHidden():
             self.hide()
-            self.crazy.run_crazy_start()
+            self.crazy.run_crazy_start(self.pos().x())
+
+
 
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mousePressEvent(self, event):
@@ -530,14 +526,14 @@ class Cat(QMainWindow):
         if distance <= self.eyes_distance and not self.bigeyes_timer.isActive():
             self.bigeyes_timer.start()
 
-        if not self.fly.isFlying:
+        if not self.isFlying:
             self.move_eye(self.eye_l, self.center_l, mouse_pos, self.eye_l_animation)
             self.move_eye(self.eye_r, self.center_r, mouse_pos, self.eye_r_animation)
 
     # ФУНКЦИЯ ПЕРЕВОРОТА И ПОЯВЛЕНИЯ КОТА
     def cat_preparing(self):
         all_cat_states = list(CatState)
-        # random.choice(all_cat_states)
+        position = random.choice(all_cat_states)
         values = self.random_rotate(self.cat_position, CatState.BOTTOM)
         self.main_cat = values[0]
         self.eye = values[1]
@@ -555,6 +551,11 @@ class Cat(QMainWindow):
         self.cat_coming_animation.setEndValue(values[6])
         self.lapa.setVisible(False)
         self.cat_coming_animation.start()
+
+        if position == CatState.BOTTOM and random.randint(1, 20) == 1:
+            self.start_fly()
+
+
 
     # ФУНКЦИЯ ПОВОРОТА КОТА И ГЛАЗ В ЗАВИСИМОСТИ ОТ ВЫБРАННОГО И ТЕКУЩЕГО ПОЛОЖЕНИЯ КОТА
     def random_rotate(self, current_position, direction):

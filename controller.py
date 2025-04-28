@@ -1,4 +1,5 @@
 import sys
+from pathlib import Path
 
 from PyQt6.QtCore import Qt, QSize, QPoint, QTimer
 from PyQt6.QtGui import QPixmap
@@ -7,6 +8,7 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLab
 
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
+from utils.enums import Characters
 from utils.utils import svg_to_icon
 
 
@@ -31,6 +33,19 @@ class CustomButton(QPushButton):
 
 
 class CustomWindow(QMainWindow):
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent  # Найти родительский каталог проекта
+
+    # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable'
+
+
     def __init__(self):
         super().__init__()
         self.drag_pos = None
@@ -66,7 +81,7 @@ class CustomWindow(QMainWindow):
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
         self.right_shadow = QLabel(self.main_container)
         self.right_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
-        self.right_shadow.setPixmap(QPixmap("drawable/menu/right_shadow.png").scaled(
+        self.right_shadow.setPixmap(QPixmap(str(self.resource_path / 'menu' / "right_shadow.png")).scaled(
             260, 380,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
@@ -77,8 +92,8 @@ class CustomWindow(QMainWindow):
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
         self.left_shadow = QLabel(self.main_container)
         self.left_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
-        self.left_shadow.setPixmap(QPixmap("drawable/menu/left_shadow.png").scaled(
-            450,485,
+        self.left_shadow.setPixmap(QPixmap(str(self.resource_path / 'menu' / "left_shadow.png")).scaled(
+            450, 485,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
         ))
@@ -95,7 +110,7 @@ class CustomWindow(QMainWindow):
         # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
         global_pos = self.right_panel.mapToGlobal(QPoint(0, 0))
         local_pos = self.main_container.mapFromGlobal(global_pos)
-        self.right_shadow.setGeometry(local_pos.x() - 5,local_pos.y() + 10,260,345)
+        self.right_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 10, 260, 345)
         # УСТАНОВКА КООРДИНАТ  ДЛЯ CHARACTERS
         global_pos = self.left_panel.mapToGlobal(QPoint(0, 0))
         local_pos = self.main_container.mapFromGlobal(global_pos)
@@ -126,10 +141,10 @@ class CustomWindow(QMainWindow):
         buttons_container.setContentsMargins(0, 0, 20, 0)
         buttons_container.setSpacing(10)
 
-        close_btn = CustomButton("./drawable/menu/close_but.svg")
+        close_btn = CustomButton(str(self.resource_path / 'menu' / "close_but.svg"))
         close_btn.clicked.connect(self.close)
 
-        minimize_btn = CustomButton("./drawable/menu/minimize_but.svg")
+        minimize_btn = CustomButton(str(self.resource_path / 'menu' / "minimize_but.svg"))
         minimize_btn.clicked.connect(self.showMinimized)
 
         buttons_container.addWidget(minimize_btn)
@@ -167,7 +182,7 @@ class CustomWindow(QMainWindow):
         content_layout.setSpacing(15)
 
         self.left_panel = self.setup_gif_container()
-        self.right_panel = DescriptionWindow(self,"НАЗВАНИЕ",
+        self.right_panel = DescriptionWindow(self, "НАЗВАНИЕ",
                                              "Современные технологии кардинально меняют нашу жизнь. Интернет, смартфоны, искусственный интеллект – всё это упрощает повседневные задачи. Однако важно помнить о балансе: цифровизация не должна заменять живое общение. Исследования показывают, что долгий экранный время вредит здоровью и снижает продуктивность.")
         self.right_panel.start_button_clicked.connect(self.on_start_button_push)
         self.right_panel.settings_button_clicked.connect(self.on_settings_button_push)
@@ -177,9 +192,8 @@ class CustomWindow(QMainWindow):
         return content
 
     def setup_gif_container(self):
-        characters = CharactersGallery([
-            "./drawable/flork/flork_shy.gif", "./drawable/flork/flork_shy.gif", "./drawable/flork/flork_shy.gif"
-            ])
+        characters = CharactersGallery({Characters.FLORK: str(self.resource_path / 'flork' / 'flork_shy.gif'),
+                                        Characters.CAT: str(self.resource_path / 'cat' / 'lapa.gif')})
         characters.character_signal.connect(self.update_character_info)
         return characters
 

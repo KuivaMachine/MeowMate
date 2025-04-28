@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 
 from PyQt6.QtCore import QPropertyAnimation, Qt, QPoint, QSize
 from PyQt6.QtGui import QMovie
@@ -5,6 +7,17 @@ from PyQt6.QtWidgets import QApplication, QLabel
 
 
 class Pacman(QLabel):
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent.parent # Найти родительский каталог проекта
+    # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable'/'pacman'
+
     def __init__(self):
         super().__init__()
 
@@ -23,7 +36,7 @@ class Pacman(QLabel):
         self.pacman_label = QLabel(self)
         self.pacman_label.setGeometry(700, 0, 800, 300)
 
-        self.pacman_gif = QMovie("./drawable/pacman/pacman.gif")
+        self.pacman_gif = QMovie(str(self.resource_path /"pacman.gif"))
         self.pacman_gif.setScaledSize(QSize(800, 300))
         self.pacman_label.setMovie(self.pacman_gif)
         self.pacman_gif.start()

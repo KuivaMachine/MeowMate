@@ -7,7 +7,7 @@ from utils.enums import Characters
 
 class CharactersGallery(QWidget):
     character_signal = pyqtSignal(Characters)
-    def __init__(self, paths):
+    def __init__(self, characters):
         super().__init__()
         self.cards = []
         self.selected_card= None
@@ -68,11 +68,12 @@ class CharactersGallery(QWidget):
         self.scroll_area.setWidget(self.cards_container)
 
 
-        self.add_cards(paths)
+        self.add_cards(characters)
 
-    def add_cards(self, gif_paths):
+    def add_cards(self, characters):
         row = None
-        for i, path in enumerate(gif_paths):
+        i=0
+        for character, gif_path in characters.items():
             if i % 2 == 0:
                 row = QWidget()
                 row.setStyleSheet("""
@@ -80,18 +81,19 @@ class CharactersGallery(QWidget):
                     background-color: transparent;
                     border: none;
                 }
-        """)
+                 """)
                 layout = QHBoxLayout(row)
                 layout.setSpacing(20)
                 self.cards_layout.addWidget(row)
 
-            card = CharacterCart(Characters.FLORK, path, QSize(100, 100))
+            card = CharacterCart(character,gif_path, QSize(100, 100))
             card.clicked.connect(lambda checked, c=card: self.handle_card_click(c))
             row.layout().addWidget(card)
             self.cards.append(card)
             if i==0:
                 self.selected_card = card
                 card.isSelected = True
+            i+=1
 
     def handle_card_click(self, clicked_card):
         for card in self.cards:
