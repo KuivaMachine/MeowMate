@@ -86,7 +86,7 @@ class CharactersGallery(QWidget):
                 layout.setSpacing(20)
                 self.cards_layout.addWidget(row)
 
-            card = CharacterCart(character, gif_path, QSize(100, 100))
+            card = CharacterCart(character, gif_path, QSize(160, 160))
             card.clicked.connect(lambda checked, c=card: self.handle_card_click(c))
             row.layout().addWidget(card)
             self.cards.append(card)

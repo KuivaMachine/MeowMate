@@ -1,0 +1,8 @@
+  29.04.2025 16:52:43: Starting composition “flork”.
+
+  Output To: C:\Users\Александр\Desktop\flork\PngSeq_GifGun\flork_[##########].png    29.04.2025 16:52:49: Finished composition “flork”.
+
+
+  Total Time Elapsed: 6 Seconds
+Log closed on 29.04.2025 at 16:52:49
+

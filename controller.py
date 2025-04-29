@@ -192,7 +192,7 @@ class CustomWindow(QMainWindow):
         return content
 
     def setup_gif_container(self):
-        characters = CharactersGallery({Characters.FLORK: str(self.resource_path / 'flork' / 'flork_shy.gif'),
+        characters = CharactersGallery({Characters.FLORK: str(self.resource_path / 'flork' / 'flork_dance.gif'),
                                         Characters.CAT: str(self.resource_path / 'cat' / 'lapa.gif')})
         characters.character_signal.connect(self.update_character_info)
         return characters

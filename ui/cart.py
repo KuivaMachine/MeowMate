@@ -90,6 +90,8 @@ class CharacterCart(QLabel):
             painter.drawRoundedRect(1, 1, self.width() - 2, self.height() - 2, 15, 15)
         else:
             self.movie.stop()
+            self.movie.start()
+            self.movie.stop()
             # 1. Рисуем фон карточки
             painter.setPen(Qt.PenStyle.NoPen)
             # painter.setBrush(QBrush(QColor("#FFD09E")))
