@@ -20,12 +20,7 @@ class DescriptionWindow(QWidget):
         self.description = text_description
 
         self.setMaximumWidth(260)
-        self.setStyleSheet("""
-                QWidget {
-                    background-color: transparent;
-                    border: none;
-                }
-            """)
+
         self.gears = QLabel()
         self.gears_movie = QMovie("./drawable/menu/gears_big.gif")
         self.gears_movie.setScaledSize(QSize(260, 130))
@@ -52,7 +47,7 @@ class DescriptionWindow(QWidget):
                 self.name = "ФЛОРК"
                 self.description = "Описание флорка"
             case (Characters.CAT):
-                self.name = "КОТ"
+                self.name = "АБРИКОС"
                 self.description = "Описание кота"
             case (Characters.BONGO_CAT):
                 self.name = "БОНГО-КОТ"
@@ -67,13 +62,6 @@ class DescriptionWindow(QWidget):
     def setup_buttons(self):
         buttons_container = QWidget()
         buttons_container.setFixedSize(260,130)
-        buttons_container.setStyleSheet("""
-            QWidget {
-                background-color: transparent;
-                border: none;
-            }
-        """)
-
         stack = QStackedLayout(buttons_container)
         stack.setStackingMode(QStackedLayout.StackingMode.StackAll)
 
@@ -83,12 +71,6 @@ class DescriptionWindow(QWidget):
         setting_button = CustomAnimatedButton("НАСТРОИТЬ", "./drawable/menu/gears_mini.gif", self)
         setting_button.clicked.connect(lambda : self.settings_button_clicked.emit())
         button_layout = QWidget()
-        button_layout.setStyleSheet("""
-            QWidget {
-                background-color: transparent;
-                border: none;
-            }
-        """)
         button_layout.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         main_layout = QVBoxLayout(button_layout)
         main_layout.setContentsMargins(0, 0, 0, 0)  # Убираем отступы
@@ -125,40 +107,19 @@ class DescriptionWindow(QWidget):
 
     def setup_description(self):
         description_container = QWidget()
-        description_container.setStyleSheet("""
-            QWidget {
-                background-color: #FFE5BD;
-                border: 2px solid #000000;
-                border-radius: 15px;
-            }
-        """)
+        description_container.setObjectName('description_container')
 
 
         self.name_label  = QLabel(self.name)
+        self.name_label.setObjectName('name_text')
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.name_label.setStyleSheet("""
-        QLabel{
-        color: #000000;
-        font-size: 30px;
-        font-weight: light;
-        font-family: 'JetBrains Mono';
-        border: none;
-        }
-        """)
+
 
 
         self.description_label = QLabel(self.description)
+        self.description_label.setObjectName('description_text')
         self.description_label.setWordWrap(True)
-        self.description_label.setStyleSheet("""
-                QLabel{
-                color: #000000;
-                text-align: left;
-                font-size: 15px;
-                font-weight: light;
-                font-family: 'JetBrains Mono';
-                border: none;
-                }
-                """)
+
 
         description_layout = QVBoxLayout(description_container)
         description_layout.addWidget(self.name_label, stretch=2)

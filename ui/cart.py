@@ -1,6 +1,6 @@
 from PyQt6.QtCore import Qt, QTimer, QPointF, pyqtSignal
 from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QConicalGradient, QPen
-from PyQt6.QtWidgets import QLabel, QGraphicsDropShadowEffect
+from PyQt6.QtWidgets import QLabel, QGraphicsDropShadowEffect, QApplication
 
 from utils.enums import Characters
 
@@ -8,19 +8,16 @@ from utils.enums import Characters
 class CharacterCart(QLabel):
     clicked = pyqtSignal(Characters)
     character = None
-    def __init__(self, character, gif_path, size):
+    def __init__(self, character, gif_path, size, speed):
         super().__init__()
         self.character = character
-        self.setStyleSheet("""
-            QWidget {
-                background-color: #FFE5BD;
-                border: 2px solid #000000;
-                border-radius: 20px;
-            }
-        """)
+        self.setObjectName('card')
+
         self.isSelected = False
 
         self.movie = QMovie(gif_path)
+        self.movie.setSpeed(speed)
+        self.movie.setCacheMode(QMovie.CacheMode.CacheAll)
         self.movie.setScaledSize(size)
         self.setMovie(self.movie)
         self.movie.start()
@@ -48,6 +45,9 @@ class CharacterCart(QLabel):
         self.update()
 
     def mousePressEvent(self, event):
+        if self.movie.state() != QMovie.MovieState.Running:
+            self.movie.jumpToFrame(0)
+            QApplication.processEvents()
         self.movie.start()
         self.isSelected = True
         self.clicked.emit(self.character)  # Отправляем сигнал при клике
@@ -94,6 +94,5 @@ class CharacterCart(QLabel):
             self.movie.stop()
             # 1. Рисуем фон карточки
             painter.setPen(Qt.PenStyle.NoPen)
-            # painter.setBrush(QBrush(QColor("#FFD09E")))
             painter.drawRoundedRect(0, 0, self.width(), self.height(), 15, 15)
         super().paintEvent(event)

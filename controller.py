@@ -6,33 +6,15 @@ from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QApplication, \
     QStackedLayout
 
+from character import Character
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
+from ui.service_button import ServiceButton
 from utils.enums import Characters
-from utils.utils import svg_to_icon
 
 
-class CustomButton(QPushButton):
-    def __init__(self, path):
-        super().__init__()
-        self.setFixedSize(30, 30)
 
-        self.setIcon(svg_to_icon(path))
-        self.setIconSize(QSize(30, 30))
-        self.setStyleSheet("""
-            QPushButton {
-                background-color: transparent;
-                border: none;
-            
-            }
-            QPushButton:hover {
-                 border: 2px solid #000000;
-                 border-radius: 6px;
-            }
-        """)
-
-
-class CustomWindow(QMainWindow):
+class MainMenuWindow(QMainWindow):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
@@ -45,7 +27,6 @@ class CustomWindow(QMainWindow):
     # Теперь можем обратиться к нужным ресурсам
     resource_path = app_directory / 'drawable'
 
-
     def __init__(self):
         super().__init__()
         self.drag_pos = None
@@ -53,21 +34,18 @@ class CustomWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
+        with open('light-theme.qss', 'r') as f:
+            self.style_sheet = f.read()
+        self.setStyleSheet(self.style_sheet)
+
         # Основные параметры окна
         self.setFixedSize(800, 600)
 
         # Создаем основной контейнер
         self.main_container = QWidget(self)
         self.main_container.setGeometry(0, 0, 800, 600)
+        self.main_container.setObjectName('main_container')
 
-        # Настройка стилей
-        self.main_container.setStyleSheet("""
-            QWidget {
-                background-color: #FFF2D6;
-                border-radius: 15px;
-                border: 3px solid #000000;
-            }
-        """)
         self.main_vbox = QVBoxLayout(self.main_container)
         self.main_vbox.setContentsMargins(0, 0, 0, 0)  # Убираем отступы
         self.main_vbox.setSpacing(0)  # Убираем промежутки между элементами
@@ -100,6 +78,11 @@ class CustomWindow(QMainWindow):
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
+        # Читаем и применяем стиль
+        with open('light-theme.qss', 'r') as f:
+            style_sheet = f.read()
+        self.setStyleSheet(style_sheet)
+
     def on_start_button_push(self):
         print(self.left_panel.selected_card.character)
 
@@ -121,16 +104,9 @@ class CustomWindow(QMainWindow):
 
         # Макет заголовка
         header = QWidget()
+        header.setObjectName('header')
         header.setFixedHeight(45)
 
-        header.setStyleSheet("""
-            QWidget{
-            background-color: #FFD300;
-            border-color: #000000;
-            border-radius:15px;
-            border-width:3px;
-            }
-        """)
         stack = QStackedLayout(header)
         stack.setStackingMode(QStackedLayout.StackingMode.StackAll)
 
@@ -141,10 +117,10 @@ class CustomWindow(QMainWindow):
         buttons_container.setContentsMargins(0, 0, 20, 0)
         buttons_container.setSpacing(10)
 
-        close_btn = CustomButton(str(self.resource_path / 'menu' / "close_but.svg"))
+        close_btn = ServiceButton(str(self.resource_path / 'menu' / "close_but.svg"))
         close_btn.clicked.connect(self.close)
 
-        minimize_btn = CustomButton(str(self.resource_path / 'menu' / "minimize_but.svg"))
+        minimize_btn = ServiceButton(str(self.resource_path / 'menu' / "minimize_but.svg"))
         minimize_btn.clicked.connect(self.showMinimized)
 
         buttons_container.addWidget(minimize_btn)
@@ -153,37 +129,24 @@ class CustomWindow(QMainWindow):
         stack.addWidget(buttons_widget)
 
         title = QLabel("Выберите персонажа")
+        title.setObjectName('title')
         title.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        title.setStyleSheet("""
-                           QLabel {
-                               color: #000000;
-                               font-size: 26px;
-                               font-weight: medium;
-                               font-family: 'PT Mono';
-                               border: none;
-                           }
-                       """)
+
         stack.addWidget(title)
         return header
 
     # ОСНОВНОЙ КОНТЕНТ
     def setup_content(self):
         content = QWidget()
-        content.setStyleSheet("""
-            QWidget {
-                background-color: transparent;
-                border: none;
-            }
-        """)
         content.setContentsMargins(25, 25, 25, 25)
 
         content_layout = QHBoxLayout(content)
         content_layout.setSpacing(15)
 
+        self.right_panel = DescriptionWindow(self, "","")
         self.left_panel = self.setup_gif_container()
-        self.right_panel = DescriptionWindow(self, "НАЗВАНИЕ",
-                                             "ОПИСАНИЕ")
+
         self.right_panel.start_button_clicked.connect(self.on_start_button_push)
         self.right_panel.settings_button_clicked.connect(self.on_settings_button_push)
         content_layout.addWidget(self.left_panel, stretch=6)
@@ -192,8 +155,14 @@ class CustomWindow(QMainWindow):
         return content
 
     def setup_gif_container(self):
-        characters = CharactersGallery({Characters.FLORK: str(self.resource_path / 'flork' / 'flork_dance.gif'),
-                                        Characters.CAT: str(self.resource_path / 'cat' / 'lapa.gif')})
+
+        characters = CharactersGallery(
+            [
+            Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
+             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
+             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
+             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130)
+             ])
         characters.character_signal.connect(self.update_character_info)
         return characters
 
@@ -216,7 +185,7 @@ class CustomWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    window = CustomWindow()
+    window = MainMenuWindow()
     window.show()
 
     app.exec()
