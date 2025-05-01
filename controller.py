@@ -3,17 +3,16 @@ from pathlib import Path
 
 from PyQt6.QtCore import Qt, QSize, QPoint, QTimer
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QPushButton, QApplication, \
-    QStackedLayout
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
 
 from character import Character
-from test import SwitchButton
+
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
+from ui.switch_button import SwitchButton
 
-from utils.enums import Characters
-
+from utils.enums import Characters, ThemeColor
 
 
 class MainMenuWindow(QMainWindow):
@@ -28,17 +27,13 @@ class MainMenuWindow(QMainWindow):
 
     # Теперь можем обратиться к нужным ресурсам
     resource_path = app_directory / 'drawable'
-
+    theme_color = ThemeColor.LIGHT
     def __init__(self):
         super().__init__()
         self.drag_pos = None
         # Убираем стандартные рамки окна
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
-        with open('light-theme.qss', 'r') as f:
-            self.style_sheet = f.read()
-        self.setStyleSheet(self.style_sheet)
 
         # Основные параметры окна
         self.setFixedSize(800, 600)
@@ -60,30 +55,42 @@ class MainMenuWindow(QMainWindow):
 
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
         self.right_shadow = QLabel(self.main_container)
-        self.right_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
-        self.right_shadow.setPixmap(QPixmap(str(self.resource_path / 'menu' / "right_shadow.png")).scaled(
+        self.right_shadow_pixmap_light = QPixmap(str(self.resource_path / 'menu' / "right_shadow.png")).scaled(
             260, 380,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
-        ))
+        )
+        self.right_shadow_pixmap_dark = QPixmap(str(self.resource_path / 'menu' / "right_shadow_white.png")).scaled(
+            260, 380,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
         self.right_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
         self.left_shadow = QLabel(self.main_container)
-        self.left_shadow.setStyleSheet("QLabel { background: transparent; border: none; }")
-        self.left_shadow.setPixmap(QPixmap(str(self.resource_path / 'menu' / "left_shadow.png")).scaled(
+        self.left_shadow_pixmap_light = QPixmap(str(self.resource_path / 'menu' / "left_shadow.png")).scaled(
             450, 485,
             Qt.AspectRatioMode.KeepAspectRatio,
             Qt.TransformationMode.SmoothTransformation
-        ))
+        )
+        self.left_shadow_pixmap_dark = QPixmap(str(self.resource_path / 'menu' / "left_shadow_white.png")).scaled(
+            450, 485,
+            Qt.AspectRatioMode.KeepAspectRatio,
+            Qt.TransformationMode.SmoothTransformation
+        )
+        self.left_shadow.setPixmap(self.left_shadow_pixmap_light)
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
         # Читаем и применяем стиль
+        with open('dark-theme.qss', 'r') as f:
+            self.dark_style = f.read()
         with open('light-theme.qss', 'r') as f:
-            style_sheet = f.read()
-        self.setStyleSheet(style_sheet)
+            self.light_style = f.read()
+        self.setStyleSheet(self.light_style)
 
     def on_start_button_push(self):
         print(self.left_panel.selected_card.character)
@@ -101,8 +108,23 @@ class MainMenuWindow(QMainWindow):
         local_pos = self.main_container.mapFromGlobal(global_pos)
         self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
 
-    def change_theme(self):
-        print('change')
+    def change_theme(self, is_change):
+        if is_change:
+            self.theme_color = ThemeColor.DARK
+            self.setStyleSheet(self.dark_style)
+            self.close_btn.setupIcon(str(self.resource_path / 'menu' / "close_but_white.svg"))
+            self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but_white.svg'))
+            self.left_shadow.setPixmap(self.left_shadow_pixmap_dark)
+            self.right_shadow.setPixmap(self.right_shadow_pixmap_dark)
+        else:
+            self.theme_color = ThemeColor.LIGHT
+            self.setStyleSheet(self.light_style)
+            self.close_btn.setupIcon(str(self.resource_path / 'menu' / "close_but.svg"))
+            self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but.svg'))
+            self.left_shadow.setPixmap(self.left_shadow_pixmap_light)
+            self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
+
+
 
 
     # ЗАГОЛОВОК
@@ -120,10 +142,10 @@ class MainMenuWindow(QMainWindow):
         switch_container = QWidget()
         switch_container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         switch_layout = QHBoxLayout(switch_container)
-        switch_button = SwitchButton()
-        switch_button.clicked.connect(self.change_theme)
-        switch_layout.addWidget(switch_button)
         switch_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        switch_button = SwitchButton()
+        switch_layout.addWidget(switch_button)
+        switch_button.change_theme.connect(self.change_theme)
         hlayout.addWidget(switch_container)
 
         # ВЫБЕРИТЕ ПЕРСОНАЖА
@@ -141,14 +163,14 @@ class MainMenuWindow(QMainWindow):
         buttons_container.setAlignment(Qt.AlignmentFlag.AlignRight)
         buttons_container.setSpacing(10)
 
-        close_btn = ServiceButton(str(self.resource_path / 'menu' / "close_but.svg"))
-        close_btn.clicked.connect(self.close)
+        self.close_btn = ServiceButton(str(self.resource_path / 'menu' / "close_but.svg" if self.theme_color==ThemeColor.LIGHT else "close_but_white.svg"))
+        self.close_btn.clicked.connect(self.close)
 
-        minimize_btn = ServiceButton(str(self.resource_path / 'menu' / "minimize_but.svg"))
-        minimize_btn.clicked.connect(self.showMinimized)
+        self.minimize_btn = ServiceButton(str(self.resource_path / 'menu' / "minimize_but.svg" if self.theme_color==ThemeColor.LIGHT else "minimize_but_white.svg"))
+        self.minimize_btn.clicked.connect(self.showMinimized)
 
-        buttons_container.addWidget(minimize_btn)
-        buttons_container.addWidget(close_btn)
+        buttons_container.addWidget(self.minimize_btn)
+        buttons_container.addWidget(self.close_btn)
         hlayout.addWidget(buttons_widget)
 
         return header
@@ -177,12 +199,8 @@ class MainMenuWindow(QMainWindow):
     def setup_gif_container(self):
 
         characters = CharactersGallery(
-            [
-            Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
-             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
-             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 100),
-             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130)
-             ])
+            [Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130),
+             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),])
         characters.character_signal.connect(self.update_character_info)
         return characters
 

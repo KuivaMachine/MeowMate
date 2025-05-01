@@ -1,50 +1,63 @@
+import sys
+from pathlib import Path
+
 from PyQt6.QtCore import QSize, Qt, QPropertyAnimation, pyqtSignal
-from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QPen, QFont
+from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QPen, QFont, QLinearGradient
 from PyQt6.QtWidgets import QLabel, QPushButton, QGraphicsDropShadowEffect
+
+from utils.enums import ThemeColor
 
 
 class CircularLabel(QLabel):
 
-    def __init__(self, parent, gif_path, color):
+    def __init__(self, parent, gif_path):
         super().__init__(parent)
-        size = QSize(40, 40)
-        self.setFixedSize(size)
-        border_radius = self.height() // 2
-        self.setStyleSheet(f"""
-            QLabel {{
-                background-color: {color};
-                border-radius: {border_radius}px;
-                border-width:0px;
-            }}
-        """)
+        self.setObjectName('circle_in_start_settings_buttons')
+        self.size = QSize(40, 40)
+        self.setFixedSize(self.size)
+        # self.movie = QMovie(gif_path)
+        # self.movie.setScaledSize(self.size)
+        # self.setMovie(self.movie)
+        # self.movie.start()
+        # self.movie.stop()
 
-        self.movie = QMovie(gif_path)
-        self.movie.setScaledSize(size)
-        self.setMovie(self.movie)
-        self.movie.start()
-        self.movie.stop()
-
+    def setGif(self, path):
+        self.new_movie = QMovie(path)
+        self.new_movie.setScaledSize(self.size)
+        self.setMovie(self.new_movie)
+        self.new_movie.start()
 
 class CustomAnimatedButton(QPushButton):
+    settings_button_clicked = pyqtSignal()
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+    # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable' / 'menu'
+
     def __init__(self, text, gif_path, parent):
         super().__init__(parent)
+        self.setObjectName('custom_buttons')
         self._pressed = None
         self.setFixedSize(170, 55)
         self.setText(text)
         self.menu_window = parent
+
         self.setMouseTracking(True)
         self._hover = False
         self._radius_inner = self.height() // 2
         self._radius_upper = (self.height() + 4) // 2
-        # Настройка шрифта
-        self.font = QFont("JetBrains Mono", 13)
 
-        self.font.setWeight(QFont.Weight.Bold)
-        self.setFont(self.font)
+
 
         # Настройка гифки в круге
-        self.gif_label = CircularLabel(self, gif_path, "#FFF2D6")
-        self.gif_label.setMouseTracking(True)
+        self.gif_label = CircularLabel(self, gif_path)
+        self.gif_label.setGif(str(self.app_directory / 'gears_mini_white.gif'))
         self.gif_label.move(
             self.width() - (self.gif_label.width() + ((self.height() + 2) - self.gif_label.height()) // 2),
             (self.height() - self.gif_label.height()) // 2)
@@ -52,7 +65,6 @@ class CustomAnimatedButton(QPushButton):
         # Тень при наведении
         self.shadow_effect = QGraphicsDropShadowEffect()
         self.shadow_effect.setBlurRadius(0)
-        self.shadow_effect.setColor(QColor(0, 0, 0, 250))
         self.shadow_effect.setOffset(0, 0)
         self.setGraphicsEffect(self.shadow_effect)
 
@@ -77,6 +89,14 @@ class CustomAnimatedButton(QPushButton):
         self._hover = True
         # Анимация появления тени
         self.shadow_animation.stop()
+        if self.menu_window.parent.theme_color == ThemeColor.LIGHT:
+            self.shadow_effect.setColor(QColor(0, 0, 0, 250))
+        else:
+            if (self.text() == 'НАСТРОИТЬ'):
+                self.shadow_effect.setColor(QColor(85, 212, 0, 250))
+            if (self.text() == 'ЗАПУСТИТЬ'):
+                self.shadow_effect.setColor(QColor(251, 6, 173, 250))
+
         self.shadow_animation.setStartValue(0)
         self.shadow_animation.setEndValue(15)
         self.shadow_animation.start()
@@ -108,30 +128,34 @@ class CustomAnimatedButton(QPushButton):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-        if self._pressed:
 
-            # 1. Рисуем фон
+
+        if self._hover:
+
+            gradient = QLinearGradient(0, 0, self.width(), self.height())
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QBrush(QColor("#FFBC75")))
-            painter.drawRoundedRect(3, 3, self.width() - 6, self.height() - 6, self._radius_inner, self._radius_inner)
-
-            # 4. Рисуем текст слева
-            painter.setPen(QPen(QColor("black")))
-            text_rect = self.rect().adjusted(25, 0, 0, 0)
-            painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self.text())
-        else:
-            # 2. Анимированная обводка при наведении
-            if self._hover:
-                painter.setPen(Qt.PenStyle.NoPen)
-                painter.setBrush(QBrush(QColor("#000000")))
+            if self.text() == 'ЗАПУСТИТЬ':
+                gradient.setColorAt(0, QColor("#FF9100"))
+                gradient.setColorAt(1, QColor("#FB06AD"))
+                painter.setBrush(QBrush(gradient))
+                painter.drawRoundedRect(0, 0, self.width(), self.height(), self._radius_upper, self._radius_upper)
+            elif self.text() == 'НАСТРОИТЬ':
+                if self.menu_window.parent.theme_color == ThemeColor.DARK:
+                    pass
+                gradient.setColorAt(0, QColor("#55D400"))
+                gradient.setColorAt(1, QColor("#07B6FB"))
+                painter.setBrush(QBrush(gradient))
                 painter.drawRoundedRect(0, 0, self.width(), self.height(), self._radius_upper, self._radius_upper)
 
-            # 1. Рисуем фон
-            painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QBrush(QColor("#FFBC75")))
-            painter.drawRoundedRect(3, 3, self.width() - 6, self.height() - 6, self._radius_inner, self._radius_inner)
+        if not self._pressed:
+            if self.menu_window.parent.theme_color==ThemeColor.LIGHT:
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.setBrush(QBrush(QColor("#FFBC75")))
+                painter.drawRoundedRect(3, 3, self.width() - 6, self.height() - 6, self._radius_inner, self._radius_inner)
+            else:
+                painter.setPen(Qt.PenStyle.NoPen)
+                painter.setBrush(QBrush(QColor("#666666")))
+                painter.drawRoundedRect(3, 3, self.width() - 6, self.height() - 6, self._radius_inner,
+                                        self._radius_inner)
 
-            # 4. Рисуем текст слева
-            painter.setPen(QPen(QColor("black")))
-            text_rect = self.rect().adjusted(25, 0, 0, 0)
-            painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self.text())
+

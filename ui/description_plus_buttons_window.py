@@ -1,3 +1,5 @@
+import sys
+from pathlib import Path
 from re import match
 
 from PyQt6.QtCore import QSize, Qt, QRect, pyqtSignal
@@ -11,6 +13,17 @@ from utils.enums import Characters
 class DescriptionWindow(QWidget):
     start_button_clicked = pyqtSignal()
     settings_button_clicked = pyqtSignal()
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent.parent # Найти родительский каталог проекта
+    # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable'/'menu'
+
     def __init__(self, parent, name, text_description):
         super().__init__()
         self.parent = parent
@@ -22,14 +35,14 @@ class DescriptionWindow(QWidget):
         self.setMaximumWidth(260)
 
         self.gears = QLabel()
-        self.gears_movie = QMovie("./drawable/menu/gears_big.gif")
+        self.gears_movie = QMovie(str(self.resource_path /'gears_big.gif'))
         self.gears_movie.setScaledSize(QSize(260, 130))
         self.gears.setMovie(self.gears_movie)
         self.gears.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.gears.hide()
 
         self.rockets = QLabel()
-        self.rocket_movie = QMovie("./drawable/menu/rockets.gif")
+        self.rocket_movie = QMovie(str(self.resource_path /'rockets.gif'))
         self.rocket_movie.setScaledSize(QSize(260, 130))
         self.rockets.setMovie(self.rocket_movie)
         self.rockets.setAlignment(Qt.AlignmentFlag.AlignCenter)
@@ -65,15 +78,14 @@ class DescriptionWindow(QWidget):
         stack = QStackedLayout(buttons_container)
         stack.setStackingMode(QStackedLayout.StackingMode.StackAll)
 
-        # 2. Добавляем кнопку (будет спереди)
-        start_button = CustomAnimatedButton("ЗАПУСТИТЬ", "./drawable/menu/fire_mini.gif", self)
+        start_button = CustomAnimatedButton("ЗАПУСТИТЬ", str(self.resource_path /'fire_mini.gif'), self)
         start_button.clicked.connect(lambda : self.start_button_clicked.emit())
-        setting_button = CustomAnimatedButton("НАСТРОИТЬ", "./drawable/menu/gears_mini.gif", self)
+        setting_button = CustomAnimatedButton("НАСТРОИТЬ", str(self.resource_path /'gears_mini.gif'), self)
         setting_button.clicked.connect(lambda : self.settings_button_clicked.emit())
         button_layout = QWidget()
         button_layout.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         main_layout = QVBoxLayout(button_layout)
-        main_layout.setContentsMargins(0, 0, 0, 0)  # Убираем отступы
+        main_layout.setContentsMargins(0, 0, 0, 0)
         main_layout.setAlignment(Qt.AlignmentFlag.AlignCenter)
         main_layout.addWidget(start_button)
         main_layout.addWidget(setting_button)

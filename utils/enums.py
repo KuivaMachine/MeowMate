@@ -13,3 +13,7 @@ class Characters(Enum):
 class Direction(Enum):
     POSITIVE = "POSITIVE"
     NEGATIVE = "NEGATIVE"
+
+class ThemeColor (Enum):
+    LIGHT = 'light'
+    DARK = 'dark'

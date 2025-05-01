@@ -1,9 +1,5 @@
 /* MainMenuWindow */
-CustomWindow {
-    background-color: #FFF2D6;
-    border-radius: 15px;
-    border: 3px solid #000000;
-}
+
 QPushButton#service_buttons {
     background-color: transparent;
     border: none;
@@ -15,7 +11,8 @@ QPushButton#service_buttons:hover {
 QLabel#title {
     color: #000000;
     font-size: 26px;
-    font-weight: light;
+    letter-spacing: -1px;
+    font-weight: bold;
     font-family: 'PT Mono';
     text-align: center;
     border:3px solid #000000;
@@ -34,6 +31,34 @@ QWidget#main_container{
 }
 
 
+/* Start/Settings BUTTONS */
+QLabel#circle_in_start_settings_buttons {
+    background-color: #FFF2D6;
+    border-radius:20px;
+    border: none;
+}
+QPushButton#custom_buttons {
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: black;
+    padding-left: 20px;
+    background-color: "#FFBC75";
+    border:0px solid #000000;
+    border-radius: 26px;
+}
+QPushButton#custom_buttons:pressed{
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: black;
+    padding-left: 17px;
+    background-color: "#FFBC75";
+    border:3px solid #000000;
+    border-radius: 26px;
+}
 
 
 /* DescriptionWindow */
@@ -108,13 +133,23 @@ QWidget#card {
 QPushButton#control_button {
     background-color: transparent;
     border: none;
-    width: 30px;
-    height: 30px;
 }
-QPushButton#control_button:hover {
+QPushButton#control_button:hover{
     border: 2px solid #000000;
     border-radius: 6px;
 }
 
+/* SwitchButton */
+QPushButton#switch_button{
+    background-color: transparent;
+    border: 2px solid #000000;
+    border-radius:12px;
+}
+
+QLabel#toggle{
+    background-color: #000000;
+    border-radius:8px;
+    border:1px solid #000000;
+}
 
 
