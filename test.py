@@ -1,112 +1,80 @@
-import sys
-
-from PyQt6.QtWidgets import QAbstractButton, QPushButton
-from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, pyqtProperty
-from PyQt6.QtGui import QPainter, QColor, QPen
-
-from PyQt6.QtWidgets import QApplication, QVBoxLayout, QWidget, QLabel
+from PyQt6.QtCore import Qt, QPropertyAnimation, QEasingCurve, QPoint
+from PyQt6.QtWidgets import QPushButton, QLabel
 
 
 class SwitchButton(QPushButton):
-    def __init__(self, parent=None):
-        super().__init__(parent)
-        self.setCheckable(True)
-        self.setFixedSize(60, 30)
-
-        # Цвета для разных состояний
-        self._bg_color = QColor("#cccccc")
-        self._circle_color = QColor("#ffffff")
-        self._active_color = QColor("#4cd964")
-
-        # Позиция кружка (0-1)
-        self._circle_position = 0.0
-
-        # Анимация
-        self._position_animation = QPropertyAnimation(self, b"circle_position")
-        self._position_animation.setDuration(200)
-        self._position_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
-
-        self._color_animation = QPropertyAnimation(self, b"bg_color")
-        self._color_animation.setDuration(200)
-
-        self.toggled.connect(self._start_animations)
-
-    @pyqtProperty(float)
-    def circle_position(self):
-        return self._circle_position
-
-    @circle_position.setter
-    def circle_position(self, pos):
-        self._circle_position = pos
-        self.update()
-
-    @pyqtProperty(QColor)
-    def bg_color(self):
-        return self._bg_color
-
-    @bg_color.setter
-    def bg_color(self, color):
-        self._bg_color = color
-        self.update()
-
-    def _start_animations(self, checked):
-        # Анимация позиции кружка
-        self._position_animation.stop()
-        self._position_animation.setStartValue(self._circle_position)
-        self._position_animation.setEndValue(1.0 if checked else 0.0)
-        self._position_animation.start()
-
-        # Анимация цвета фона
-        self._color_animation.stop()
-        self._color_animation.setStartValue(self._bg_color)
-        self._color_animation.setEndValue(self._active_color if checked else QColor("#cccccc"))
-        self._color_animation.start()
-
-    def paintEvent(self, event):
-        painter = QPainter(self)
-        painter.setRenderHint(QPainter.RenderHint.Antialiasing)
-
-        # Рисуем фон (прямоугольник со скругленными краями)
-        bg_rect = self.rect()
-        radius = bg_rect.height() / 2
-        painter.setPen(Qt.PenStyle.NoPen)
-        painter.setBrush(self._bg_color)
-        painter.drawRoundedRect(bg_rect, radius, radius)
-
-        # Рисуем кружок
-        circle_diameter = bg_rect.height() - 6
-        circle_x = 3 + self._circle_position * (bg_rect.width() - 6 - circle_diameter)
-        circle_y = 3
-
-        painter.setBrush(self._circle_color)
-        painter.drawEllipse(circle_x, circle_y, circle_diameter, circle_diameter)
-
-
-
-
-
-class DemoWindow(QWidget):
     def __init__(self):
         super().__init__()
+        self.setMouseTracking(True)
+        self._checked = False
+        self.circle_diameter = 20
+        self._animation_duration = 200
+        self._rect_height = self.circle_diameter + int(self.circle_diameter * 0.2)
+        self._rect_width = int(self.circle_diameter * 2.5) + self._rect_height - self.circle_diameter
 
-        layout = QVBoxLayout()
+        self.setStyleSheet(f"""
+        QPushButton {{
+    background-color: transparent;
+    border: 2px solid #000000;
+    border-radius:{self._rect_height // 2}px;
+   }}
+        """)
+        self.circle = QLabel(self)
+        self.circle.setMouseTracking(True)
+        self.circle.setGeometry(int((self._rect_height - self.circle_diameter) / 2),
+                                int((self._rect_height - self.circle_diameter) / 2), self.circle_diameter,
+                                self.circle_diameter)
+        self.circle.setStyleSheet(f"""
+        QLabel{{
+        background-color: #313131;
+        border-radius: {self.circle_diameter // 2}px;
+        border:1px solid #000000;
+        }}""")
+        self.position_animation = QPropertyAnimation(self.circle, b"pos")
+        self.position_animation.setDuration(self._animation_duration)
 
-        self.switch = SwitchButton()
-        self.switch.setChecked(False)
-        self.switch.toggled.connect(self.on_switch_toggled)
+        # Начальное положение и непрозрачность
+        self._position = 0
+        self._opacity = 1.0
 
-        self.label = QLabel("Switch is OFF")
+        # Внешний вид кнопки
+        self.setFixedSize(self._rect_width, self._rect_height)
+        self.setCheckable(True)
+        self.setChecked(False)
+       
+       
+       
+    def mousePressEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            print(self._checked)
+            if not self._checked:
+                self.position_animation.setStartValue( QPoint(self.circle.geometry().x(), self.circle.geometry().y()))
+                self.position_animation.setEndValue(QPoint(self.circle.geometry().x() + int(self.circle_diameter*1.5), self.circle.geometry().y()))
+            else:
+                self.position_animation.setStartValue(QPoint(self.circle.geometry().x(), self.circle.geometry().y()))
+                self.position_animation.setEndValue(QPoint(self.circle.geometry().x() - int(self.circle_diameter*1.5),
+                                                           self.circle.geometry().y()))
+            self.position_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
+            self.position_animation.start()
+            self._checked = not self._checked
+            super().mousePressEvent(event)
 
-        layout.addWidget(self.switch, alignment=Qt.AlignmentFlag.AlignCenter)
-        layout.addWidget(self.label, alignment=Qt.AlignmentFlag.AlignCenter)
-        self.setLayout(layout)
-
-    def on_switch_toggled(self, state):
-        self.label.setText("Switch is ON" if state else "Switch is OFF")
 
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    window = DemoWindow()
-    window.show()
-    app.exec()
+# class ExampleWindow(QWidget):
+#     def __init__(self):
+#         super().__init__()
+#         self.setWindowFlags(
+#             Qt.WindowType.FramelessWindowHint |
+#             Qt.WindowType.WindowStaysOnTopHint
+#
+#         )
+#
+#         self.switch_button = SwitchButton(self)
+#
+#
+# if __name__ == "__main__":
+#     app = QApplication(sys.argv)
+#     ex = ExampleWindow()
+#     ex.show()
+#     app.exec()

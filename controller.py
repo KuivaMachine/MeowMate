@@ -7,9 +7,11 @@ from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLab
     QStackedLayout
 
 from character import Character
+from test import SwitchButton
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
+
 from utils.enums import Characters
 
 
@@ -99,22 +101,44 @@ class MainMenuWindow(QMainWindow):
         local_pos = self.main_container.mapFromGlobal(global_pos)
         self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
 
+    def change_theme(self):
+        print('change')
+
+
     # ЗАГОЛОВОК
     def setup_header(self):
-
-        # Макет заголовка
         header = QWidget()
         header.setObjectName('header')
         header.setFixedHeight(45)
 
-        stack = QStackedLayout(header)
-        stack.setStackingMode(QStackedLayout.StackingMode.StackAll)
 
+        hlayout = QHBoxLayout(header)
+        hlayout.setSpacing(10)
+        hlayout.setContentsMargins(20, 0, 15, 0)
+
+        # ПЕРЕКЛЮЧАТЕЛЬ ТЕМЫ
+        switch_container = QWidget()
+        switch_container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        switch_layout = QHBoxLayout(switch_container)
+        switch_button = SwitchButton()
+        switch_button.clicked.connect(self.change_theme)
+        switch_layout.addWidget(switch_button)
+        switch_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
+        hlayout.addWidget(switch_container)
+
+        # ВЫБЕРИТЕ ПЕРСОНАЖА
+        title = QLabel("Выберите персонажа")
+        title.setObjectName('title')
+        title.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
+
+        hlayout.addWidget(title)
+
+        # КНОПКИ СВЕРНУТЬ/ЗАКРЫТЬ
         buttons_widget = QWidget()
         buttons_widget.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         buttons_container = QHBoxLayout(buttons_widget)
         buttons_container.setAlignment(Qt.AlignmentFlag.AlignRight)
-        buttons_container.setContentsMargins(0, 0, 20, 0)
         buttons_container.setSpacing(10)
 
         close_btn = ServiceButton(str(self.resource_path / 'menu' / "close_but.svg"))
@@ -125,15 +149,8 @@ class MainMenuWindow(QMainWindow):
 
         buttons_container.addWidget(minimize_btn)
         buttons_container.addWidget(close_btn)
+        hlayout.addWidget(buttons_widget)
 
-        stack.addWidget(buttons_widget)
-
-        title = QLabel("Выберите персонажа")
-        title.setObjectName('title')
-        title.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        title.setAlignment(Qt.AlignmentFlag.AlignCenter)
-
-        stack.addWidget(title)
         return header
 
     # ОСНОВНОЙ КОНТЕНТ
@@ -153,6 +170,9 @@ class MainMenuWindow(QMainWindow):
         content_layout.addWidget(self.right_panel, stretch=4)
 
         return content
+
+
+
 
     def setup_gif_container(self):
 
