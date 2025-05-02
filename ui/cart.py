@@ -2,15 +2,15 @@ from PyQt6.QtCore import Qt, QTimer, QPointF, pyqtSignal
 from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QConicalGradient, QPen
 from PyQt6.QtWidgets import QLabel, QGraphicsDropShadowEffect, QApplication
 
-from utils.enums import Characters, ThemeColor
+from utils.enums import ThemeColor, CharactersList
 
 
 class CharacterCart(QLabel):
-    clicked = pyqtSignal(Characters)
-    character = None
-    def __init__(self,parent, character, gif_path, size, speed):
+    clicked = pyqtSignal()
+    character_name = None
+    def __init__(self, parent, character_name, gif_path, size, speed):
         super().__init__()
-        self.character = character
+        self.character_name = character_name
         self.setObjectName('card')
         self.scroll_area_instance = parent
         self.scroll_area_instance.controller_instance.theme_change_signal.connect(self.on_theme_change)
@@ -64,7 +64,7 @@ class CharacterCart(QLabel):
             QApplication.processEvents()
         self.movie.start()
         self.isSelected = True
-        self.clicked.emit(self.character)  # Отправляем сигнал при клике
+        self.clicked.emit()  # Отправляем сигнал при клике
 
 
 

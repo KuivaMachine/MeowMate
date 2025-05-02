@@ -43,7 +43,6 @@ class Blinker(QLabel):
             gradient.setColorAt(self.blink_ratio + 0.1, QColor(255, 255, 255, 200))
             gradient.setColorAt(self.blink_ratio + 0.2, QColor(0, 0, 0, 0))
 
-
             painter.setBrush(QBrush(gradient))
             painter.drawRoundedRect(0, 0, self.parent_window.width(), self.parent_window.height(), 20, 20)
         finally:

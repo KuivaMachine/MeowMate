@@ -1,13 +1,11 @@
 import sys
 from pathlib import Path
-from re import match
 
-from PyQt6.QtCore import QSize, Qt, QRect, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QAbstractAnimation
-from PyQt6.QtGui import QMovie, QPixmap
+from PyQt6.QtCore import QSize, Qt, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QAbstractAnimation
+from PyQt6.QtGui import QMovie
 from PyQt6.QtWidgets import QStackedLayout, QWidget, QVBoxLayout, QLabel
 
 from ui.custom_button import CustomAnimatedButton
-from utils.enums import Characters
 
 
 class DescriptionWindow(QWidget):
@@ -53,17 +51,11 @@ class DescriptionWindow(QWidget):
         description_layout.addWidget(self.setup_description())
         description_layout.addWidget(self.setup_buttons())
 
+
     def update_info(self, character):
-        match character:
-            case(Characters.FLORK):
-                self.name = "ФЛОРК"
-                self.description = "Описание флорка"
-            case (Characters.CAT):
-                self.name = "АБРИКОС"
-                self.description = "Описание кота"
-            case (Characters.BONGO_CAT):
-                self.name = "БОНГО-КОТ"
-                self.description = "Описание бонго кота"
+
+        self.name = character.value.name
+        self.description = character.value.description
 
         self.name_label.hide()
         self.description_label.hide()
@@ -76,8 +68,6 @@ class DescriptionWindow(QWidget):
 
         self.name_animation.start()
         self.description_animation.start()
-
-
 
 
 
@@ -133,7 +123,6 @@ class DescriptionWindow(QWidget):
 
 
         self.name_label  = QLabel(self.name)
-        # self.name_label.move(-200,0)
         self.name_label.setObjectName('name_text')
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 

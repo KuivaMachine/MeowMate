@@ -1,18 +1,16 @@
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal, QSize
+from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QStackedWidget, \
-    QStackedLayout
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
 
-from character import Character
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
 from ui.switch_button import SwitchButton
-from utils.enums import ThemeColor, Characters
+from utils.enums import ThemeColor, CharactersList
 
 
 class MainMenuWindow(QMainWindow):
@@ -189,7 +187,7 @@ class MainMenuWindow(QMainWindow):
         content_layout = QHBoxLayout(content)
         content_layout.setSpacing(15)
 
-        self.description_panel = DescriptionWindow(self, "", "")
+        self.description_panel = DescriptionWindow(self, CharactersList.getFirst().value.name, CharactersList.getFirst().value.description)
         self.characters_panel = self.setup_gif_container()
 
         self.description_panel.start_button_clicked.connect(self.on_start_button_push)
@@ -200,18 +198,12 @@ class MainMenuWindow(QMainWindow):
         return content
 
     def setup_gif_container(self):
-
-        characters = CharactersGallery(self,
-            [
-                Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),
-                          130),
-                Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
-            ])
+        characters = CharactersGallery(self,list(CharactersList))
         characters.character_signal.connect(self.update_character_info)
         return characters
 
-    def update_character_info(self, character):
-        self.description_panel.update_info(character)
+    def update_character_info(self, character_a):
+        self.description_panel.update_info(character_a)
 
     # Обработчики событий для перемещения окна
     def mousePressEvent(self, event):

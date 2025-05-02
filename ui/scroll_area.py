@@ -2,11 +2,11 @@ from PyQt6.QtCore import Qt, pyqtSignal
 from PyQt6.QtWidgets import QWidget, QVBoxLayout, QHBoxLayout, QScrollArea, QScrollBar
 
 from ui.cart import CharacterCart
-from utils.enums import Characters
+from utils.enums import CharactersList
 
 
 class CharactersGallery(QScrollArea):
-    character_signal = pyqtSignal(Characters)
+    character_signal = pyqtSignal(CharactersList)
 
     def __init__(self, parent=None, characters=None):
         super().__init__()
@@ -46,8 +46,8 @@ class CharactersGallery(QScrollArea):
                 layout.setSpacing(20)
                 self.cards_layout.addWidget(row)
 
-            card = CharacterCart(self,character.character, character.gif_path, character.size, character.speed)
-            card.clicked.connect(lambda checked, c=card: self.handle_card_click(c))
+            card = CharacterCart(self, character.value.name, character.value.gif_path, character.value.size, character.value.speed)
+            card.clicked.connect(lambda c=card, ch = character: self.handle_card_click(c, ch))
             row.layout().addWidget(card)
             self.cards.append(card)
             if i == 0:
@@ -56,9 +56,10 @@ class CharactersGallery(QScrollArea):
 
 
 
-    def handle_card_click(self, clicked_card):
+    def handle_card_click(self, clicked_card, character):
         for card in self.cards:
             card.isSelected = False
         clicked_card.isSelected = True
         self.selected_card = clicked_card
-        self.character_signal.emit(clicked_card.character)
+        self.character_signal.emit(character)
+
