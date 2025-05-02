@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 from re import match
 
-from PyQt6.QtCore import QSize, Qt, QRect, pyqtSignal
+from PyQt6.QtCore import QSize, Qt, QRect, pyqtSignal, QPropertyAnimation, QEasingCurve, QPoint, QAbstractAnimation
 from PyQt6.QtGui import QMovie, QPixmap
 from PyQt6.QtWidgets import QStackedLayout, QWidget, QVBoxLayout, QLabel
 
@@ -48,7 +48,6 @@ class DescriptionWindow(QWidget):
         self.rockets.setAlignment(Qt.AlignmentFlag.AlignCenter)
         self.rockets.hide()
 
-
         description_layout = QVBoxLayout(self)
         description_layout.setContentsMargins(0, 0, 0, 0)
         description_layout.addWidget(self.setup_description())
@@ -66,8 +65,20 @@ class DescriptionWindow(QWidget):
                 self.name = "БОНГО-КОТ"
                 self.description = "Описание бонго кота"
 
+        self.name_label.hide()
+        self.description_label.hide()
+
         self.name_label.setText(self.name)
         self.description_label.setText(self.description)
+
+        self.name_label.show()
+        self.description_label.show()
+
+        self.name_animation.start()
+        self.description_animation.start()
+
+
+
 
 
 
@@ -96,22 +107,22 @@ class DescriptionWindow(QWidget):
         return buttons_container
 
 
-    def startRocketsAnimation(self):
+    def start_rockets_animation(self):
         self.rocket_movie.start()
         self.rockets.show()
 
 
-    def hideRocketsAnimation(self):
+    def hide_rockets_animation(self):
         self.rockets.hide()
         self.rocket_movie.stop()
 
 
-    def startGearsAnimation(self):
+    def start_gears_animation(self):
         self.gears_movie.start()
         self.gears.show()
 
 
-    def hideGearsAnimation(self):
+    def hide_gears_animation(self):
         self.gears.hide()
         self.gears_movie.stop()
 
@@ -122,15 +133,27 @@ class DescriptionWindow(QWidget):
 
 
         self.name_label  = QLabel(self.name)
+        # self.name_label.move(-200,0)
         self.name_label.setObjectName('name_text')
         self.name_label.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-
+        self.name_animation = QPropertyAnimation(self.name_label, b"pos")
+        self.name_animation.setDuration(500)
+        self.name_animation.setDirection(QAbstractAnimation.Direction.Backward)
+        self.name_animation.setEasingCurve(QEasingCurve.Type.InExpo)
+        self.name_animation.setStartValue(QPoint(self.name_label.pos().x(),self.name_label.pos().y()))
+        self.name_animation.setEndValue(QPoint(self.name_label.pos().x()-200,self.name_label.pos().y()))
 
         self.description_label = QLabel(self.description)
         self.description_label.setObjectName('description_text')
         self.description_label.setWordWrap(True)
 
+        self.description_animation = QPropertyAnimation(self.description_label, b"pos")
+        self.description_animation.setDuration(500)
+        self.description_animation.setDirection(QAbstractAnimation.Direction.Backward)
+        self.description_animation.setEasingCurve(QEasingCurve.Type.InOutCirc)
+        self.description_animation.setStartValue(QPoint(self.name_label.pos().x() + 10, self.name_label.pos().y()))
+        self.description_animation.setEndValue(QPoint(self.name_label.pos().x() + 400, self.name_label.pos().y()))
 
         description_layout = QVBoxLayout(description_container)
         description_layout.addWidget(self.name_label, stretch=2)

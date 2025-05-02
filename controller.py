@@ -1,15 +1,18 @@
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
+from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QStackedWidget, \
+    QStackedLayout
 
+from character import Character
+from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
 from ui.switch_button import SwitchButton
-from utils.enums import ThemeColor
+from utils.enums import ThemeColor, Characters
 
 
 class MainMenuWindow(QMainWindow):
@@ -26,27 +29,24 @@ class MainMenuWindow(QMainWindow):
     resource_path = app_directory / 'drawable'
     theme_color = ThemeColor.LIGHT
     theme_change_signal = pyqtSignal(ThemeColor)
+
     def __init__(self):
         super().__init__()
-        self.drag_pos = None
-
-
-
-        # Убираем стандартные рамки окна
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
-        # Основные параметры окна
         self.setFixedSize(800, 600)
 
-        # Создаем основной контейнер
-        self.main_container = QWidget(self)
-        self.main_container.setGeometry(0, 0, 800, 600)
-        self.main_container.setObjectName('main_container')
 
-        self.main_vbox = QVBoxLayout(self.main_container)
-        self.main_vbox.setContentsMargins(0, 0, 0, 0)  # Убираем отступы
-        self.main_vbox.setSpacing(0)  # Убираем промежутки между элементами
+
+        # ФОН ОКНА
+        self.root_container = QWidget(self)
+
+        self.root_container.setGeometry(0, 0, 800, 600)
+        self.root_container.setObjectName('main_container')
+
+        self.main_vbox = QVBoxLayout(self.root_container)
+        self.main_vbox.setContentsMargins(0, 0, 0, 0)
+        self.main_vbox.setSpacing(0)
 
         # ЗАГОЛОВОК
         self.main_vbox.addWidget(self.setup_header())
@@ -55,7 +55,7 @@ class MainMenuWindow(QMainWindow):
         self.main_vbox.addWidget(self.setup_content())
 
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
-        self.right_shadow = QLabel(self.main_container)
+        self.right_shadow = QLabel(self.root_container)
         self.right_shadow_pixmap_light = QPixmap(str(self.resource_path / 'menu' / "right_shadow.png")).scaled(
             260, 380,
             Qt.AspectRatioMode.KeepAspectRatio,
@@ -71,7 +71,7 @@ class MainMenuWindow(QMainWindow):
         QTimer.singleShot(50, self.update_bg_position)
 
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
-        self.left_shadow = QLabel(self.main_container)
+        self.left_shadow = QLabel(self.root_container)
         self.left_shadow_pixmap_light = QPixmap(str(self.resource_path / 'menu' / "left_shadow.png")).scaled(
             450, 485,
             Qt.AspectRatioMode.KeepAspectRatio,
@@ -85,6 +85,9 @@ class MainMenuWindow(QMainWindow):
         self.left_shadow.setPixmap(self.left_shadow_pixmap_light)
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
+
+
+
 
         # Читаем и применяем стиль
         with open('dark-theme.qss', 'r') as f:
@@ -101,12 +104,12 @@ class MainMenuWindow(QMainWindow):
 
     def update_bg_position(self):
         # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
-        global_pos = self.right_panel.mapToGlobal(QPoint(0, 0))
-        local_pos = self.main_container.mapFromGlobal(global_pos)
+        global_pos = self.description_panel.mapToGlobal(QPoint(0, 0))
+        local_pos = self.root_container.mapFromGlobal(global_pos)
         self.right_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 10, 260, 345)
         # УСТАНОВКА КООРДИНАТ ДЛЯ CHARACTERS
-        global_pos = self.left_panel.mapToGlobal(QPoint(0, 0))
-        local_pos = self.main_container.mapFromGlobal(global_pos)
+        global_pos = self.characters_panel.mapToGlobal(QPoint(0, 0))
+        local_pos = self.root_container.mapFromGlobal(global_pos)
         self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
 
     def change_theme(self, is_change):
@@ -125,15 +128,15 @@ class MainMenuWindow(QMainWindow):
             self.left_shadow.setPixmap(self.left_shadow_pixmap_light)
             self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
         self.theme_change_signal.emit(self.theme_color)
-
-
+        blink = Blinker(self.root_container)
+        blink.show()
+        QTimer.singleShot(300, blink.deleteLater)
 
     # ЗАГОЛОВОК
     def setup_header(self):
         header = QWidget()
         header.setObjectName('header')
         header.setFixedHeight(45)
-
 
         hlayout = QHBoxLayout(header)
         hlayout.setSpacing(10)
@@ -164,10 +167,12 @@ class MainMenuWindow(QMainWindow):
         buttons_container.setAlignment(Qt.AlignmentFlag.AlignRight)
         buttons_container.setSpacing(10)
 
-        self.close_btn = ServiceButton(str(self.resource_path / 'menu' / "close_but.svg" if self.theme_color==ThemeColor.LIGHT else "close_but_white.svg"))
+        self.close_btn = ServiceButton(
+            str(self.resource_path / 'menu' / "close_but.svg" if self.theme_color == ThemeColor.LIGHT else "close_but_white.svg"))
         self.close_btn.clicked.connect(self.close)
 
-        self.minimize_btn = ServiceButton(str(self.resource_path / 'menu' / "minimize_but.svg" if self.theme_color==ThemeColor.LIGHT else "minimize_but_white.svg"))
+        self.minimize_btn = ServiceButton(
+            str(self.resource_path / 'menu' / "minimize_but.svg" if self.theme_color == ThemeColor.LIGHT else "minimize_but_white.svg"))
         self.minimize_btn.clicked.connect(self.showMinimized)
 
         buttons_container.addWidget(self.minimize_btn)
@@ -184,31 +189,29 @@ class MainMenuWindow(QMainWindow):
         content_layout = QHBoxLayout(content)
         content_layout.setSpacing(15)
 
-        self.right_panel = DescriptionWindow(self, "","")
-        self.left_panel = self.setup_gif_container()
+        self.description_panel = DescriptionWindow(self, "", "")
+        self.characters_panel = self.setup_gif_container()
 
-        self.right_panel.start_button_clicked.connect(self.on_start_button_push)
-        self.right_panel.settings_button_clicked.connect(self.on_settings_button_push)
-        content_layout.addWidget(self.left_panel, stretch=6)
-        content_layout.addWidget(self.right_panel, stretch=4)
+        self.description_panel.start_button_clicked.connect(self.on_start_button_push)
+        self.description_panel.settings_button_clicked.connect(self.on_settings_button_push)
+        content_layout.addWidget(self.characters_panel, stretch=6)
+        content_layout.addWidget(self.description_panel, stretch=4)
 
         return content
 
-
-
-
     def setup_gif_container(self):
 
-        characters = CharactersGallery(
+        characters = CharactersGallery(self,
             [
-             #    Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130),
-             # Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130)
+                Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),
+                          130),
+                Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
             ])
         characters.character_signal.connect(self.update_character_info)
         return characters
 
     def update_character_info(self, character):
-        self.right_panel.update_info(character)
+        self.description_panel.update_info(character)
 
     # Обработчики событий для перемещения окна
     def mousePressEvent(self, event):

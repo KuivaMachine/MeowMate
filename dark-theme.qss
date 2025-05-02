@@ -125,7 +125,7 @@ QScrollBar#scroll_bar::sub-page:vertical {
 /* CharacterCart */
 QWidget#card {
     background-color: #333333;
-    border: 2px solid #FFFFFF;
+    border: 0px solid #FFFFFF;
     border-radius: 20px;
     }
 

@@ -8,9 +8,10 @@ from utils.enums import Characters
 class CharactersGallery(QScrollArea):
     character_signal = pyqtSignal(Characters)
 
-    def __init__(self, characters):
+    def __init__(self, parent=None, characters=None):
         super().__init__()
 
+        self.controller_instance = parent
         self.cards = []
         self.selected_card = None
         self.setObjectName('scroll_area')
@@ -45,7 +46,7 @@ class CharactersGallery(QScrollArea):
                 layout.setSpacing(20)
                 self.cards_layout.addWidget(row)
 
-            card = CharacterCart(character.character, character.gif_path, character.size, character.speed)
+            card = CharacterCart(self,character.character, character.gif_path, character.size, character.speed)
             card.clicked.connect(lambda checked, c=card: self.handle_card_click(c))
             row.layout().addWidget(card)
             self.cards.append(card)

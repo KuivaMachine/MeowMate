@@ -2,19 +2,20 @@ from PyQt6.QtCore import Qt, QTimer, QPointF, pyqtSignal
 from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QConicalGradient, QPen
 from PyQt6.QtWidgets import QLabel, QGraphicsDropShadowEffect, QApplication
 
-from utils.enums import Characters
+from utils.enums import Characters, ThemeColor
 
 
 class CharacterCart(QLabel):
     clicked = pyqtSignal(Characters)
     character = None
-    def __init__(self, character, gif_path, size, speed):
+    def __init__(self,parent, character, gif_path, size, speed):
         super().__init__()
         self.character = character
         self.setObjectName('card')
-
+        self.scroll_area_instance = parent
+        self.scroll_area_instance.controller_instance.theme_change_signal.connect(self.on_theme_change)
         self.isSelected = False
-
+        self.current_theme = ThemeColor.LIGHT
         self.movie = QMovie(gif_path)
         self.movie.setSpeed(speed)
         self.movie.setCacheMode(QMovie.CacheMode.CacheAll)
@@ -33,12 +34,25 @@ class CharacterCart(QLabel):
 
         self.setAlignment(Qt.AlignmentFlag.AlignCenter)
 
-
-
         # Таймер для анимации
         self.timer = QTimer()
         self.timer.timeout.connect(self.update_angle)
-        self.timer.start(11)  # ~33 FPS
+        self.timer.start(11)
+
+
+    def on_theme_change(self, theme):
+        self.current_theme = theme
+        if theme == ThemeColor.LIGHT:
+            self.shadow.setColor(QColor(255, 153, 102, 150))
+            self.shadow.setOffset(-6, 6)
+            self.shadow.setBlurRadius(0)
+        else:
+            self.shadow.setColor(QColor(0, 0, 0, 0))
+            if self.isSelected:
+                self.shadow.setColor(QColor(255, 0, 98, 255))
+                self.shadow.setOffset(0, 6)
+                self.shadow.setBlurRadius(15)
+
 
     def update_angle(self):
         self.angle = (self.angle + 2) % 360  # Плавное изменение угла
@@ -51,6 +65,9 @@ class CharacterCart(QLabel):
         self.movie.start()
         self.isSelected = True
         self.clicked.emit(self.character)  # Отправляем сигнал при клике
+
+
+
         event.accept()
 
 
@@ -62,33 +79,45 @@ class CharacterCart(QLabel):
 
         if self.isSelected:
             self.movie.start()
-            # 1. Рисуем фон карточки
+            # 20% ПРОЗРАЧНЫЙ ОСВЕТЛЯЮЩИЙ КВАДРАТ
             painter.setPen(Qt.PenStyle.NoPen)
-            painter.setBrush(QBrush(QColor("#20ffffff")))
-            painter.drawRoundedRect(0, 0, self.width(), self.height(), 15, 15)
-            # 2. Создаем градиент для обводки
-            gradient = QConicalGradient()  # Конический градиент (для кругового движения)
+            painter.drawRoundedRect(0, 0, self.width(), self.height(), 18, 18)
+
+            # ГРАДИЕНТНАЯ ЦВЕТНАЯ ОБВОДКА
+            gradient = QConicalGradient()  # Конический градиент
             gradient.setCenter(QPointF(self.rect().center()))
             gradient.setAngle(self.angle)  # Текущий угол анимации
 
-            # Цвета градиента (прозрачный -> цвет -> прозрачный)
-            gradient.setColorAt(0.05, QColor(255, 211, 0, 0))
-            gradient.setColorAt(0.15, QColor(255, 211, 0, 255))
-            gradient.setColorAt(0.20, QColor(255, 250, 0, 255))
-            gradient.setColorAt(0.39, QColor(255, 255, 255, 0))
+            if self.current_theme==ThemeColor.LIGHT:
+                painter.setBrush(QBrush(QColor("#20FFFFFF")))
+                gradient.setColorAt(0.05, QColor(255, 211, 0, 0))
+                gradient.setColorAt(0.15, QColor(255, 211, 0, 255))
+                gradient.setColorAt(0.20, QColor(255, 250, 0, 255))
+                gradient.setColorAt(0.39, QColor(255, 255, 255, 0))
 
-            gradient.setColorAt(0.59, QColor(255, 211, 0, 0))
-            gradient.setColorAt(0.65, QColor(255, 211, 0, 255))
-            gradient.setColorAt(0.70, QColor(255, 211, 0, 255))
-            gradient.setColorAt(0.79, QColor(255, 211, 0, 0))
+                gradient.setColorAt(0.59, QColor(255, 211, 0, 0))
+                gradient.setColorAt(0.65, QColor(255, 211, 0, 255))
+                gradient.setColorAt(0.70, QColor(255, 211, 0, 255))
+                gradient.setColorAt(0.79, QColor(255, 211, 0, 0))
 
-            gradient.setColorAt(0.90, QColor(255, 255, 255, 0))
+                gradient.setColorAt(0.90, QColor(255, 255, 255, 0))
+            else:
+                painter.setBrush(QBrush(QColor("#20000000")))
+                gradient.setColorAt(0.0, QColor(255, 51, 51, 255))
+                gradient.setColorAt(0.5, QColor(255, 174, 0, 255))
+                gradient.setColorAt(0.99, QColor(255, 51, 51, 255))
+                if self.current_theme == ThemeColor.DARK:
+                    self.shadow.setColor(QColor(255, 129, 45, 255))
+                    self.shadow.setOffset(0, 4)
+                    self.shadow.setBlurRadius(10)
 
             # 3. Рисуем обводку с градиентом
-            pen = QPen(QBrush(gradient), 3)
+            pen = QPen(QBrush(gradient), 5)
             painter.setPen(pen)
-            painter.drawRoundedRect(1, 1, self.width() - 2, self.height() - 2, 15, 15)
+            painter.drawRoundedRect(2, 2, self.width() - 4, self.height() - 4, 18, 18)
         else:
+            if self.current_theme == ThemeColor.DARK:
+                self.shadow.setColor(QColor(0, 0, 0, 0))
             self.movie.stop()
             self.movie.start()
             self.movie.stop()

@@ -21,7 +21,8 @@ class SwitchButton(QPushButton):
                                 self.circle_diameter)
 
         self.position_animation = QPropertyAnimation(self.circle, b"pos")
-        self.position_animation.setDuration(150)
+        self.position_animation.setEasingCurve(QEasingCurve.Type.OutInQuad)
+        self.position_animation.setDuration(350)
         # Внешний вид кнопки
         self.setFixedSize(self.rect_width, self.rect_height)
 
@@ -37,7 +38,9 @@ class SwitchButton(QPushButton):
                 self.position_animation.setStartValue(QPoint(self.circle.geometry().x(), self.circle.geometry().y()))
                 self.position_animation.setEndValue(QPoint(self.circle.geometry().x() - int(self.circle_diameter*2),
                                                            self.circle.geometry().y()))
-            self.position_animation.setEasingCurve(QEasingCurve.Type.OutQuad)
+
+
+
             self.position_animation.start()
             self.is_checked = not self.is_checked
             self.change_theme.emit(self.is_checked)

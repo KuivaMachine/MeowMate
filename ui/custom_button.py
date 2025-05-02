@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QSize, Qt, QPropertyAnimation, pyqtSignal
-from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QLinearGradient
+from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QLinearGradient, QPen
 from PyQt6.QtWidgets import QLabel, QPushButton, QGraphicsDropShadowEffect
 
 from utils.enums import ThemeColor
@@ -115,9 +115,9 @@ class CustomAnimatedButton(QPushButton):
         self.shadow_animation.start()
         self.gif_label.movie.start()
         if (self.text() == 'НАСТРОИТЬ'):
-            self.menu_window.startGearsAnimation()
+            self.menu_window.start_gears_animation()
         if (self.text() == 'ЗАПУСТИТЬ'):
-            self.menu_window.startRocketsAnimation()
+            self.menu_window.start_rockets_animation()
 
         super().enterEvent(event)
 
@@ -131,9 +131,9 @@ class CustomAnimatedButton(QPushButton):
         self.gif_label.movie.stop()
 
         if (self.text() == 'НАСТРОИТЬ'):
-            self.menu_window.hideGearsAnimation()
+            self.menu_window.hide_gears_animation()
         if (self.text() == 'ЗАПУСТИТЬ'):
-            self.menu_window.hideRocketsAnimation()
+            self.menu_window.hide_rockets_animation()
 
         super().leaveEvent(event)
 
@@ -166,4 +166,9 @@ class CustomAnimatedButton(QPushButton):
                 painter.drawRoundedRect(3, 3, self.width() - 6, self.height() - 6, self._radius_inner,
                                         self._radius_inner)
 
-
+        if self.menu_window.parent.theme_color == ThemeColor.LIGHT:
+            painter.setPen(QPen(QColor("black")))
+        else:
+            painter.setPen(QPen(QColor("white")))
+        text_rect = self.rect().adjusted(20, 0, 0, 0)
+        painter.drawText(text_rect, Qt.AlignmentFlag.AlignLeft | Qt.AlignmentFlag.AlignVCenter, self.text())
