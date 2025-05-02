@@ -1,18 +1,15 @@
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QSize, QPoint, QTimer
+from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt6.QtGui import QPixmap
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
-
-from character import Character
 
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
 from ui.switch_button import SwitchButton
-
-from utils.enums import Characters, ThemeColor
+from utils.enums import ThemeColor
 
 
 class MainMenuWindow(QMainWindow):
@@ -28,9 +25,13 @@ class MainMenuWindow(QMainWindow):
     # Теперь можем обратиться к нужным ресурсам
     resource_path = app_directory / 'drawable'
     theme_color = ThemeColor.LIGHT
+    theme_change_signal = pyqtSignal(ThemeColor)
     def __init__(self):
         super().__init__()
         self.drag_pos = None
+
+
+
         # Убираем стандартные рамки окна
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
@@ -93,10 +94,10 @@ class MainMenuWindow(QMainWindow):
         self.setStyleSheet(self.light_style)
 
     def on_start_button_push(self):
-        print(self.left_panel.selected_card.character)
+        pass
 
     def on_settings_button_push(self):
-        print(self.left_panel.selected_card.character)
+        pass
 
     def update_bg_position(self):
         # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
@@ -123,7 +124,7 @@ class MainMenuWindow(QMainWindow):
             self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but.svg'))
             self.left_shadow.setPixmap(self.left_shadow_pixmap_light)
             self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
-
+        self.theme_change_signal.emit(self.theme_color)
 
 
 
@@ -199,8 +200,10 @@ class MainMenuWindow(QMainWindow):
     def setup_gif_container(self):
 
         characters = CharactersGallery(
-            [Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130),
-             Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130),])
+            [
+             #    Character(Characters.FLORK, str(self.resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130),
+             # Character(Characters.CAT, str(self.resource_path / 'cat' / 'cat_preview.gif'), QSize(170, 170), 130)
+            ])
         characters.character_signal.connect(self.update_character_info)
         return characters
 

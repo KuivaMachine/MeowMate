@@ -2,7 +2,7 @@ import sys
 from pathlib import Path
 
 from PyQt6.QtCore import QSize, Qt, QPropertyAnimation, pyqtSignal
-from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QPen, QFont, QLinearGradient
+from PyQt6.QtGui import QMovie, QPainter, QBrush, QColor, QLinearGradient
 from PyQt6.QtWidgets import QLabel, QPushButton, QGraphicsDropShadowEffect
 
 from utils.enums import ThemeColor
@@ -12,20 +12,30 @@ class CircularLabel(QLabel):
 
     def __init__(self, parent, gif_path):
         super().__init__(parent)
+        self.setMouseTracking(True)
         self.setObjectName('circle_in_start_settings_buttons')
         self.size = QSize(40, 40)
+        self.movie = None
         self.setFixedSize(self.size)
-        # self.movie = QMovie(gif_path)
-        # self.movie.setScaledSize(self.size)
-        # self.setMovie(self.movie)
-        # self.movie.start()
-        # self.movie.stop()
+        self.gif = QMovie(gif_path)
+        self.gif.setScaledSize(self.size)
+        self.setMovie(self.gif)
+        self.gif.start()
+        self.gif.stop()
+        self.movie = self.gif
 
-    def setGif(self, path):
-        self.new_movie = QMovie(path)
-        self.new_movie.setScaledSize(self.size)
-        self.setMovie(self.new_movie)
-        self.new_movie.start()
+    def set_gif(self, path):
+        new_movie = QMovie(path)
+        new_movie.setScaledSize(self.size)
+        self.setMovie(new_movie)
+        new_movie.start()
+        new_movie.stop()
+        self.movie = new_movie
+
+    def mousePressEvent(self, ev):
+        self.set_gif('./drawable/menu/fire_mini.gif')
+
+
 
 class CustomAnimatedButton(QPushButton):
     settings_button_clicked = pyqtSignal()
@@ -47,17 +57,15 @@ class CustomAnimatedButton(QPushButton):
         self.setFixedSize(170, 55)
         self.setText(text)
         self.menu_window = parent
-
+        self.menu_window.parent.theme_change_signal.connect(self.update_gif_on_theme_change)
         self.setMouseTracking(True)
         self._hover = False
         self._radius_inner = self.height() // 2
         self._radius_upper = (self.height() + 4) // 2
 
-
-
         # Настройка гифки в круге
         self.gif_label = CircularLabel(self, gif_path)
-        self.gif_label.setGif(str(self.app_directory / 'gears_mini_white.gif'))
+        self.gif_label.setMouseTracking(True)
         self.gif_label.move(
             self.width() - (self.gif_label.width() + ((self.height() + 2) - self.gif_label.height()) // 2),
             (self.height() - self.gif_label.height()) // 2)
@@ -72,7 +80,12 @@ class CustomAnimatedButton(QPushButton):
         self.shadow_animation = QPropertyAnimation(self.shadow_effect, b"blurRadius")
         self.shadow_animation.setDuration(120)
 
-
+    def update_gif_on_theme_change(self, new_theme):
+        if self.text() == 'НАСТРОИТЬ':
+            if new_theme == ThemeColor.DARK:
+                self.gif_label.set_gif('./drawable/menu/gears_mini_white.gif')
+            else:
+                self.gif_label.set_gif('./drawable/menu/gears_mini.gif')
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
@@ -128,10 +141,7 @@ class CustomAnimatedButton(QPushButton):
         painter = QPainter(self)
         painter.setRenderHint(QPainter.RenderHint.Antialiasing)
 
-
-
         if self._hover:
-
             gradient = QLinearGradient(0, 0, self.width(), self.height())
             painter.setPen(Qt.PenStyle.NoPen)
             if self.text() == 'ЗАПУСТИТЬ':
@@ -140,8 +150,6 @@ class CustomAnimatedButton(QPushButton):
                 painter.setBrush(QBrush(gradient))
                 painter.drawRoundedRect(0, 0, self.width(), self.height(), self._radius_upper, self._radius_upper)
             elif self.text() == 'НАСТРОИТЬ':
-                if self.menu_window.parent.theme_color == ThemeColor.DARK:
-                    pass
                 gradient.setColorAt(0, QColor("#55D400"))
                 gradient.setColorAt(1, QColor("#07B6FB"))
                 painter.setBrush(QBrush(gradient))

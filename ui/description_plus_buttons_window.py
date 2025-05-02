@@ -66,7 +66,6 @@ class DescriptionWindow(QWidget):
                 self.name = "БОНГО-КОТ"
                 self.description = "Описание бонго кота"
 
-
         self.name_label.setText(self.name)
         self.description_label.setText(self.description)
 
