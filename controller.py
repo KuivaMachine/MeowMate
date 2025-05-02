@@ -95,7 +95,7 @@ class MainMenuWindow(QMainWindow):
         self.setStyleSheet(self.light_style)
 
     def on_start_button_push(self):
-        pass
+        print(self.characters_panel.selected_card.character_name)
 
     def on_settings_button_push(self):
         pass

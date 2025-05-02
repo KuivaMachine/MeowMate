@@ -87,7 +87,7 @@ class CustomAnimatedButton(QPushButton):
             else:
                 self.gif_label.set_gif('./drawable/menu/gears_mini.gif')
 
-    def mousePressEvent(self, event):
+    def mousePressEvent(self, event, ):
         if event.button() == Qt.MouseButton.LeftButton:
             self._pressed = True
             self.update()

@@ -32,8 +32,8 @@ class ThemeColor (Enum):
     DARK = 'dark'
 
 class CharactersList (Enum):
-    FLORK =  Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),130)
     CAT = Character('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
+    FLORK =  Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),130)
 
     @classmethod
     def getFirst(cls):
