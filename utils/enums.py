@@ -2,7 +2,7 @@ import sys
 from enum import Enum
 from pathlib import Path
 
-from PyQt6.QtCore import QSize
+from PyQt6.QtCore import QSize, QPoint
 
 from character import Character
 # Определяем путь к каталогу с данными в зависимости от режима исполнения
@@ -31,10 +31,18 @@ class ThemeColor (Enum):
     LIGHT = 'light'
     DARK = 'dark'
 
+class CharactersStartCoordinates(Enum):
+    CAT = QPoint()
+
 class CharactersList (Enum):
     CAT = Character('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
     FLORK =  Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),130)
-
+    CSAT = Character('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
+    FLFORK = Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),
+                      130)
+    CDAT = Character('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
+    FLGORK = Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),
+                      130)
     @classmethod
     def getFirst(cls):
         return next(iter(cls))

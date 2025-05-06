@@ -145,3 +145,36 @@ QLabel#toggle{
 }
 
 
+/* AlertWindow */
+QLabel#alert {
+    background-color: #4D4D4D;
+    border-radius:15px;
+    border:2px solid #FFFFFF;
+}
+QPushButton#ok_button {
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: 2px solid #FFFFFF;
+    border-radius:15px;
+}
+QPushButton#ok_button:pressed {
+    color: #FFFFFF;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #40FFFFFF;
+    border: 2px solid #FFFFFF;
+    border-radius:15px;
+}
+QLabel#alert_text {
+    color: #FFFFFF;
+    font-size: 18px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: none;
+    border-radius:15px;
+}

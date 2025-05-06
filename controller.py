@@ -1,12 +1,15 @@
+import ctypes
 import sys
 from pathlib import Path
 
 from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap
+from PyQt6.QtGui import QPixmap, QGuiApplication
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
 
+from ui.alert_window import AlertWindow
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
+from ui.portal import Portal
 from ui.scroll_area import CharactersGallery
 from ui.service_button import ServiceButton
 from ui.switch_button import SwitchButton
@@ -84,6 +87,11 @@ class MainMenuWindow(QMainWindow):
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
+        #ПРОВЕРЯЕМ МАСШТАБ ЭКРАНА, ЕСЛИ БОЛЬШЕ 100 - ВЫЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ
+        scale_factor = self.get_screen_scale_factor()
+        if scale_factor != 100:
+            self.alert = AlertWindow(self.root_container,scale_factor)
+
 
 
 
@@ -94,8 +102,19 @@ class MainMenuWindow(QMainWindow):
             self.light_style = f.read()
         self.setStyleSheet(self.light_style)
 
+    def get_screen_scale_factor(self):
+        shcore = ctypes.windll.shcore
+        monitor = ctypes.windll.user32.MonitorFromWindow(ctypes.windll.user32.GetDesktopWindow(), 0)
+        scale = ctypes.c_uint()
+        shcore.GetScaleFactorForMonitor(monitor, ctypes.byref(scale))
+        return scale.value  # Возвращает 100, 125, 150 и т.д.
+
+
+
     def on_start_button_push(self):
         print(self.characters_panel.selected_card.character_name)
+        self.portal = Portal()
+        self.portal.show()
 
     def on_settings_button_push(self):
         pass
