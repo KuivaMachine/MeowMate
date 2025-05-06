@@ -93,8 +93,6 @@ class MainMenuWindow(QMainWindow):
             self.alert = AlertWindow(self.root_container,scale_factor)
 
 
-
-
         # Читаем и применяем стиль
         with open('dark-theme.qss', 'r') as f:
             self.dark_style = f.read()
