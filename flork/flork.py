@@ -34,9 +34,13 @@ class Flork(QMainWindow):
         self.setGeometry(1200, screen.height()-240, 200, 200)
         self.setMouseTracking(True)
         
-        self.flork_gif = QMovie(str(self.resource_path/"flork_shy.gif"))
-        self.flork_gif.setScaledSize(QSize(200,200))
-  
+        self.shy = QMovie(str(self.resource_path / "flork_shy.gif"))
+        self.shy.setScaledSize(QSize(200, 200))
+        self.shy.setSpeed(110)
+        self.dance = QMovie(str(self.resource_path / "flork_dance.gif"))
+        self.dance.setScaledSize(QSize(200, 200))
+        self.dance.setSpeed(120)
+
         self.flork_main_pixmap = QPixmap(str(self.resource_path/"flork_main.png")).scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.flork_left_pixmap = QPixmap(str(self.resource_path/"flork_left.png")).scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
         self.flork_right_pixmap = QPixmap(str(self.resource_path/"flork_right.png")).scaled( 200, 200,  Qt.AspectRatioMode.KeepAspectRatio, Qt.TransformationMode.SmoothTransformation)
@@ -70,7 +74,7 @@ class Flork(QMainWindow):
         self.flork_main.setPixmap(self.flork_main_pixmap)
   
     def on_gif_finished(self):
-        self.flork_gif.stop()
+        self.shy.stop()
         self.flork_main.setPixmap(self.flork_main_pixmap)
         self.isAnimationPlaying = False
    
@@ -79,16 +83,19 @@ class Flork(QMainWindow):
         if event.button() == Qt.MouseButton.LeftButton:
             
            if not self.isAnimationPlaying:
-                random_int = random.randint(0,1)
-                self.playAnimation(1)
+                random_int = random.randint(1,2)
+                self.playAnimation( random_int)
 
 
     def playAnimation(self, number):     
         match number:
             case (1):
-                self.flork_gif.start()
-                self.flork_main.setMovie(self.flork_gif)
-        QTimer.singleShot(3800, self.on_gif_finished)  
+                self.shy.start()
+                self.flork_main.setMovie(self.shy)
+            case (2):
+                self.dance.start()
+                self.flork_main.setMovie(self.dance)
+        QTimer.singleShot(3800, self.on_gif_finished)
         self.isAnimationPlaying = True
 
 

@@ -62,7 +62,7 @@ class CharacterCart(QLabel):
         if self.movie.state() != QMovie.MovieState.Running:
             self.movie.jumpToFrame(0)
             QApplication.processEvents()
-        self.movie.start()
+        # self.movie.start()
         self.isSelected = True
         self.clicked.emit()  # Отправляем сигнал при клике
 

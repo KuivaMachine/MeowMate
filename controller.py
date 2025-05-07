@@ -2,10 +2,13 @@ import ctypes
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
+from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal, QSize
 from PyQt6.QtGui import QPixmap, QGuiApplication
 from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
 
+from bongo.bongo import Bongo
+from cat.apricot import Cat
+from flork.flork import Flork
 from ui.alert_window import AlertWindow
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
@@ -36,8 +39,6 @@ class MainMenuWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
-
-
 
         # ФОН ОКНА
         self.root_container = QWidget(self)
@@ -87,11 +88,12 @@ class MainMenuWindow(QMainWindow):
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
 
-        #ПРОВЕРЯЕМ МАСШТАБ ЭКРАНА, ЕСЛИ БОЛЬШЕ 100 - ВЫЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ
+        self.windows = []
+
+        # ПРОВЕРЯЕМ МАСШТАБ ЭКРАНА, ЕСЛИ БОЛЬШЕ 100 - ВЫЗЫВАЕМ ПРЕДУПРЕЖДЕНИЕ
         scale_factor = self.get_screen_scale_factor()
         if scale_factor != 100:
-            self.alert = AlertWindow(self.root_container,scale_factor)
-
+            self.alert = AlertWindow(self.root_container, scale_factor)
 
         # Читаем и применяем стиль
         with open('dark-theme.qss', 'r') as f:
@@ -107,11 +109,21 @@ class MainMenuWindow(QMainWindow):
         shcore.GetScaleFactorForMonitor(monitor, ctypes.byref(scale))
         return scale.value  # Возвращает 100, 125, 150 и т.д.
 
-
-
     def on_start_button_push(self):
-        print(self.characters_panel.selected_card.character_name)
-        self.portal = Portal()
+        portal_destination = None
+        selected_character = None
+
+        match self.characters_panel.selected_card.character_name:
+            case 'БОНГО-КОТ':
+                selected_character = Bongo()
+            case 'ФЛОРК':
+                selected_character = Flork()
+            case 'АБРИКОС':
+                selected_character = Cat()
+        self.windows.append(selected_character)
+        portal_destination = QPoint(selected_character.pos().x()+(selected_character.width()-360)//2, selected_character.pos().y()+(selected_character.height()-400)//2)
+        self.portal = Portal(portal_destination)
+        QTimer.singleShot(2000,selected_character.show)
         self.portal.show()
 
     def on_settings_button_push(self):
@@ -204,7 +216,8 @@ class MainMenuWindow(QMainWindow):
         content_layout = QHBoxLayout(content)
         content_layout.setSpacing(15)
 
-        self.description_panel = DescriptionWindow(self, CharactersList.getFirst().value.name, CharactersList.getFirst().value.description)
+        self.description_panel = DescriptionWindow(self, CharactersList.getFirst().value.name,
+                                                   CharactersList.getFirst().value.description)
         self.characters_panel = self.setup_gif_container()
 
         self.description_panel.start_button_clicked.connect(self.on_start_button_push)
@@ -215,7 +228,7 @@ class MainMenuWindow(QMainWindow):
         return content
 
     def setup_gif_container(self):
-        characters = CharactersGallery(self,list(CharactersList))
+        characters = CharactersGallery(self, list(CharactersList))
         characters.character_signal.connect(self.update_character_info)
         return characters
 
@@ -228,7 +241,7 @@ class MainMenuWindow(QMainWindow):
             self.drag_pos = event.globalPosition().toPoint()
 
     def mouseMoveEvent(self, event):
-        if self.drag_pos:
+        if  hasattr(self, 'drag_pos') and self.drag_pos is not None:
             self.move(self.pos() + event.globalPosition().toPoint() - self.drag_pos)
             self.drag_pos = event.globalPosition().toPoint()
 
