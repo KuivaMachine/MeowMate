@@ -1,8 +1,0 @@
-  28.04.2025 14:25:19: Starting composition “cat_craz2y”.
-
-  Output To: C:\Users\Александр\Desktop\cat_craz2y\PngSeq_GifGun\cat_craz2y_[##########].png    28.04.2025 14:25:23: Finished composition “cat_craz2y”.
-
-
-  Total Time Elapsed: 4 Seconds
-Log closed on 28.04.2025 at 14:25:23
-
