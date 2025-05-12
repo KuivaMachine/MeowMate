@@ -1,64 +1,45 @@
-import os
-
-from PyQt6.QtCore import QProcess
-import ctypes
-import sys
+from PyQt6.QtGui import QMovie
+from PyQt6.QtWidgets import QApplication, QLabel, QMainWindow
 from pathlib import Path
 
-from PyQt6.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt6.QtGui import QPixmap, QGuiApplication
-from PyQt6.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton
-
-
-class MainApp(QMainWindow):
+class MyWindow(QMainWindow):
     def __init__(self):
         super().__init__()
-        self.bongo_process = None
-        self.setup_ui()
+        self.initUI()
 
-    def setup_ui(self):
-        self.start_btn = QPushButton("Запустить Bongo")
-        self.start_btn.clicked.connect(self.toggle_bongo)
+    def initUI(self):
 
-        layout = QVBoxLayout()
-        layout.addWidget(self.start_btn)
+        movie = QMovie(str("C:/Users/olegz/Java/MeowMate/drawable/flork/flork_dance.gif)"))
 
-        central_widget = QWidget()
-        central_widget.setLayout(layout)
-        self.setCentralWidget(central_widget)
+        # Устанавливаем фильм в QLabel
+        label = QLabel(self)
+        label.setMovie(movie)
+        movie.start()
 
-    def toggle_bongo(self):
-        if self.bongo_process:
-            self.stop_bongo()
-            self.start_btn.setText("Запустить Bongo")
-        else:
-            self.start_bongo()
-            self.start_btn.setText("Остановить Bongo")
+        # Подписываемся на сигнал смены кадров
+        movie.frameChanged.connect(self.check_frame_change)
 
-    def start_bongo(self):
-        self.bongo_process = QProcess()
+        # Добавляем QLabel в окно
+        self.setCentralWidget(label)
+        self.setFixedSize(300, 300)
+        self.show()
 
-        # Для упакованного приложения
-        if getattr(sys, '_MEIPASS', None):
-            app_path = sys.executable
-            path = ["--bongo"]
-        else:
-            app_path = sys.executable
-            path = str(Path(__file__).parent / 'bongo'/'bongo.py')
-            self.bongo_process.startDetached(app_path,[path])
+    def check_frame_change(self, frame_number):
+        """
+        Проверяет смену кадров и выводит сообщение, когда анимация закончена.
+        """
+        current_frame = frame_number
+        previous_frame = getattr(self, "_previous_frame", None)
 
-    def stop_bongo(self):
-        if self.bongo_process:
-            print('ЗАКРЫВАЮ')
-            self.bongo_process.terminate()
-            # self.bongo_process.waitForFinished(1000)
+        # Сохраняем предыдущий кадр
+        setattr(self, "_previous_frame", current_frame)
 
-    def closeEvent(self, event):
-        self.stop_bongo()
-        super().closeEvent(event)
+        # Если кадр больше не меняется, значит анимация завершилась
+        if previous_frame == current_frame:
+            print("Анимация закончилась!")
 
-if __name__=="__main__":
-    app = QApplication(sys.argv)
-    bongo = MainApp()
-    bongo.show()
-    sys.exit(app.exec())
+if __name__ == '__main__':
+    app = QApplication([])
+    ex = MyWindow()
+    app.exec()
+

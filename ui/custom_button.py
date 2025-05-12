@@ -32,9 +32,6 @@ class CircularLabel(QLabel):
         new_movie.stop()
         self.movie = new_movie
 
-    def mousePressEvent(self, ev):
-        self.set_gif('./drawable/menu/fire_mini.gif')
-
 
 
 class CustomAnimatedButton(QPushButton):
