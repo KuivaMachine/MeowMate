@@ -31,7 +31,7 @@ class Flork(QMainWindow):
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
-        # self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         screen = QApplication.primaryScreen().geometry()
         self.setGeometry(1200, screen.height()-get_taskbar_height()-200, 200, 200)
         self.setMouseTracking(True)
