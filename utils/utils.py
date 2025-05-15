@@ -36,7 +36,7 @@ def get_taskbar_height():
     else:  # Панель слева/справа или скрыта
         return int(40 / dpi_scale)  # Стандартное значение с масштабом
 
-def svg_to_icon(path, size=30):
+def svg_to_icon(path, size=90):
     renderer = QSvgRenderer(path)
     pixmap = QPixmap(size, size)
     pixmap.fill(Qt.GlobalColor.transparent)
@@ -46,4 +46,11 @@ def svg_to_icon(path, size=30):
     return QIcon(pixmap)
 
 
-
+def svg_to_pixmap(svg_path: str, size: int) -> QPixmap:
+    renderer = QSvgRenderer(svg_path)
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)  # Прозрачный фон
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    return pixmap

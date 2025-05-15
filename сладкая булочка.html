@@ -1,20 +1,135 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Кто тут сладкая булочка?</title>
+
     <style>
-          #animation-container {
-              background-color: transparent;
-            width: 200px; /* Анимация занимает всю ширину контейнера */
-            height: 200px; /* Фиксированная высота для анимации */
+        body {
+            font-family: 'Comic Sans MS', cursive; /* Художественный шрифт */
+            background: #ffd9e6;
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Убираем прокрутку */
+            height: 100vh; /* Высота равна высоте экрана */
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .page-title {
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 42px;
+            color: #ffffff;
+            text-shadow: 1px 2px 2px rgba(0, 0, 0, 0.21);
+        }
+
+        .container {
+            display: flex;
+            flex-direction: column; /* Кнопки располагаются вертикально */
+            gap: 20px;
+            align-items: center;
+        }
+
+        .container2 {
+            display: none; /* Скрываем контейнер по умолчанию */
+            margin-top: 20px;
+        }
+
+        .meButton {
+            width: 250px;
+            background-color: #FFC0CB; /* Розовый фон */
+            border-radius: 20px; /* Скругление краев */
+            padding: 10px 20px; /* Внутренние отступы */
+            font-size: 35px; /* Размер шрифта */
+            color: white; /* Цвет текста */
+            cursor: pointer; /* Указатель мыши меняет вид на руку */
+            font-family: "Imprint MT Shadow", sans-serif; /* Настройки шрифта */
+            box-shadow: 3px 5px 6px rgba(0, 0, 0, 0.15),
+            -3px -3px 4px rgba(255, 255, 255, 1); /* Две тени: одна снизу черная, другая сверху белая */
+            transition: all 0.1s ease-in-out; /* Плавный переход эффектов */
+            border: 2px solid #ff89b1;
+        }
+
+        .meButton:active {
+            box-shadow: inset 3px 5px 6px rgba(0, 0, 0, 0.15),
+            inset -3px -5px 6px rgba(255, 255, 255, 0.9); /* Внутренняя тень */
+            transform: scale(0.95); /* Уменьшение размера кнопки при нажатии */
+        }
+
+        .alert {
+            display: none; /* Скрываем алерт по умолчанию */
+            width: 80%; /* Ширина алерта */
+            max-width: 300px; /* Максимальная ширина */
+            padding: 20px;
+            background-color: #FFC0CB; /* Розовый фон */
+            border-radius: 30px; /* Скругление краев */
+            box-shadow: 3px 5px 2px rgba(0, 0, 0, 0.25);
+            border: 3px solid #ff89b1;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .text_container {
+            font-weight: bold; /* Жирный шрифт */
+            font-family: "Comic Sans MS", ui-serif;
+            font-size: 20px;
+            color: white;
+        }
+
+        .g {
+            width: 250px;
+            background-color: #FFC0CB; /* Розовый фон */
+            border-radius: 20px; /* Скругление краев */
+            padding: 10px 20px; /* Внутренние отступы */
+            font-size: 35px; /* Размер шрифта */
+            color: white; /* Цвет текста */
+            cursor: pointer; /* Указатель мыши меняет вид на руку */
+            font-family: "Imprint MT Shadow", sans-serif; /* Настройки шрифта */
+            box-shadow: 3px 5px 6px rgba(0, 0, 0, 0.15),
+            -3px -3px 4px rgba(255, 255, 255, 1); /* Две тени: одна снизу черная, другая сверху белая */
+            transition: all 0.1s ease-in-out; /* Плавный переход эффектов */
+            border: 2px solid #ff89b1;
+        }
+
+        .g:active {
+            box-shadow: inset 3px 5px 6px rgba(0, 0, 0, 0.15),
+            inset -3px -5px 6px rgba(255, 255, 255, 0.9); /* Внутренняя тень */
+            transform: scale(0.95); /* Уменьшение размера кнопки при нажатии */
+        }
+
+        #animation-container {
+            width: 100%; /* Анимация занимает всю ширину контейнера */
+            height: 300px; /* Фиксированная высота для анимации */
+            margin-top: 20px; /* Отступ от текста */
         }
     </style>
-    <title></title>
-
 </head>
 <body>
-<div id='animation-container' class="anim"></div>
+<h1 id="text" class="page-title">Кто тут сладкая булочка?</h1>
+
+<div id="alert" class="alert">
+    <div class="text_container">
+        <div>Все правильно!</div>
+        <div>Ленка - сладкая булочка 😊</div>
+    </div>
+    <div id='animation-container' class="anim"></div>
+</div>
+
+<div id='container2' class="container2">
+    <button id="g" class="g">Гы?)</button>
+</div>
+
+<div id='container' class="container">
+    <button id='meButton' class="meButton">Я 😊</button>
+    <button id='notMeButton' class="meButton">Не я 😔</button>
+</div>
+
 <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.10.1/lottie.min.js"></script>
-<!--<script>
+<script>
     const animation = lottie.loadAnimation({
         container: document.getElementById('animation-container'), // Контейнер для анимации
         animationData: {
@@ -6242,10 +6357,64 @@
         autoplay: true, // Автоматически запускать анимацию
     });
 
+    const alert = document.getElementById('alert');
+    const text = document.getElementById('text');
+    const notMe = document.getElementById('notMeButton');
+    const container = document.getElementById('container');
+    const container2 = document.getElementById('container2');
+    const g = document.getElementById('g');
 
+    function rand(max, min) {
+        return Math.floor(Math.random() * (max - min + 1)) + min;
+    }
 
-</script>-->
+    function move() {
+        const buttonWidth = notMe.offsetWidth;
+        const buttonHeight = notMe.offsetHeight;
+        const windowWidth = window.innerWidth;
+        const windowHeight = window.innerHeight;
 
+        const randomX = rand(windowWidth - buttonWidth, 0);
+        const randomY = rand(windowHeight - buttonHeight, 0);
+
+        notMe.style.position = 'fixed';
+        notMe.style.left = `${randomX}px`;
+        notMe.style.top = `${randomY}px`;
+        notMe.style.transform = `rotate(${rand(360, 0)}deg)`;
+    }
+
+    let count = 0;
+    notMe.addEventListener('mousedown', () => {
+        move();
+        count++;
+        if (count > 6) {
+            notMe.style.display = 'none';
+        }
+    });
+
+    function doWork() {
+        container2.style.display = 'block';
+    }
+
+    const meButton = document.getElementById('meButton');
+    meButton.addEventListener('click', () => {
+        container.style.display = 'none';
+        text.style.display = 'none';
+        alert.style.display = 'block';
+        setTimeout(doWork, 3000);
+    });
+
+    g.addEventListener('click', () => {
+        alert.style.display = 'none';
+        container.style.display = 'flex';
+        container2.style.display = 'none';
+        notMe.style.display = 'block';
+        notMe.style.position = 'static';
+        notMe.style.transform = '';
+        text.style.display = 'block';
+        count = 0;
+    });
+</script>
 
 </body>
 </html>
