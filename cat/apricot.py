@@ -36,12 +36,17 @@ class MouseTrackerThread(QThread):
         with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
 
-
+#TODO:НАСТРОЙКИ:
+# Выключить звуки
+# Муха
+# Пакман
+# ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
 class Cat(QMainWindow):
     def __init__(self):
         super().__init__()
 
         # ПЕРЕМЕННЫЕ
+        self.cat_hiding_delay = 0       # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
         self.isFlying = False
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
         self.cat_window_size = 300
@@ -103,10 +108,10 @@ class Cat(QMainWindow):
         resource_path = app_directory / 'drawable' / 'cat'
 
         # ЗАГРУЖАЕМ ИЗОБРАЖЕНИЯ
-        self.eye_left = str(resource_path / "eye_left.svg")
-        self.eye_right = str(resource_path / "eye_right.svg")
-        self.eye_left_big = str(resource_path / "eye_left_big.svg")
-        self.eye_right_big = str(resource_path / "eye_right_big.svg")
+        self.eye_left = QPixmap(str(resource_path / "eye.png"))
+        self.eye_right = QPixmap(str(resource_path / "eye2.png"))
+        self.eye_left_big = QPixmap(str(resource_path / "eye_big.png"))
+        self.eye_right_big = QPixmap(str(resource_path / "eye2_big.png"))
         self.cat_dragged = QPixmap(str(resource_path / "cat_dragged.png"))
         self.cat_fall = QPixmap(str(resource_path / "cat_fall.png"))
         self.main_cat = QPixmap(str(resource_path / 'PET_t.png'))
@@ -119,8 +124,8 @@ class Cat(QMainWindow):
         self.right_lapa_gif = QMovie(str(resource_path / "lapa_right.gif"))
 
         # ЛЕВЫЙ ГЛАЗ
-        self.eye_l = QSvgWidget(self)
-        self.eye_l.load(self.eye_left)
+        self.eye_l = QLabel(self)
+        self.eye_l.setPixmap(self.eye_left)
         self.eye_l.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
         self.eye_l.setMouseTracking(True)
 
@@ -130,8 +135,8 @@ class Cat(QMainWindow):
         self.center_l = self.eye_l.geometry().center()  # Центр левого глаза
 
         # ПРАВЫЙ ГЛАЗ
-        self.eye_r = QSvgWidget(self)
-        self.eye_r.load(self.eye_right)
+        self.eye_r = QLabel(self)
+        self.eye_r.setPixmap(self.eye_right)
         self.eye_r.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
         self.eye_r.setMouseTracking(True)
 
@@ -167,7 +172,7 @@ class Cat(QMainWindow):
 
         # АНИМАЦИЯ ВЫГЛЯДЫВАНИЯ КОТА ИЗ РАЗНЫХ МЕСТ
         self.cat_coming_animation = QPropertyAnimation(self, b"pos")
-        self.cat_coming_animation.setDuration(500)
+        self.cat_coming_animation.setDuration(1500)
 
         # АНИМАЦИЯ СКРЫВАЮЩЕГОСЯ КОТА
         self.hiding_cat_animation = QPropertyAnimation(self, b"pos")
@@ -446,15 +451,15 @@ class Cat(QMainWindow):
     # ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ БОЛЬШИХ ГЛАЗ
     def do_big_eyes(self):
         self.isEyesBig = True
-        self.eye_l.load(self.eye_left_big)
-        self.eye_r.load(self.eye_right_big)
+        self.eye_l.setPixmap(self.eye_left_big)
+        self.eye_r.setPixmap(self.eye_right_big)
         self.bigeyes_timer.stop()
 
     # ФУНКЦИЯ УСТАНОВКИ МАЛЕНЬКИХ ГЛАЗ
     def do_small_eyes(self):
         self.isEyesBig = False
-        self.eye_l.load(self.eye_left)
-        self.eye_r.load(self.eye_right)
+        self.eye_l.setPixmap(self.eye_left)
+        self.eye_r.setPixmap(self.eye_right)
         self.small_eyes_timer.stop()
 
     # ФУНКЦИЯ "ДОСТАТЬ ЛАПУ"
@@ -551,11 +556,11 @@ class Cat(QMainWindow):
         self.cat_coming_animation.setStartValue(values[5])
         self.cat_coming_animation.setEndValue(values[6])
         self.lapa.setVisible(False)
-        self.cat_coming_animation.start()
 
-        if position == CatState.BOTTOM and random.randint(1, 20) == 1:
-            self.start_fly()
-
+        QTimer.singleShot(self.cat_hiding_delay, lambda: (
+            self.cat_coming_animation.start(),
+            self.start_fly() if position == CatState.BOTTOM and random.randint(1, 20) == 1 else None
+        ))
 
 
     # ФУНКЦИЯ ПОВОРОТА КОТА И ГЛАЗ В ЗАВИСИМОСТИ ОТ ВЫБРАННОГО И ТЕКУЩЕГО ПОЛОЖЕНИЯ КОТА
@@ -768,6 +773,9 @@ class Cat(QMainWindow):
 
     # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
     def on_release(self, key):
+        pass
+
+    def getSettingWindow(self, root_container):
         pass
 
 

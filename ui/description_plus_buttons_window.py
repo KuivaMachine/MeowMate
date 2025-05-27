@@ -119,6 +119,7 @@ class DescriptionWindow(QWidget):
 
     def setup_description(self):
         description_container = QWidget()
+        description_container.setFixedSize(260, 345)
         description_container.setObjectName('description_container')
 
 

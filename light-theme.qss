@@ -176,3 +176,14 @@ QLabel#alert_text {
     border: none;
     border-radius:15px;
 }
+
+
+QPushButton#close_character_button {
+    color: #FF0000;
+    font-size: 17px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: 2px solid #FF0000;
+    border-radius:15px;
+}

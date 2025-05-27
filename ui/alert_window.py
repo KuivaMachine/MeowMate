@@ -1,9 +1,11 @@
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QTimer, QSize
+from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal
 from PyQt5.QtGui import QPainter, QLinearGradient, QColor, QBrush, QMovie
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QHBoxLayout, QVBoxLayout, QPushButton
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QDialog
+
+
 
 
 class OkButton(QPushButton):
@@ -14,26 +16,24 @@ class OkButton(QPushButton):
         self.setText('Ok')
 
 class AlertWindow(QLabel):
-    # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
-        # Мы находимся в упакованном виде (PyInstaller)
         app_directory = Path(base_path)
     else:
-        # Обычный режим разработки
-        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
-    # Теперь можем обратиться к нужным ресурсам
+        app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'menu'
 
-    def __init__(self,parent,scale_factor):
+    on_close = pyqtSignal()
+    def __init__(self,parent):
         super().__init__(parent)
+        self.drag_position = None
         self.setObjectName('alert')
         self.parent_window = parent
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.WindowTransparentForInput)
         self.root_hbox = QHBoxLayout(self)
 
         self.root_hbox.setContentsMargins(20,10,20,10)
-        self.text = QLabel(f'Для корректного отображения \nперсонажей требуется масштаб \nэкрана 100% \nВаш масштаб - {scale_factor}%')
+        self.text = QLabel(f'Для корректного отображения \nперсонажей требуется масштаб \nэкрана 100% \nВаш масштаб')
         self.text.setObjectName('alert_text')
 
         self.text.setWordWrap(True)
@@ -49,7 +49,9 @@ class AlertWindow(QLabel):
 
 
         self.ok = OkButton()
-        self.ok.clicked.connect(self.close)
+        self.ok.clicked.connect(self.on_close_window)
+
+
         self.vbox.addWidget(self.duck, alignment=Qt.AlignmentFlag.AlignCenter, stretch=8)
         self.vbox.addWidget(self.ok, alignment=Qt.AlignmentFlag.AlignRight, stretch=2)
 
@@ -58,17 +60,22 @@ class AlertWindow(QLabel):
 
         self.setGeometry((parent.size().width() - self.width()) // 6, (parent.size().height() - self.height()) // 3,
                          550, 150)
+    def on_close_window(self):
+        self.on_close.emit()
+        self.close()
+
+
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self.drag_position = event.globalPosition().toPoint() - self.frameGeometry().topLeft()
+            self.drag_position = event.globalPos() - self.frameGeometry().topLeft()
             event.accept()
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             if self.drag_position is not None:
                 # Новая позиция окна относительно родительского виджета
-                new_position = event.globalPosition().toPoint() - self.drag_position
+                new_position = event.globalPos() - self.drag_position
                 parent_geometry = self.parent().frameGeometry()
                 window_size = self.geometry()
 

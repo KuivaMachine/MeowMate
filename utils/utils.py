@@ -4,11 +4,12 @@ from ctypes import wintypes
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QPainter, QIcon
 from PyQt5.QtSvg import QSvgRenderer
-from PyQt6.QtWidgets import QApplication
+from PyQt5.QtWidgets import QApplication
 
 # Константы WinAPI
 ABM_GETTASKBARPOS = 0x00000005
 ABE_BOTTOM = 3
+
 
 
 

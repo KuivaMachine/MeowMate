@@ -1,11 +1,7 @@
-import re
-
-from PyQt5.QtCore import QSize, Qt, pyqtSignal
+from PyQt5.QtCore import Qt, pyqtSignal
 from PyQt5.QtSvg import QSvgWidget
 
-from PyQt5.QtWidgets import QPushButton, QWidget
-
-from utils.utils import svg_to_icon
+from PyQt5.QtWidgets import QWidget
 
 
 class SvgButton(QWidget):

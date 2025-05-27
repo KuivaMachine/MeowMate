@@ -1,18 +1,19 @@
-import random
 import sys
 from pathlib import Path
 
+from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt6.QtCore import QSize
-from PyQt5.QtCore import Qt, QTimer
-from PyQt6.QtGui import QPixmap, QMovie
-
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget
 from pynput import keyboard
 
+from ui.alert_window import AlertWindow
 from utils.enums import BongoType
 
+
+# TODO:НАСТРОЙКИ:
+# Выключить звуки
+# Выбрать инструмент
+# Включить счетчик нажатий
 
 class BongoApp(QApplication):
     def __init__(self, args):
@@ -24,6 +25,23 @@ class BongoApp(QApplication):
         self.bongo.close()
         self.quit()
 
+
+class CloseButton(QPushButton):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.setFixedSize(30, 30)
+        self.setStyleSheet("""QPushButton {
+    color: black;
+    font-size: 17px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #FF7A73;
+    border: 3px solid black;
+    border-radius:15px;
+}""")
+        self.setText('x')
+
+
 class Bongo(QMainWindow):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
@@ -32,13 +50,14 @@ class Bongo(QMainWindow):
         app_directory = Path(base_path)
     else:
         # Обычный режим разработки
-        app_directory = Path(__file__).parent.parent # Найти родительский каталог проекта
+        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
     # Теперь можем обратиться к нужным ресурсам
     resource_path = app_directory / 'drawable' / 'bongo'
 
     def __init__(self):
         super().__init__()
 
+        self.is_close_btn_showing = False
         self.bongo_type = BongoType.CLASSIC
 
         self.cat_main_pixmap = None
@@ -51,13 +70,16 @@ class Bongo(QMainWindow):
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setGeometry(100, 100, 392,392)
+        self.setGeometry(100, 100, 100, 100)
 
+        self.root_container = QWidget()
 
-        self.cat = QSvgWidget(self)
+        self.hbox = QHBoxLayout(self.root_container)
+        self.hbox.setContentsMargins(0, 0, 0, 0)
+
+        self.cat = QSvgWidget()
         self.cat.setFixedSize(392, 392)
         self.cat.setMouseTracking(True)
-
 
         self.cat_piano_pixmap = str(self.resource_path / 'piano' / "cat_piano.svg")
         self.cat_piano_left_pixmap = str(self.resource_path / 'piano' / "cat_piano_left.svg")
@@ -82,7 +104,7 @@ class Bongo(QMainWindow):
         self.flag = True
 
         match self.bongo_type:
-            case(BongoType.ROCK):
+            case (BongoType.ROCK):
                 self.cat_main_pixmap = self.cat_rock_pixmap
                 self.left_pixmap = self.cat_rock_left_pixmap
                 self.right_pixmap = self.cat_rock_right_pixmap
@@ -103,18 +125,15 @@ class Bongo(QMainWindow):
                 self.left_pixmap = self.cat_bongo_left_pixmap
                 self.right_pixmap = self.cat_bongo_right_pixmap
 
-
         self.cat.load(self.cat_main_pixmap)
-
+        self.hbox.addWidget(self.cat)
+        self.setCentralWidget(self.root_container)
         # СЛУШАТЕЛЬ КЛАВИАТУРЫ
         self.listener = keyboard.Listener(
             on_press=self.on_press,
             on_release=self.on_release
         )
         self.listener.start()
-
-
-
 
     # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
     def on_press(self, key):
@@ -125,31 +144,36 @@ class Bongo(QMainWindow):
             self.cat.load(self.right_pixmap)
             self.flag = True
 
-
     # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
     def on_release(self, key):
         self.cat.load(self.cat_main_pixmap)
 
-
-
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
-            self.drag_pos = event.globalPosition().toPoint()
+            self.drag_pos = event.globalPos()
+        if event.button() == Qt.MouseButton.RightButton:
+            if not self.is_close_btn_showing:
+                self.close = CloseButton(self)
+                self.close.setGeometry(280, 100, 30, 30)
+                self.close.clicked.connect(self.close)
+                self.close.show()
+                self.is_close_btn_showing = True
+            else:
+                self.close.close()
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             if self.drag_pos:
                 # Вычисляем новую позицию
-                new_pos = self.pos() + event.globalPosition().toPoint() - self.drag_pos
+                new_pos = self.pos() + event.globalPos() - self.drag_pos
 
                 # Получаем геометрию родительского окна
                 parent_rect = QApplication.primaryScreen().geometry()
 
-                left_maximum = parent_rect.left()-100
-                right_maximum = parent_rect.right() -300
-                top_maximum = parent_rect.top() -140
+                left_maximum = parent_rect.left() - 100
+                right_maximum = parent_rect.right() - 300
+                top_maximum = parent_rect.top() - 140
                 bottom_maximum = parent_rect.bottom() - 240
-
 
                 # Ограничиваем перемещение
                 x = max(left_maximum,
@@ -162,14 +186,16 @@ class Bongo(QMainWindow):
 
                 # Перемещаем виджет
                 self.move(x, y)
-                self.drag_pos = event.globalPosition().toPoint()
+                self.drag_pos = event.globalPos()
                 event.accept()
 
     def mouseReleaseEvent(self, event):
         self.drag_pos = None
 
+    def getSettingWindow(self, root_container):
+        return AlertWindow(root_container)
+
 
 if __name__ == "__main__":
-
     app = BongoApp(sys.argv)
     sys.exit(app.exec())

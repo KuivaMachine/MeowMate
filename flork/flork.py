@@ -1,53 +1,127 @@
-import os
+import random
 import sys
+from pathlib import Path
 
-from PyQt5.QtCore import QUrl, Qt, QTimer
-
-from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5.QtCore import QSize
+from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtGui import QPixmap, QMovie
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from pynput import keyboard
 
 
-
-
+#TODO:НАСТРОЙКИ:
+# Выключить звуки
+# Зафиксировать по X
+# Зафиксировать по Y
 class Flork(QMainWindow):
+    # Определяем путь к каталогу с данными в зависимости от режима исполнения
+    base_path = getattr(sys, '_MEIPASS', None)
+    if base_path is not None:
+        # Мы находимся в упакованном виде (PyInstaller)
+        app_directory = Path(base_path)
+    else:
+        # Обычный режим разработки
+        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+    # Теперь можем обратиться к нужным ресурсам
+    resource_path = app_directory / 'drawable' / 'flork'
+
     def __init__(self):
         super().__init__()
 
-        # Настройки окна
         self.setWindowFlags(
-            Qt.FramelessWindowHint |
-            Qt.WindowStaysOnTopHint
+            Qt.WindowType.FramelessWindowHint |
+            Qt.WindowType.WindowStaysOnTopHint
         )
-
-        self.setAttribute(Qt.WA_TranslucentBackground)
-        self.setGeometry(1200, QApplication.primaryScreen().geometry().height()-self.get_taskbar_height()-200, 200, 200)
-
-        # Настройка WebView
-        self.webview = QWebEngineView()
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        screen = QApplication.primaryScreen().geometry()
+        self.setGeometry(100, screen.height() - self.get_taskbar_height() - 200, 200, 200)
         self.setMouseTracking(True)
-        self.webview.setMouseTracking(True)
-        self.webview.settings().setAttribute(QWebEngineSettings.ShowScrollBars, False)
-        self.webview.setAttribute(Qt.WA_TranslucentBackground, True)
-        self.webview.page().setBackgroundColor(Qt.transparent)
 
-        # Загрузка HTML
-        html_path = os.path.abspath("flork.html")
-        self.webview.load(QUrl.fromLocalFile(html_path))
+        self.current_gif = None
 
-        self.setCentralWidget(self.webview)
+        self.shy = QMovie(str(self.resource_path / "flork_shy.gif"))
+        self.shy.setScaledSize(QSize(200, 200))
+        self.shy.setSpeed(110)
+        self.shy.frameChanged.connect(self.check_frame_change)
+
+        self.dance = QMovie(str(self.resource_path / "flork_dance.gif"))
+        self.dance.setScaledSize(QSize(200, 200))
+        self.dance.setSpeed(120)
+        self.dance.frameChanged.connect(self.check_frame_change)
+
+        self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(200, 200,
+                                                                                            Qt.AspectRatioMode.KeepAspectRatio,
+                                                                                            Qt.TransformationMode.SmoothTransformation)
+        self.flork_left_pixmap = QPixmap(str(self.resource_path / "flork_left.png")).scaled(200, 200,
+                                                                                            Qt.AspectRatioMode.KeepAspectRatio,
+                                                                                            Qt.TransformationMode.SmoothTransformation)
+        self.flork_right_pixmap = QPixmap(str(self.resource_path / "flork_right.png")).scaled(200, 200,
+                                                                                              Qt.AspectRatioMode.KeepAspectRatio,
+                                                                                              Qt.TransformationMode.SmoothTransformation)
+
+        self.flork_main = QLabel(self)
+        self.flork_main.setMouseTracking(True)
+        self.flork_main.setPixmap(self.flork_main_pixmap)
+        self.flork_main.setGeometry(0, 0, 200, 200)
 
         self.flag = True
-
+        self.is_first_frame = False
         self.isAnimationPlaying = False
 
         # СЛУШАТЕЛЬ КЛАВИАТУРЫ
         self.listener = keyboard.Listener(
-            on_press=self.on_press, 
+            on_press=self.on_press,
             on_release=self.on_release
         )
         self.listener.start()
 
+    def check_frame_change(self, frame_number):
+        if frame_number == 0:
+            if self.is_first_frame:
+                self.stopAnimation()
+                self.is_first_frame = False
+            else:
+                self.is_first_frame = True
+
+    # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
+    def on_press(self, key):
+        if self.flag:
+            self.flork_main.setPixmap(self.flork_left_pixmap)
+            self.flag = False
+        else:
+            self.flork_main.setPixmap(self.flork_right_pixmap)
+            self.flag = True
+
+        # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
+
+    def on_release(self, key):
+        self.flork_main.setPixmap(self.flork_main_pixmap)
+
+    def stopAnimation(self):
+        self.current_gif.stop()
+        self.flork_main.setPixmap(self.flork_main_pixmap)
+        self.isAnimationPlaying = False
+
+    def mousePressEvent(self, event):
+        super().mousePressEvent(event)
+        if event.button() == Qt.MouseButton.LeftButton:
+
+            if not self.isAnimationPlaying:
+                random_int = random.randint(1, 2)
+                self.playAnimation(2)
+
+    def playAnimation(self, number):
+        match number:
+            case (1):
+                self.current_gif = self.shy
+                self.current_gif.start()
+                self.flork_main.setMovie(self.current_gif)
+            case (2):
+                self.current_gif = self.dance
+                self.current_gif.start()
+                self.flork_main.setMovie(self.current_gif)
+        # QTimer.singleShot(3800, self.stopAnimation)
+        self.isAnimationPlaying = True
 
     def get_taskbar_height(self):
         screen = QApplication.primaryScreen()
@@ -55,37 +129,15 @@ class Flork(QMainWindow):
         available_rect = screen.availableGeometry()
         dpi_scale = screen.devicePixelRatio()
 
-        if screen_rect.bottom() != available_rect.bottom():  # Панель снизу
+        if screen_rect.bottom() != available_rect.bottom():
             return int((screen_rect.bottom() - available_rect.bottom()) / dpi_scale)
-        elif screen_rect.top() != available_rect.top():  # Панель сверху
+        elif screen_rect.top() != available_rect.top():
             return int((available_rect.top() - screen_rect.top()) / dpi_scale)
-        else:  # Панель слева/справа или скрыта
-            return int(40 / dpi_scale)  # Стандартное значение с масштабом
-
-    # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
-    def on_press(self,key):
-        QTimer.singleShot(0, self.change_flork_hand)
-
-    # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
-    def on_release(self, key):
-        QTimer.singleShot(0, self.set_default_image)
-
-
-    def change_flork_hand(self):
-        if self.flag:
-            direction = "left"
-            self.flag = False
         else:
-            direction = "right"
-            self.flag = True
-        script_code = f"changeState('{direction}');"
-        self.webview.page().runJavaScript(script_code)
+            return int(40 / dpi_scale)
 
-    def set_default_image(self):
-        self.webview.page().runJavaScript(
-                "changeState('idle');")
-
-
+    def getSettingWindow(self, root_container):
+        pass
 
 
 if __name__ == "__main__":
