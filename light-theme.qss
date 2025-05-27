@@ -1,0 +1,178 @@
+/* MainMenuWindow */
+
+QPushButton#service_buttons {
+    background-color: transparent;
+    border: none;
+}
+QPushButton#service_buttons:hover {
+    border: 2px solid #000000;
+    border-radius: 6px;
+}
+QLabel#title {
+    color: #000000;
+    font-size: 26px;
+    letter-spacing: -1px;
+    font-weight: bold;
+    font-family: 'PT Mono';
+    text-align: center;
+    border:3px solid #000000;
+    border-radius:15px;
+}
+QWidget#header {
+    background-color: #FFD300;
+    border-color: #000000;
+    border-radius: 15px;
+    border:3px solid #000000;
+}
+QWidget#main_container{
+    background-color: #FFF2D6;
+    border-radius: 15px;
+    border: 3px solid #000000;
+}
+
+
+/* Start/Settings BUTTONS */
+QLabel#circle_in_start_settings_buttons {
+    background-color: #FFF2D6;
+    border-radius:20px;
+    border: none;
+}
+QPushButton#custom_buttons {
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: black;
+    padding-left: 20px;
+    background-color: "#FFBC75";
+    border:0px solid #000000;
+    border-radius: 26px;
+}
+QPushButton#custom_buttons:pressed{
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: black;
+    padding-left: 17px;
+    background-color: "#FFBC75";
+    border:3px solid #000000;
+    border-radius: 26px;
+}
+
+
+/* DescriptionWindow */
+QWidget#description_container {
+    background-color: #FFE5BD;
+    border: 2px solid #000000;
+    border-radius: 15px;
+}
+QLabel#name_text {
+    color: #000000;
+    font-size: 30px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
+QLabel#description_text {
+    color: #000000;
+    text-align: left;
+    font-size: 15px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
+
+
+
+/* CharactersGallery */
+QWidget#main {
+     background-color: transparent;
+     border: none;
+}
+QWidget#row_of_cards {
+ background-color: transparent;
+     border: none;
+}
+
+QScrollArea#scroll_area {
+    background-color: #FFE5BD;
+    border: 2px solid #000000;
+    border-radius: 20px;
+}
+QScrollBar#scroll_bar:vertical{
+    background: transparent;
+    width: 45px;
+    margin: 10px;
+    }
+QScrollBar#scroll_bar::handle:vertical {
+    background: #FFD300;
+    border: 2px solid #000000;
+    border-radius: 12px;
+    height: 10px;
+    }
+QScrollBar#scroll_bar::add-line:vertical,
+QScrollBar#scroll_bar::sub-line:vertical,
+QScrollBar#scroll_bar::add-page:vertical,
+QScrollBar#scroll_bar::sub-page:vertical {
+    background: none;
+    border: none;
+    height: 0px;
+    width: 0px;
+    }
+
+
+/* CharacterCart */
+QWidget#card {
+    background-color: #FFD09E;
+    border: 2px solid #000000;
+    border-radius: 20px;
+    }
+
+
+/* SwitchButton */
+QPushButton#switch_button{
+    background-color: transparent;
+    border: 2px solid #000000;
+    border-radius:12px;
+}
+
+QLabel#toggle{
+    background-color: #000000;
+    border-radius:8px;
+    border:1px solid #000000;
+}
+
+/* AlertWindow */
+QLabel#alert {
+    background-color: #FFE5BD;
+    border-radius:15px;
+    border:2px solid #000000;
+}
+QPushButton#ok_button {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: 2px solid #000000;
+    border-radius:15px;
+}
+QPushButton#ok_button:pressed {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #40000000;
+    border: 2px solid #000000;
+    border-radius:15px;
+}
+QLabel#alert_text {
+    color: #000000;
+    font-size: 18px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: none;
+    border-radius:15px;
+}

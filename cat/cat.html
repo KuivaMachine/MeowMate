@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+            background: transparent;
+        }
+
+        /* Базовые стили для контейнера */
+        #cat-container {
+            position: relative;  /* Это важно для позиционирования дочерних элементов */
+            width: 300px;
+            height: 300px;
+        }
+
+        /* Основное изображение кота */
+        #cat_main {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;  /* Базовый слой */
+        }
+
+        /* Контейнер для глаз */
+        #eye_left, #eye_right {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+
+            z-index: 1;  /* Глаза поверх основного изображения */
+
+        }
+
+    </style>
+</head>
+<body>
+<div id="cat-container">
+        <img id="cat_main" src="../drawable/cat/cat.svg">
+        <img id="eye_left"  src="../drawable/cat/eye_left.svg" >
+        <img id="eye_right"   src="../drawable/cat/eye_right.svg">
+    </div>
+
+<script>
+
+
+        const EYES_CHANGE_DELAY = 500; // Задержка 500 мс
+
+        // Элементы
+        const catContainer = document.getElementById('cat-container');
+        const eyeLeft = document.getElementById('eye_left');
+        const eyeRight = document.getElementById('eye_right');
+
+        // Таймеры
+        let eyesTimer = null;
+        let isEyesBig = false;
+
+        document.addEventListener('DOMContentLoaded', () => {
+            const catImg = document.getElementById('cat_main');
+            let initialHeight, originalYPosition, dragging = false;
+
+            // Начало перетаскивания
+            catImg.addEventListener('mousedown', e => {
+                dragging = true;
+                initialHeight = catImg.offsetHeight;
+                originalYPosition = e.clientY;
+            });
+
+            // Перемещение мыши
+            document.addEventListener('mousemove', e => {
+                if (dragging && initialHeight !== undefined) {
+                    const deltaY = e.clientY - originalYPosition;
+                    const newHeight = initialHeight - deltaY;
+
+                    // Ограничение минимальной высоты
+                    if (newHeight >= 50) {
+                        catImg.style.height = `${newHeight}px`;
+                    }
+                }
+            });
+
+            // Окончание перетаскивания
+            document.addEventListener('mouseup', () => {
+                dragging = false;
+                initialHeight = undefined;
+            });
+        });
+
+        function doBigEyes() {
+            if (!isEyesBig) {
+                clearTimeout(eyesTimer);
+                eyesTimer = setTimeout(() => {
+                    eyeLeft.style.opacity = 0;
+                    isEyesBig = true;
+                }, EYES_CHANGE_DELAY);
+            }
+            else {
+                clearTimeout(eyesTimer);
+                eyesTimer = setTimeout(() => {
+                    eyeLeft.classList.remove('eye-big');
+                    eyeRight.classList.remove('eye-big');
+                    isEyesBig = false;
+                }, EYES_CHANGE_DELAY);
+            }
+        }
+
+</script>
+</body>
+</html>

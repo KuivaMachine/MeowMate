@@ -1,0 +1,35 @@
+import ctypes
+from ctypes import wintypes
+
+from PyQt6.QtCore import Qt
+from PyQt6.QtGui import QPixmap, QPainter, QIcon
+from PyQt6.QtSvg import QSvgRenderer
+from PyQt6.QtWidgets import QApplication
+
+# Константы WinAPI
+ABM_GETTASKBARPOS = 0x00000005
+ABE_BOTTOM = 3
+
+
+
+
+
+
+def svg_to_icon(path, size):
+    renderer = QSvgRenderer(path)
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    return QIcon(pixmap)
+
+
+def svg_to_pixmap(svg_path: str, size: int) -> QPixmap:
+    renderer = QSvgRenderer(svg_path)
+    pixmap = QPixmap(size, size)
+    pixmap.fill(Qt.GlobalColor.transparent)  # Прозрачный фон
+    painter = QPainter(pixmap)
+    renderer.render(painter)
+    painter.end()
+    return pixmap

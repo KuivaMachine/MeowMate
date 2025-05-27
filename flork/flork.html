@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: transparent;
+            overflow: hidden;
+            width: 200px;
+            height: 200px;
+        }
+        .state {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+
+        }
+        #character-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            opacity: 100%;
+            transition: opacity 0.01s ease-in-out;
+        }
+
+        #animation-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 200px;
+            height: 200px;
+            opacity: 0;
+            transition: opacity 0.01s ease-in-out;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lottie-web/5.10.1/lottie.min.js"></script>
+</head>
+<body>
+
+<div id="animation-container"></div>
+<div id="character-container" onclick="onFlorkClick()">
+        <img id="state-idle" class="state" src="../drawable/flork/flork_main.svg" style="display: block;">
+        <img id="state-left" class="state" src="../drawable/flork/flork_left.svg" style="display: none;">
+        <img id="state-right" class="state" src="../drawable/flork/flork_right.svg" style="display: none;">
+    </div>
+
+    <script type="text/javascript">
+        const animations = ["../drawable/flork/flork_shy.json", "../drawable/flork/flork_dance.json"];
+        const animationContainer = document.getElementById("animation-container");
+        const charContainer = document.getElementById("character-container");
+        let isAnimating = false; // Флаг для отслеживания состояния анимации
+        let animationPlayer = null;
+
+
+        function changeState(newState) {
+            // Скрываем все состояния
+            document.querySelectorAll('.state').forEach(el => {
+                el.style.display = 'none';
+            });
+            // Показываем нужное состояние
+            const stateElement = document.getElementById(`state-${newState}`);
+
+            stateElement.style.display = 'block';
+
+        }
+
+
+
+        function onFlorkClick() {
+            // Если анимация уже идет - игнорируем новый клик
+            if (isAnimating) return;
+
+            // Устанавливаем флаг
+            isAnimating = true;
+
+            // Очищаем предыдущую анимацию, если она есть
+            if (animationPlayer) {
+                animationPlayer.destroy();
+            }
+
+            const randomIndex = Math.floor(Math.random() * animations.length);
+            animationPlayer = lottie.loadAnimation({
+                container: animationContainer,
+                path: animations[0],
+                renderer: "svg",
+                loop: false,
+                autoplay: true
+            });
+            charContainer.style.opacity = 0;
+            animationContainer.style.opacity = 100;
+
+
+            animationPlayer.addEventListener("complete", () => {
+                animationContainer.style.opacity = 0;
+                charContainer.style.opacity = 100;
+                setTimeout(() => {
+                    // Очищаем анимацию
+                    animationPlayer.destroy();
+                    animationPlayer = null;
+
+                    // Сбрасываем флаг
+                    isAnimating = false;
+                },100)
+            });
+        }
+
+    </script>
+</body>
+</html>
