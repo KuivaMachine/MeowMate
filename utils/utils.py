@@ -1,9 +1,9 @@
 import ctypes
 from ctypes import wintypes
 
-from PyQt6.QtCore import Qt
-from PyQt6.QtGui import QPixmap, QPainter, QIcon
-from PyQt6.QtSvg import QSvgRenderer
+from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QPixmap, QPainter, QIcon
+from PyQt5.QtSvg import QSvgRenderer
 from PyQt6.QtWidgets import QApplication
 
 # Константы WinAPI

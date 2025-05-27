@@ -1,9 +1,9 @@
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import QPropertyAnimation, Qt, QPoint, QSize
-from PyQt6.QtGui import QMovie
-from PyQt6.QtWidgets import QApplication, QLabel
+from PyQt5.QtCore import QPropertyAnimation, Qt, QPoint, QSize
+from PyQt5.QtGui import QMovie
+from PyQt5.QtWidgets import QApplication, QLabel
 
 
 class Pacman(QLabel):

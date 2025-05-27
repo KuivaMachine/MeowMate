@@ -2,6 +2,7 @@ import os
 import sys
 
 from PyQt5.QtCore import QUrl, Qt, QTimer
+
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEngineSettings
 from PyQt5.QtWidgets import QApplication, QMainWindow
 from pynput import keyboard

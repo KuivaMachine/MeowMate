@@ -20,25 +20,6 @@ class CharacterCart(QLabel):
         self.scroll_area_instance.controller_instance.theme_change_signal.connect(self.on_theme_change)
         self.isSelected = False
         self.current_theme = ThemeColor.LIGHT
-        # self.container = QWidget(self)
-        # self.container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        # self.container.setStyleSheet("background: transparent;")
-        #
-        # # Создаем layout для контейнера
-        # layout = QVBoxLayout(self.container)
-        # layout.setContentsMargins(0, 0, 0, 0)
-        # layout.setSpacing(0)
-        #
-        # # Создаем QWebEngineView без родителя
-        # self.movie = QWebEngineView()
-        # self.setMouseTracking(True)
-        # html_path = os.path.abspath("D:/py/MeowMate/ui/movie.html")
-        # self.movie.load(QUrl.fromLocalFile(html_path))
-        # self.movie.settings().setAttribute(QWebEngineSettings.ShowScrollBars, False)
-        # self.movie.setAttribute(Qt.WA_TranslucentBackground, True)
-        # self.movie.page().setBackgroundColor(Qt.transparent)
-        #
-        # layout.addWidget(self.movie)
 
         self.movie = QMovie(gif_path)
         self.movie.setSpeed(speed)

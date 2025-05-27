@@ -4,10 +4,11 @@ import sys
 from pathlib import Path
 
 import win32api
-from PyQt6.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve, QSize
-from PyQt6.QtGui import QPixmap, QTransform, QMovie
-from PyQt6.QtSvgWidgets import QSvgWidget
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve, QSize
+from PyQt5.QtGui import QPixmap, QTransform, QMovie
+from PyQt5.QtSvg import QSvgWidget
+
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from pynput import keyboard, mouse
 
 from cat.cat_run import CatRun

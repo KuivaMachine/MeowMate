@@ -2,13 +2,13 @@ import random
 import sys
 from pathlib import Path
 
-
+from PyQt5.QtSvg import QSvgWidget
 from PyQt6.QtCore import QSize
-from PyQt6.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt, QTimer
 from PyQt6.QtGui import QPixmap, QMovie
-from PyQt6.QtSvgWidgets import QSvgWidget
 
-from PyQt6.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout
+
+from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel, QVBoxLayout
 from pynput import keyboard
 
 from utils.enums import BongoType

@@ -3,11 +3,11 @@ import random
 import sys
 from pathlib import Path
 
-from PyQt6.QtCore import QPointF, pyqtSignal
-from PyQt6.QtCore import QPropertyAnimation, Qt, QTimer, QEasingCurve, QVariantAnimation
-from PyQt6.QtGui import QPainterPath
-from PyQt6.QtGui import QPixmap
-from PyQt6.QtWidgets import QApplication, QLabel
+from PyQt5.QtCore import QPointF, pyqtSignal
+from PyQt5.QtCore import QPropertyAnimation, Qt, QTimer, QEasingCurve, QVariantAnimation
+from PyQt5.QtGui import QPainterPath
+from PyQt5.QtGui import QPixmap
+from PyQt5.QtWidgets import QApplication, QLabel
 
 from utils.enums import Direction
 
