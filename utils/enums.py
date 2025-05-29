@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtCore import QSize, QPoint
 
-from character import Character
+from charactermodel import CharacterModel
 base_path = getattr(sys, '_MEIPASS', None)
 if base_path is not None:
     app_directory = Path(base_path)
@@ -35,9 +35,9 @@ class ThemeColor (Enum):
 
 
 class CharactersList (Enum):
-    CAT = Character('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
-    FLORK =  Character('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160),130)
-    BONGO = Character('БОНГО-КОТ', 'Описание бонго-кота', str(resource_path / 'bongo' / 'cat_preview.gif'), QSize(160, 160), 100)
+    CAT = CharacterModel('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
+    FLORK =  CharacterModel('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130)
+    BONGO = CharacterModel('БОНГО-КОТ', 'Описание бонго-кота', str(resource_path / 'bongo' / 'cat_preview.gif'), QSize(160, 160), 100)
     @classmethod
     def getFirst(cls):
         return next(iter(cls))

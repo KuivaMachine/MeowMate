@@ -2,10 +2,10 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QTimer, QSize, pyqtSignal
-from PyQt5.QtGui import QPainter, QLinearGradient, QColor, QBrush, QMovie
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QDialog
-
-
+from PyQt5.QtGui import QPainter, QLinearGradient, QColor, QBrush, QMovie, QPixmap
+from PyQt5.QtSvg import QSvgWidget
+from PyQt5.QtWidgets import QWidget, QApplication, QLabel, QHBoxLayout, QVBoxLayout, QPushButton, QDialog, QToolBar, \
+    QComboBox
 
 
 class OkButton(QPushButton):
@@ -14,6 +14,7 @@ class OkButton(QPushButton):
         self.setFixedSize(60, 30)
         self.setObjectName('ok_button')
         self.setText('Ok')
+
 
 class AlertWindow(QLabel):
     base_path = getattr(sys, '_MEIPASS', None)
@@ -24,20 +25,29 @@ class AlertWindow(QLabel):
     resource_path = app_directory / 'drawable' / 'menu'
 
     on_close = pyqtSignal()
-    def __init__(self,parent):
+
+    def __init__(self, parent):
         super().__init__(parent)
         self.drag_position = None
         self.setObjectName('alert')
         self.parent_window = parent
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint|Qt.WindowType.WindowTransparentForInput)
+        self.setWindowFlags(
+            Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.WindowTransparentForInput)
+
+
         self.root_hbox = QHBoxLayout(self)
-
-        self.root_hbox.setContentsMargins(20,10,20,10)
-        self.text = QLabel(f'Для корректного отображения \nперсонажей требуется масштаб \nэкрана 100% \nВаш масштаб')
-        self.text.setObjectName('alert_text')
-
-        self.text.setWordWrap(True)
+        self.root_hbox.setContentsMargins(20, 10, 20, 10)
         self.vbox = QVBoxLayout()
+
+        toolbar = QToolBar()
+        toolbar.setObjectName('toolbar_bongo')
+        toolbar.setFixedSize(260,50)
+
+        self.combo = QComboBox()
+        self.combo.setObjectName('toolbar_bongo_combo')
+        self.combo.addItems(["Классика", "Пианино", "Электрогитара","Бонго","Гитара"])
+        toolbar.addWidget(self.combo)
+
 
         self.duck = QLabel()
         self.duck_gif = QMovie(str(self.resource_path / 'duck.gif'))
@@ -47,24 +57,21 @@ class AlertWindow(QLabel):
         self.duck_gif.setSpeed(120)
         self.duck_gif.start()
 
-
         self.ok = OkButton()
         self.ok.clicked.connect(self.on_close_window)
 
+        self.vbox.addWidget(toolbar, alignment=Qt.AlignmentFlag.AlignCenter)
+        self.vbox.addWidget(self.ok, alignment=Qt.AlignmentFlag.AlignRight)
 
-        self.vbox.addWidget(self.duck, alignment=Qt.AlignmentFlag.AlignCenter, stretch=8)
-        self.vbox.addWidget(self.ok, alignment=Qt.AlignmentFlag.AlignRight, stretch=2)
 
-        self.root_hbox.addWidget(self.text)
         self.root_hbox.addLayout(self.vbox)
 
-        self.setGeometry((parent.size().width() - self.width()) // 6, (parent.size().height() - self.height()) // 3,
-                         550, 150)
+        self.setGeometry((parent.size().width() - self.width())//3, (parent.size().height() - self.height())//8,
+                         320, 460)
+
     def on_close_window(self):
         self.on_close.emit()
         self.close()
-
-
 
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:

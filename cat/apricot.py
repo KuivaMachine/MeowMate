@@ -14,6 +14,7 @@ from pynput import keyboard, mouse
 from cat.cat_run import CatRun
 from cat.fly import Fly
 from cat.pacman import Pacman
+from character_abstract import Character
 from utils.enums import CatState
 
 
@@ -41,7 +42,7 @@ class MouseTrackerThread(QThread):
 # Муха
 # Пакман
 # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
-class Cat(QMainWindow):
+class Cat(Character):
     def __init__(self):
         super().__init__()
 
@@ -244,23 +245,19 @@ class Cat(QMainWindow):
 
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mousePressEvent(self, event):
-
-        if event.button() == Qt.MouseButton.LeftButton and self.cat.geometry().contains(event.pos()):
+        if event.button() == Qt.MouseButton.LeftButton:
             self.dragging = True
             self.isOne = not self.isOne
             self.initial_pos = event.pos()
             self.original_height = self.cat.height()
             self.original_y = self.cat.y()
             self.bounce_animation.stop()
-            event.accept()
-
         else:
             super().mousePressEvent(event)
 
+
     # СЛУШАТЕЛЬ ДВИЖЕНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mouseMoveEvent(self, event):
-        # print(f"X:{event.pos().x()}  Y:{event.pos().y()}")
-
         if self.dragging and self.initial_pos is not None:
             match self.cat_position:
                 case (CatState.TOP):

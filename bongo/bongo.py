@@ -6,13 +6,16 @@ from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QHBoxLayout, QWidget
 from pynput import keyboard
 
+from character_abstract import Character
+from charactermodel import CharacterModel
 from ui.alert_window import AlertWindow
+from ui.close_characher_btn import CloseButton
 from utils.enums import BongoType
 
 
-# TODO:НАСТРОЙКИ:
+#TODO:НАСТРОЙКИ:
 # Выключить звуки
-# Выбрать инструмент
+# ыбрать инструмент
 # Включить счетчик нажатий
 
 class BongoApp(QApplication):
@@ -26,23 +29,9 @@ class BongoApp(QApplication):
         self.quit()
 
 
-class CloseButton(QPushButton):
-    def __init__(self, parent):
-        super().__init__(parent)
-        self.setFixedSize(30, 30)
-        self.setStyleSheet("""QPushButton {
-    color: black;
-    font-size: 17px;
-    font-weight: bold;
-    font-family: 'JetBrains Mono';
-    background-color: #FF7A73;
-    border: 3px solid black;
-    border-radius:15px;
-}""")
-        self.setText('x')
 
 
-class Bongo(QMainWindow):
+class Bongo(Character):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
@@ -72,10 +61,7 @@ class Bongo(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(100, 100, 100, 100)
 
-        self.root_container = QWidget()
 
-        self.hbox = QHBoxLayout(self.root_container)
-        self.hbox.setContentsMargins(0, 0, 0, 0)
 
         self.cat = QSvgWidget()
         self.cat.setFixedSize(392, 392)
@@ -126,8 +112,8 @@ class Bongo(QMainWindow):
                 self.right_pixmap = self.cat_bongo_right_pixmap
 
         self.cat.load(self.cat_main_pixmap)
-        self.hbox.addWidget(self.cat)
-        self.setCentralWidget(self.root_container)
+
+        self.setCentralWidget(self.cat)
         # СЛУШАТЕЛЬ КЛАВИАТУРЫ
         self.listener = keyboard.Listener(
             on_press=self.on_press,
@@ -151,15 +137,10 @@ class Bongo(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_pos = event.globalPos()
-        if event.button() == Qt.MouseButton.RightButton:
-            if not self.is_close_btn_showing:
-                self.close = CloseButton(self)
-                self.close.setGeometry(280, 100, 30, 30)
-                self.close.clicked.connect(self.close)
-                self.close.show()
-                self.is_close_btn_showing = True
-            else:
-                self.close.close()
+        else:
+            super().mousePressEvent(event)
+
+
 
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:

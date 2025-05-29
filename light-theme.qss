@@ -178,12 +178,38 @@ QLabel#alert_text {
 }
 
 
-QPushButton#close_character_button {
-    color: #FF0000;
-    font-size: 17px;
-    font-weight: bold;
-    font-family: 'JetBrains Mono';
-    background-color: transparent;
-    border: 2px solid #FF0000;
-    border-radius:15px;
+
+QToolBar#toolbar_bongo {
+    background-color: #FFDA8A;
+    border: 1px solid black;
+    border-radius: 10px;
+    padding: 3px;
+}
+QComboBox#toolbar_bongo_combo {
+    font-size: 24px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    background-color: #FFF2D6;
+    border: 1px solid black;
+    height: 42px;
+    width: 252px;
+    border-radius: 10px;
+    color: black;
+}
+QComboBox#toolbar_bongo_combo::drop-down {
+    background-color: #EDA942;
+    subcontrol-position: top right;
+    width: 45px;
+    border: 1px solid black;
+    border-radius: 10px;
+}
+QComboBox#toolbar_bongo_combo QAbstractItemView {
+    border-radius: 10px;
+    background-color: #FFF2D6;
+    border: 1px solid black;
+    height: 42px;
+    selection-background-color: #FCCE88;
+    selection-color: black;
+    color: black;
+    outline: none;
 }

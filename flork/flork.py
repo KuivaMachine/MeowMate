@@ -8,12 +8,14 @@ from PyQt5.QtGui import QPixmap, QMovie
 from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
 from pynput import keyboard
 
+from character_abstract import Character
+
 
 #TODO:НАСТРОЙКИ:
 # Выключить звуки
 # Зафиксировать по X
 # Зафиксировать по Y
-class Flork(QMainWindow):
+class Flork(Character):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
@@ -103,12 +105,12 @@ class Flork(QMainWindow):
         self.isAnimationPlaying = False
 
     def mousePressEvent(self, event):
-        super().mousePressEvent(event)
         if event.button() == Qt.MouseButton.LeftButton:
-
             if not self.isAnimationPlaying:
                 random_int = random.randint(1, 2)
-                self.playAnimation(2)
+                self.playAnimation(random_int)
+        else:
+            super().mousePressEvent(event)
 
     def playAnimation(self, number):
         match number:

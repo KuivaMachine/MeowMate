@@ -121,7 +121,7 @@ class MainMenuWindow(QMainWindow):
         self.portal = Portal(portal_destination)
         QTimer.singleShot(2000,selected_character.show)
         self.portal.show()
-        self.settings_window.close()
+        self.settings_window.close_button()
 
 
     # КНОПКА "НАСТРОИТЬ"

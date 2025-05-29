@@ -1,5 +1,5 @@
 
-class Character:
+class CharacterModel:
     def __init__(self, name, description, gif_path, size, speed):
         self.description = description
         self.name = name
