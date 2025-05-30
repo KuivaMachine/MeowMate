@@ -3,40 +3,37 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import QSize
-from PyQt5.QtCore import Qt, QTimer
+from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QMovie
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QLabel
 from pynput import keyboard
 
 from character_abstract import Character
+from flork.flork_settings import FlorkSettingsWindow
 
 
-#TODO:НАСТРОЙКИ:
-# Выключить звуки
-# Зафиксировать по X
-# Зафиксировать по Y
 class Flork(Character):
-    # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
-        # Мы находимся в упакованном виде (PyInstaller)
         app_directory = Path(base_path)
     else:
-        # Обычный режим разработки
-        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
-    # Теперь можем обратиться к нужным ресурсам
+        app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'flork'
 
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+        self.enable_sounds = settings["sounds"]
 
+
+
+        self.drag_pos = None
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(100, screen.height() - self.get_taskbar_height() - 200, 200, 200)
+        self.screen = QApplication.primaryScreen().geometry()
+        self.setGeometry(100, self.screen.height() - self.get_taskbar_height() - 200, 200, 200)
         self.setMouseTracking(True)
 
         self.current_gif = None
@@ -109,8 +106,24 @@ class Flork(Character):
             if not self.isAnimationPlaying:
                 random_int = random.randint(1, 2)
                 self.playAnimation(random_int)
-        else:
-            super().mousePressEvent(event)
+
+        super().mousePressEvent(event)
+
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            if self.drag_pos:
+                new_pos = self.pos() + event.globalPos() - self.drag_pos
+                parent_rect = QApplication.primaryScreen().geometry()
+
+                left_maximum = parent_rect.left() - 20
+                right_maximum = parent_rect.right() - 200
+
+                x = max(left_maximum,
+                        min(new_pos.x(),
+                            right_maximum))
+
+                self.move(x, self.screen.height() - self.get_taskbar_height() - 200)
+                self.drag_pos = event.globalPos()
 
     def playAnimation(self, number):
         match number:
@@ -122,7 +135,6 @@ class Flork(Character):
                 self.current_gif = self.dance
                 self.current_gif.start()
                 self.flork_main.setMovie(self.current_gif)
-        # QTimer.singleShot(3800, self.stopAnimation)
         self.isAnimationPlaying = True
 
     def get_taskbar_height(self):
@@ -138,12 +150,7 @@ class Flork(Character):
         else:
             return int(40 / dpi_scale)
 
-    def getSettingWindow(self, root_container):
-        pass
+    @staticmethod
+    def getSettingWindow(root_container, settings):
+        return FlorkSettingsWindow(root_container, settings)
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    flork = Flork()
-    flork.show()
-    sys.exit(app.exec())

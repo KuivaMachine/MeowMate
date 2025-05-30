@@ -4,10 +4,10 @@ from PyQt5.QtWidgets import QPushButton, QLabel
 
 class SwitchButton(QPushButton):
     change_theme = pyqtSignal(bool)
-    def __init__(self):
+    def __init__(self, is_light_theme):
         super().__init__()
         self.setMouseTracking(True)
-        self.is_checked = False
+        self.is_checked = is_light_theme
         self.circle_diameter = 16
         self.rect_height = self.circle_diameter + int(self.circle_diameter * 0.5)
         self.rect_width = int(self.circle_diameter * 3) + self.rect_height - self.circle_diameter
@@ -16,9 +16,15 @@ class SwitchButton(QPushButton):
         self.circle = QLabel(self)
         self.circle.setObjectName('toggle')
         self.circle.setMouseTracking(True)
-        self.circle.setGeometry(int((self.rect_height - self.circle_diameter) / 2),
-                                int((self.rect_height - self.circle_diameter) / 2), self.circle_diameter,
-                                self.circle_diameter)
+
+        if self.is_checked:
+            self.circle.setGeometry(int((self.rect_height - self.circle_diameter) / 2)+int(self.circle_diameter*2),
+                                    int((self.rect_height - self.circle_diameter) / 2), self.circle_diameter,
+                                    self.circle_diameter)
+        else:
+            self.circle.setGeometry(int((self.rect_height - self.circle_diameter) / 2),
+                                    int((self.rect_height - self.circle_diameter) / 2), self.circle_diameter,
+                                    self.circle_diameter)
 
         self.position_animation = QPropertyAnimation(self.circle, b"pos")
         self.position_animation.setEasingCurve(QEasingCurve.Type.OutInQuad)
@@ -39,9 +45,7 @@ class SwitchButton(QPushButton):
                 self.position_animation.setEndValue(QPoint(self.circle.geometry().x() - int(self.circle_diameter*2),
                                                            self.circle.geometry().y()))
 
-
-
             self.position_animation.start()
             self.is_checked = not self.is_checked
             self.change_theme.emit(self.is_checked)
-            super().mousePressEvent(event)
+

@@ -11,7 +11,7 @@ class CloseButton(QPushButton):
     font-weight: bold;
     font-family: 'JetBrains Mono';
     background-color: #FFE5BD;
-    border: 3px solid black;
+    border: 2px solid black;
     border-radius:5px;
 }
 QPushButton:pressed {
@@ -20,7 +20,7 @@ QPushButton:pressed {
     font-weight: bold;
     font-family: 'JetBrains Mono';
     background-color: #A89271;
-    border: 3px solid black;
+    border: 2px solid black;
     border-radius:5px;
 }""")
         self.setText('закрыть')

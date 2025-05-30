@@ -6,11 +6,10 @@ from pathlib import Path
 import win32api
 from PyQt5.QtCore import QPropertyAnimation, Qt, QRect, QPoint, QTimer, QThread, pyqtSignal, QEasingCurve, QSize
 from PyQt5.QtGui import QPixmap, QTransform, QMovie
-from PyQt5.QtSvg import QSvgWidget
-
-from PyQt5.QtWidgets import QApplication, QMainWindow, QLabel
+from PyQt5.QtWidgets import QApplication, QLabel
 from pynput import keyboard, mouse
 
+from cat.apricot_settings import ApricotSettingsWindow
 from cat.cat_run import CatRun
 from cat.fly import Fly
 from cat.pacman import Pacman
@@ -43,11 +42,11 @@ class MouseTrackerThread(QThread):
 # Пакман
 # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
 class Cat(Character):
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
 
         # ПЕРЕМЕННЫЕ
-        self.cat_hiding_delay = 0       # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
+        self.cat_hiding_delay = int(settings["cat_hiding_delay"])*1000    # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
         self.isFlying = False
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
         self.cat_window_size = 300
@@ -374,8 +373,7 @@ class Cat(Character):
                     ).transformed(transform))
 
             event.accept()
-        else:
-            super().mouseMoveEvent(event)
+
 
     # СЛУШАТЕЛЬ ОТПУСКАНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mouseReleaseEvent(self, event):
@@ -397,8 +395,7 @@ class Cat(Character):
             self.bounce_animation.start()
 
             event.accept()
-        else:
-            super().mouseReleaseEvent(event)
+
 
     # СЛУШАТЕЛЬ ЛЕВОГО КЛИКА МЫШИ
     def handle_left_click(self, x, y, left_pressed):
@@ -772,8 +769,9 @@ class Cat(Character):
     def on_release(self, key):
         pass
 
-    def getSettingWindow(self, root_container):
-        pass
+    @staticmethod
+    def getSettingWindow(root_container,settings):
+        return ApricotSettingsWindow(root_container,settings)
 
 
 if __name__ == "__main__":

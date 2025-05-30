@@ -1,0 +1,6 @@
+{
+    "sounds": false,
+    "pacman": false,
+    "fly": false,
+    "cat_hiding_delay": "0"
+}

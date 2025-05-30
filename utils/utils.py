@@ -6,12 +6,17 @@ from PyQt5.QtGui import QPixmap, QPainter, QIcon
 from PyQt5.QtSvg import QSvgRenderer
 from PyQt5.QtWidgets import QApplication
 
+from utils.enums import BongoType
+
 # Константы WinAPI
 ABM_GETTASKBARPOS = 0x00000005
 ABE_BOTTOM = 3
 
 
-
+def get_bongo_enum( value):
+    for item in BongoType:
+        if item.value == value:
+            return item
 
 
 

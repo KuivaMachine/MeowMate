@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtCore import QSize, QPoint
 
-from charactermodel import CharacterModel
+from character_model import CharacterModel
 base_path = getattr(sys, '_MEIPASS', None)
 if base_path is not None:
     app_directory = Path(base_path)
@@ -23,11 +23,11 @@ class Direction(Enum):
     NEGATIVE = "NEGATIVE"
 
 class BongoType(Enum):
-    ROCK = 'rock'
-    GUITAR = 'guitar'
-    BONGO = 'bongo'
-    PIANO = 'piano'
-    CLASSIC='classic'
+    ROCK = "Электрогитара"
+    GUITAR = 'Гитара'
+    BONGO = 'Бонго'
+    PIANO = 'Пианино'
+    CLASSIC='Классика'
 
 class ThemeColor (Enum):
     LIGHT = 'light'

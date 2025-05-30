@@ -1,4 +1,5 @@
 import ctypes
+import json
 import sys
 from pathlib import Path
 
@@ -37,10 +38,17 @@ class MainMenuWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         self.drag_pos = None
-        self.is_setting_showing =False
+        self.is_setting_showing = False
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
+
+        with open('settings/theme_mode.json', "r", encoding='utf-8') as f:
+            theme = json.load(f)
+        if theme['mode'] == 'dark':
+            is_dark_theme = True
+        else:
+            is_dark_theme = False
 
         # ФОН ОКНА
         self.root_container = QWidget(self)
@@ -51,9 +59,8 @@ class MainMenuWindow(QMainWindow):
         self.main_vbox = QVBoxLayout(self.root_container)
         self.main_vbox.setContentsMargins(0, 0, 0, 0)
 
-
         # ЗАГОЛОВОК
-        self.main_vbox.addWidget(self.setup_header())
+        self.main_vbox.addWidget(self.setup_header(is_dark_theme))
 
         # ОСНОВНОЙ КОНТЕНТ
         self.main_vbox.addWidget(self.setup_content())
@@ -76,7 +83,7 @@ class MainMenuWindow(QMainWindow):
         QTimer.singleShot(50, self.update_bg_position)
 
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
-        self.left_shadow =  QSvgWidget(self.root_container)
+        self.left_shadow = QSvgWidget(self.root_container)
         self.left_shadow_pixmap_light = str(self.resource_path / 'menu' / "left_shadow.svg")
         self.left_shadow_pixmap_dark = str(self.resource_path / 'menu' / "left_shadow_white.svg")
 
@@ -87,14 +94,13 @@ class MainMenuWindow(QMainWindow):
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
         self.windows = []
 
-
-
         # Читаем и применяем стиль
         with open('dark-theme.qss', 'r') as f:
             self.dark_style = f.read()
         with open('light-theme.qss', 'r') as f:
             self.light_style = f.read()
-        self.setStyleSheet(self.light_style)
+
+        self.change_theme(is_dark_theme)
 
     # ВОЗВРАЩАЕТ МАСШТАБ ЭКНАНА (100, 125, 150 и т.д.)
     def get_screen_scale_factor(self):
@@ -104,25 +110,38 @@ class MainMenuWindow(QMainWindow):
         shcore.GetScaleFactorForMonitor(monitor, ctypes.byref(scale))
         return scale.value
 
+    def load_settings(self, path):
+        try:
+            with open(path, "r", encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            print("Файл настроек не найден или поврежден")
+            return None
+
     # КНОПКА "ЗАПУСТИТЬ"
     def on_start_button_push(self):
         selected_character = None
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
-                selected_character = Bongo()
+                settings = self.load_settings("settings/bongo_settings.json")
+                selected_character = Bongo(settings)
             case 'ФЛОРК':
-                selected_character = Flork()
+                settings = self.load_settings("settings/flork_settings.json")
+                selected_character = Flork(settings)
             case 'АБРИКОС':
-                selected_character = Cat()
+                settings = self.load_settings("settings/apricot_settings.json")
+                selected_character = Cat(settings)
 
         self.windows.append(selected_character)
-        portal_destination = QPoint(selected_character.pos().x()+(selected_character.width()-360)//2, selected_character.pos().y()+(selected_character.height()-400)//2)
+        portal_destination = QPoint(selected_character.pos().x() + (selected_character.width() - 360) // 2,
+                                    selected_character.pos().y() + (selected_character.height() - 400) // 2)
         self.portal = Portal(portal_destination)
-        QTimer.singleShot(2000,selected_character.show)
+        QTimer.singleShot(2000, selected_character.show)
         self.portal.show()
-        self.settings_window.close_button()
 
+        if self.is_setting_showing:
+            self.settings_window.close()
 
     # КНОПКА "НАСТРОИТЬ"
     def on_settings_button_push(self):
@@ -131,20 +150,20 @@ class MainMenuWindow(QMainWindow):
             self.settings_window = None
             match self.characters_panel.selected_card.character_name:
                 case 'БОНГО-КОТ':
-                    self.settings_window = Bongo().getSettingWindow(self.root_container)
+                    settings = self.load_settings("settings/bongo_settings.json")
+                    self.settings_window = Bongo.getSettingWindow(self.root_container, settings)
                 case 'ФЛОРК':
-                    pass
-                    # self.settings_window = Flork().getSettingWindow(self.root_container)
+                    settings = self.load_settings("settings/flork_settings.json")
+                    self.settings_window = Flork.getSettingWindow(self.root_container, settings)
                 case 'АБРИКОС':
-                    pass
-                    # self.settings_window = Cat().getSettingWindow(self.root_container)
+                    settings = self.load_settings("settings/apricot_settings.json")
+                    self.settings_window = Cat.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
             self.settings_window.show()
 
     def update_settings(self):
         self.is_setting_showing = False
-
 
     def update_bg_position(self):
         # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
@@ -164,6 +183,9 @@ class MainMenuWindow(QMainWindow):
             self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but_white.svg'))
             self.left_shadow.load(self.left_shadow_pixmap_dark)
             self.right_shadow.setPixmap(self.right_shadow_pixmap_dark)
+            settings = {
+                "mode": 'dark',
+            }
         else:
             self.theme_color = ThemeColor.LIGHT
             self.setStyleSheet(self.light_style)
@@ -171,14 +193,21 @@ class MainMenuWindow(QMainWindow):
             self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but.svg'))
             self.left_shadow.load(self.left_shadow_pixmap_light)
             self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
+            settings = {
+                "mode": 'light',
+            }
         self.theme_change_signal.emit(self.theme_color)
         # БЛИК СВЕТА ПРИ СМЕНЕ ТЕМЫ
         blink = Blinker(self.root_container)
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
+
+        with open("./settings/theme_mode.json", "w", encoding='utf-8') as f:
+            json.dump(settings, f, indent=4, ensure_ascii=False)
+
     # ЗАГОЛОВОК
-    def setup_header(self):
+    def setup_header(self,is_light_theme):
         header = QWidget()
         header.setObjectName('header')
         header.setFixedHeight(55)
@@ -191,7 +220,7 @@ class MainMenuWindow(QMainWindow):
         switch_container.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         switch_layout = QHBoxLayout(switch_container)
         switch_layout.setAlignment(Qt.AlignmentFlag.AlignLeft)
-        switch_button = SwitchButton()
+        switch_button = SwitchButton(is_light_theme)
         switch_layout.addWidget(switch_button)
         switch_button.change_theme.connect(self.change_theme)
         hlayout.addWidget(switch_container)
@@ -200,7 +229,6 @@ class MainMenuWindow(QMainWindow):
         title = QLabel("Выберите персонажа")
         title.setObjectName('title')
         title.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-
 
         hlayout.addWidget(title)
 
@@ -238,7 +266,7 @@ class MainMenuWindow(QMainWindow):
         self.description_panel.start_button_clicked.connect(self.on_start_button_push)
         self.description_panel.settings_button_clicked.connect(self.on_settings_button_push)
         content_layout.addWidget(self.characters_panel, alignment=Qt.AlignTop)
-        content_layout.addWidget(self.description_panel,  alignment=Qt.AlignTop)
+        content_layout.addWidget(self.description_panel, alignment=Qt.AlignTop)
 
         return content
 
@@ -254,10 +282,12 @@ class MainMenuWindow(QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and event.pos().y() < 40:
             self.drag_pos = event.globalPos()
+
     def mouseMoveEvent(self, event):
-        if  hasattr(self, 'drag_pos') and self.drag_pos is not None:
+        if hasattr(self, 'drag_pos') and self.drag_pos is not None:
             self.move(self.pos() + event.globalPos() - self.drag_pos)
             self.drag_pos = event.globalPos()
+
     def mouseReleaseEvent(self, event):
         self.drag_pos = None
 
