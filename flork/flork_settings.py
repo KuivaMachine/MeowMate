@@ -2,10 +2,12 @@ import json
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import pyqtSignal
+from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox, QHBoxLayout
 from PyQt5.QtWidgets import QVBoxLayout
+
+from ui.question_window import Question
 from ui.settings_window import SettingsWindow, OkButton
 
 
@@ -38,9 +40,12 @@ class FlorkSettingsWindow(SettingsWindow):
         self.sounds_check.setChecked(self.enable_sounds)
         self.sounds_check.setObjectName('checkbox_flork')
 
+        self.question = Question("Разрешает коту\nгоняться за мухой\n(шанс появления - 1.25%)")
+        self.hbox = QHBoxLayout()
+        self.hbox.addWidget(self.sounds_check, alignment=Qt.AlignLeft)
+        self.hbox.addWidget(self.question, alignment=Qt.AlignLeft)
 
-
-        self.vbox.addWidget(self.sounds_check)
+        self.vbox.addLayout(self.hbox)
 
 
 

@@ -36,16 +36,14 @@ class MouseTrackerThread(QThread):
         with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
 
-#TODO:НАСТРОЙКИ:
-# Выключить звуки
-# Муха
-# Пакман
-# ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
+
 class Cat(Character):
     def __init__(self, settings):
         super().__init__()
 
         # ПЕРЕМЕННЫЕ
+        self.enable_pacman = settings["pacman"]
+        self.enable_fly = settings["fly"]
         self.cat_hiding_delay = int(settings["cat_hiding_delay"])*1000    # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
         self.isFlying = False
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
@@ -212,11 +210,12 @@ class Cat(Character):
         self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
 
         # СЛУШАТЕЛЬ КЛАВИАТУРЫ
-        self.listener = keyboard.Listener(
-            on_press=self.on_press,
-            on_release=self.on_release
-        )
-        self.listener.start()
+        if self.enable_pacman:
+            self.listener = keyboard.Listener(
+                on_press=self.on_press,
+                on_release=self.on_release
+            )
+            self.listener.start()
 
 
     def start_fly(self):
@@ -553,7 +552,7 @@ class Cat(Character):
 
         QTimer.singleShot(self.cat_hiding_delay, lambda: (
             self.cat_coming_animation.start(),
-            self.start_fly() if position == CatState.BOTTOM and random.randint(1, 20) == 1 else None
+            self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 20) == 1 else None
         ))
 
 

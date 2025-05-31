@@ -3,13 +3,14 @@ import re
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import pyqtSignal, QRegExp
+from PyQt5.QtCore import pyqtSignal, QRegExp, Qt
 from PyQt5.QtGui import QIntValidator, QRegExpValidator
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox, QLineEdit, QLabel
+from PyQt5.QtWidgets import QCheckBox, QLineEdit, QLabel, QHBoxLayout
 from PyQt5.QtWidgets import QVBoxLayout, QToolBar, QComboBox
 from pyparsing import Regex
 
+from ui.question_window import Question
 from ui.settings_window import SettingsWindow, OkButton
 
 
@@ -45,10 +46,22 @@ class ApricotSettingsWindow(SettingsWindow):
         self.pacman_check = QCheckBox("Пакмен")
         self.pacman_check.setChecked(self.enable_pacman)
         self.pacman_check.setObjectName('checkbox_apricot')
+        self.question = Question("Запустите кота\nи наберите\nна клавиатуре:\n\"пакмен\" или \"pacman\"")
+        self.pacman_hbox = QHBoxLayout()
+        self.pacman_hbox.setSpacing(5)
+        self.pacman_hbox.addWidget(self.pacman_check, alignment=Qt.AlignLeft)
+        self.pacman_hbox.addWidget(self.question, alignment=Qt.AlignLeft)
+
 
         self.fly_check = QCheckBox("Муха")
         self.fly_check.setChecked(self.enable_fly)
         self.fly_check.setObjectName('checkbox_apricot')
+        self.question = Question("Разрешает коту\nгоняться за мухой\n(шанс появления - 1.25%)")
+        self.fly_hbox = QHBoxLayout()
+        self.fly_hbox.setSpacing(5)
+        self.fly_hbox.addWidget(self.fly_check, alignment=Qt.AlignLeft)
+        self.fly_hbox.addWidget(self.question, alignment=Qt.AlignLeft)
+
 
         self.text = QLabel("Задержка перед появлением,\nсекунды:")
         self.text.setObjectName('apricot_text_cat_hiding_delay')
@@ -62,8 +75,8 @@ class ApricotSettingsWindow(SettingsWindow):
         self.input.setPlaceholderText("от 0 до 60")
 
         self.vbox.addWidget(self.sounds_check)
-        self.vbox.addWidget(self.pacman_check)
-        self.vbox.addWidget(self.fly_check)
+        self.vbox.addLayout(self.pacman_hbox)
+        self.vbox.addLayout(self.fly_hbox)
         self.vbox.addWidget(self.text)
         self.vbox.addWidget(self.input)
 

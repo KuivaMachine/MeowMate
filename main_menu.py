@@ -21,16 +21,11 @@ from utils.enums import ThemeColor, CharactersList
 
 
 class MainMenuWindow(QMainWindow):
-    # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
-        # Мы находимся в упакованном виде (PyInstaller)
         app_directory = Path(base_path)
     else:
-        # Обычный режим разработки
-        app_directory = Path(__file__).parent  # Найти родительский каталог проекта
-
-    # Теперь можем обратиться к нужным ресурсам
+        app_directory = Path(__file__).parent
     resource_path = app_directory / 'drawable'
     theme_color = ThemeColor.LIGHT
     theme_change_signal = pyqtSignal(ThemeColor)
@@ -66,21 +61,13 @@ class MainMenuWindow(QMainWindow):
         self.main_vbox.addWidget(self.setup_content())
 
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
-        self.right_shadow = QLabel(self.root_container)
-        self.right_shadow_pixmap_light = QPixmap(str(self.resource_path / 'menu' / "right_shadow.png")).scaled(
-            260, 380,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
-        self.right_shadow_pixmap_dark = QPixmap(str(self.resource_path / 'menu' / "right_shadow_white.png")).scaled(
-            260, 380,
-            Qt.AspectRatioMode.KeepAspectRatio,
-            Qt.TransformationMode.SmoothTransformation
-        )
+        self.right_shadow = QSvgWidget(self.root_container)
+        self.right_shadow_pixmap_light =  str(self.resource_path / 'menu' / "right_shadow.svg")
+        self.right_shadow_pixmap_dark =  str(self.resource_path / 'menu' / "right_shadow_white.svg")
 
-        self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
+        self.right_shadow.load(self.right_shadow_pixmap_light)
         self.right_shadow.lower()
-        QTimer.singleShot(50, self.update_bg_position)
+
 
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
         self.left_shadow = QSvgWidget(self.root_container)
@@ -182,7 +169,7 @@ class MainMenuWindow(QMainWindow):
             self.close_btn.setupIcon(str(self.resource_path / 'menu' / "close_but_white.svg"))
             self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but_white.svg'))
             self.left_shadow.load(self.left_shadow_pixmap_dark)
-            self.right_shadow.setPixmap(self.right_shadow_pixmap_dark)
+            self.right_shadow.load(self.right_shadow_pixmap_dark)
             settings = {
                 "mode": 'dark',
             }
@@ -192,7 +179,7 @@ class MainMenuWindow(QMainWindow):
             self.close_btn.setupIcon(str(self.resource_path / 'menu' / "close_but.svg"))
             self.minimize_btn.setupIcon(str(self.resource_path / 'menu' / 'minimize_but.svg'))
             self.left_shadow.load(self.left_shadow_pixmap_light)
-            self.right_shadow.setPixmap(self.right_shadow_pixmap_light)
+            self.right_shadow.load(self.right_shadow_pixmap_light)
             settings = {
                 "mode": 'light',
             }

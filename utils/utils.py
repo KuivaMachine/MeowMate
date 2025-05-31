@@ -13,6 +13,19 @@ ABM_GETTASKBARPOS = 0x00000005
 ABE_BOTTOM = 3
 
 
+def get_taskbar_height(screen):
+    screen_rect = screen.geometry()
+    available_rect = screen.availableGeometry()
+    dpi_scale = screen.devicePixelRatio()
+
+    if screen_rect.bottom() != available_rect.bottom():
+        return int((screen_rect.bottom() - available_rect.bottom()) / dpi_scale)
+    elif screen_rect.top() != available_rect.top():
+        return int((available_rect.top() - screen_rect.top()) / dpi_scale)
+    else:
+        return int(40 / dpi_scale)
+
+
 def get_bongo_enum( value):
     for item in BongoType:
         if item.value == value:

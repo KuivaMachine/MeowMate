@@ -5,6 +5,8 @@ from PyQt5.QtCore import QPropertyAnimation, Qt, QPoint, QSize
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QApplication, QLabel
 
+from utils.utils import get_taskbar_height
+
 
 class Pacman(QLabel):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения
@@ -31,7 +33,7 @@ class Pacman(QLabel):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
 
         screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(0, 745, screen.width(), 300)
+        self.setGeometry(0, screen.height() - get_taskbar_height(QApplication.primaryScreen())-300, screen.width(), 300)
 
         self.pacman_label = QLabel(self)
         self.pacman_label.setGeometry(700, 0, 800, 300)
