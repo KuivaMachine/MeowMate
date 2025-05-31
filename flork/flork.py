@@ -8,7 +8,7 @@ from PyQt5.QtGui import QPixmap, QMovie
 from PyQt5.QtWidgets import QApplication, QLabel
 from pynput import keyboard
 
-from character_abstract import Character
+from utils.character_abstract import Character
 from flork.flork_settings import FlorkSettingsWindow
 
 

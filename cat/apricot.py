@@ -13,11 +13,11 @@ from cat.apricot_settings import ApricotSettingsWindow
 from cat.cat_run import CatRun
 from cat.fly import Fly
 from cat.pacman import Pacman
-from character_abstract import Character
+from utils.character_abstract import Character
 from utils.enums import CatState
 
 
-# Поток для отслеживания движения мыши
+# Дополнительны поток для отслеживания движения мыши
 class MouseTrackerThread(QThread):
     mouse_moved = pyqtSignal(int, int)
     left_clicked = pyqtSignal(int, int, bool)
@@ -772,10 +772,3 @@ class Cat(Character):
     def getSettingWindow(root_container,settings):
         return ApricotSettingsWindow(root_container,settings)
 
-
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    cat = Cat()
-    cat.show()
-
-    sys.exit(app.exec())

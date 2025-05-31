@@ -1,0 +1,7 @@
+self.duck = QLabel()
+self.duck_gif = QMovie(str(self.resource_path / 'duck.gif'))
+self.duck_gif.setSpeed(120)
+self.duck_gif.setScaledSize(QSize(100, 80))
+self.duck.setMovie(self.duck_gif)
+self.duck_gif.setSpeed(120)
+self.duck_gif.start()

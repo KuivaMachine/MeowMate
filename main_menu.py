@@ -1,10 +1,10 @@
 import ctypes
 import json
+import os
 import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt5.QtGui import QPixmap
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
 
@@ -27,8 +27,17 @@ class MainMenuWindow(QMainWindow):
     else:
         app_directory = Path(__file__).parent
     resource_path = app_directory / 'drawable'
+
     theme_color = ThemeColor.LIGHT
     theme_change_signal = pyqtSignal(ThemeColor)
+
+    def get_resource_path(self, relative_path):
+        try:
+            base_path = sys._MEIPASS
+        except AttributeError:
+            base_path = os.path.dirname(os.path.abspath(__file__))
+
+        return Path(base_path) / relative_path
 
     def __init__(self):
         super().__init__()
@@ -38,8 +47,11 @@ class MainMenuWindow(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
 
-        with open('settings/theme_mode.json', "r", encoding='utf-8') as f:
+
+        with open(self.get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
             theme = json.load(f)
+        print("READ   ",theme, self.get_resource_path('settings/theme_mode.json'))
+
         if theme['mode'] == 'dark':
             is_dark_theme = True
         else:
@@ -82,9 +94,9 @@ class MainMenuWindow(QMainWindow):
         self.windows = []
 
         # Читаем и применяем стиль
-        with open('dark-theme.qss', 'r') as f:
+        with open(self.get_resource_path('resources/dark-theme.qss'), 'r') as f:
             self.dark_style = f.read()
-        with open('light-theme.qss', 'r') as f:
+        with open(self.get_resource_path('resources/light-theme.qss'), 'r') as f:
             self.light_style = f.read()
 
         self.change_theme(is_dark_theme)
@@ -111,13 +123,13 @@ class MainMenuWindow(QMainWindow):
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
-                settings = self.load_settings("settings/bongo_settings.json")
+                settings = self.load_settings(self.get_resource_path("settings/bongo_settings.json"))
                 selected_character = Bongo(settings)
             case 'ФЛОРК':
-                settings = self.load_settings("settings/flork_settings.json")
+                settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
                 selected_character = Flork(settings)
             case 'АБРИКОС':
-                settings = self.load_settings("settings/apricot_settings.json")
+                settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
                 selected_character = Cat(settings)
 
         self.windows.append(selected_character)
@@ -137,13 +149,13 @@ class MainMenuWindow(QMainWindow):
             self.settings_window = None
             match self.characters_panel.selected_card.character_name:
                 case 'БОНГО-КОТ':
-                    settings = self.load_settings("settings/bongo_settings.json")
+                    settings = self.load_settings(self.get_resource_path("settings/bongo_settings.json"))
                     self.settings_window = Bongo.getSettingWindow(self.root_container, settings)
                 case 'ФЛОРК':
-                    settings = self.load_settings("settings/flork_settings.json")
+                    settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
                     self.settings_window = Flork.getSettingWindow(self.root_container, settings)
                 case 'АБРИКОС':
-                    settings = self.load_settings("settings/apricot_settings.json")
+                    settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
@@ -190,8 +202,9 @@ class MainMenuWindow(QMainWindow):
         QTimer.singleShot(300, blink.deleteLater)
 
 
-        with open("./settings/theme_mode.json", "w", encoding='utf-8') as f:
+        with open(self.get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
+            print("write    ",settings,self.get_resource_path("settings/theme_mode.json") )
 
     # ЗАГОЛОВОК
     def setup_header(self,is_light_theme):

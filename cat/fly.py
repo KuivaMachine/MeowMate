@@ -24,7 +24,7 @@ class Fly(QLabel):
         # Обычный режим разработки
         app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
         # Теперь можем обратиться к нужным ресурсам
-    resource_path = app_directory / 'drawable' / 'fly'
+    resource_path = app_directory / 'drawable' / 'cat'
 
     def __init__(self, cat_instance):
         super().__init__()

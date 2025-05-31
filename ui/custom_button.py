@@ -36,17 +36,12 @@ class CircularLabel(QLabel):
 
 class CustomAnimatedButton(QPushButton):
     settings_button_clicked = pyqtSignal()
-    # Определяем путь к каталогу с данными в зависимости от режима исполнения
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
-        # Мы находимся в упакованном виде (PyInstaller)
         app_directory = Path(base_path)
     else:
-        # Обычный режим разработки
-        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
-    # Теперь можем обратиться к нужным ресурсам
+        app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'menu'
-
     def __init__(self, text, gif_path, parent):
         super().__init__(parent)
         self.setObjectName('custom_buttons')
@@ -80,9 +75,9 @@ class CustomAnimatedButton(QPushButton):
     def update_gif_on_theme_change(self, new_theme):
         if self.text() == 'НАСТРОИТЬ':
             if new_theme == ThemeColor.DARK:
-                self.gif_label.set_gif('./drawable/menu/gears_mini_white.gif')
+                self.gif_label.set_gif(str(self.resource_path/'gears_mini_white.gif'))
             else:
-                self.gif_label.set_gif('./drawable/menu/gears_mini.gif')
+                self.gif_label.set_gif(str(self.resource_path/'gears_mini.gif'))
 
     def mousePressEvent(self, event, ):
         if event.button() == Qt.MouseButton.LeftButton:

@@ -1,0 +1,364 @@
+/* MainMenuWindow */
+
+
+QLabel#title {
+    color: #ffffff;
+    font-size: 26px;
+    font-weight: bold;
+    letter-spacing: -1px;
+    font-family: 'PT Mono';
+    text-align: center;
+    border:3px solid #000000;
+    border-radius:15px;
+}
+QWidget#header {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #FF0062, stop:1 #FFAE00);
+    border-radius: 15px;
+    border:3px solid #ffffff;
+}
+QWidget#main_container{
+    background-color: #333333;
+    border-radius: 15px;
+    border: 3px solid #ffffff;
+}
+
+
+
+
+/* DescriptionWindow */
+QWidget#description_container {
+    background-color: #4D4D4D;
+    border: 2px solid #FFFFFF;
+    border-radius: 15px;
+}
+QLabel#name_text {
+    color: #FFFFFF;
+    font-size: 30px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
+QLabel#description_text {
+    color: #FFFFFF;
+    text-align: left;
+    font-size: 15px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
+
+
+/* Start/Settings BUTTONS */
+QLabel#circle_in_start_settings_buttons {
+    background-color: #333333;
+    border-radius:20px;
+    border: none;
+}
+QPushButton#custom_buttons {
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: white;
+    padding-left: 20px;
+    background-color: #666666;
+    border:0px solid #000000;
+    border-radius: 26px;
+}
+QPushButton#custom_buttons:pressed{
+    font-size: 18px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    text-align: left center;
+    color: white;
+    padding-left: 17px;
+    background-color: #666666;
+    border:3px solid #000000;
+    border-radius: 26px;
+}
+
+
+/* CharactersGallery */
+QWidget#main {
+     background-color: transparent;
+     border: none;
+}
+QWidget#row_of_cards {
+ background-color: transparent;
+     border: none;
+}
+
+QScrollArea#scroll_area {
+    background-color: #4D4D4D;
+    border:2px solid #FFFFFF;
+    border-radius: 20px;
+}
+QScrollBar#scroll_bar:vertical{
+    background: transparent;
+    width: 45px;
+    margin: 10px;
+    }
+QScrollBar#scroll_bar::handle:vertical {
+    background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #FF0062, stop:1 #FFAE00);
+    border: 2px solid #FFFFFF;
+    border-radius: 12px;
+    height: 10px;
+    }
+QScrollBar#scroll_bar::add-line:vertical,
+QScrollBar#scroll_bar::sub-line:vertical,
+QScrollBar#scroll_bar::add-page:vertical,
+QScrollBar#scroll_bar::sub-page:vertical {
+    background: none;
+    border: none;
+    height: 0px;
+    width: 0px;
+    }
+
+
+/* CharacterCart */
+QWidget#card {
+    background-color: #333333;
+    border: 0px solid #FFFFFF;
+    border-radius: 20px;
+    }
+
+
+
+/* SwitchButton */
+QPushButton#switch_button{
+    background-color: transparent;
+    border: 2px solid #FFFFFF;
+    border-radius:12px;
+}
+
+QLabel#toggle{
+    background-color: #FFFFFF;
+    border-radius:8px;
+    border:1px solid #FFFFFF;
+}
+
+
+
+
+
+/* BONGO SETTINGS */
+QLabel#BongoSettingsWindow {
+    background-color:#FFE0E0;
+    border-radius:15px;
+    border:2px solid #8F3C43;
+}
+QPushButton#ok_button {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: transparent;
+    border: 2px solid #8F3C43;
+    border-radius:6px;
+}
+QPushButton#ok_button:hover {
+    background-color: #E3BABC;
+
+}
+QPushButton#ok_button:pressed {
+    background-color: #E38D91;
+}
+QToolBar#toolbar_bongo {
+    background-color: #FF9E9E;
+    border: 1px solid #8F3C43;
+    border-radius: 6px;
+    padding: 3px;
+}
+QComboBox#toolbar_bongo_combo {
+    font-size: 24px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    background-color: #FFCCCC;
+    border: 1px solid #8F3C43;
+    height: 42px;
+    width: 252px;
+    border-radius: 6px;
+    color: black;
+}
+QComboBox#toolbar_bongo_combo::drop-down {
+    background-color: #FFA8A8;
+    subcontrol-position: top right;
+    width: 45px;
+    border: 1px solid #8F3C43;
+    border-radius: 6px;
+}
+QComboBox#toolbar_bongo_combo QAbstractItemView {
+    border-radius: 10px;
+    background-color: #FFE0E0;
+    border: 1px solid #8F3C43;
+    height: 42px;
+    selection-background-color: #FFA8A6;
+    selection-color: white;
+    color: black;
+    outline: none;
+}
+/* BONGO_CHECKBOX */
+QCheckBox#checkbox_bongo {
+    spacing: 8px;
+    color: black;
+    font-size: 20px;
+    font-weight: light;
+    font-family: 'PT Mono';
+            }
+/* Квадратик в невыбранном состоянии */
+QCheckBox#checkbox_bongo::indicator {
+    width: 25px;
+    height: 25px;
+    border: 2px solid #8F3C43;  /* Рамка */
+    border-radius: 6px;
+    background: #FFE0E0;  /* Фон */
+}
+/* При наведении */
+QCheckBox#checkbox_bongo::indicator:hover {
+    background:#E3B3B5;
+    border: 2px solid #8F3C43;
+}
+/* В выбранном состоянии */
+QCheckBox#checkbox_bongo::indicator:checked {
+    background: #E3B3B5;  /* Фон выбранного */
+    border: 2px solid #8F3C43;
+    font-size: 20px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    image: url(./drawable/bongo/checkmark.png);
+}
+
+
+
+
+
+
+
+
+
+
+/* FLORK SETTINGS */
+QLabel#FlorkSettingsWindow {
+    background-color:#E8DEFF;
+    border-radius:15px;
+    border:2px solid #0F0F94;
+}
+QPushButton#flork_done_btn {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #E8DEFF;
+    border: 2px solid #0F0F94;
+    border-radius:6px;
+}
+QPushButton#flork_done_btn:hover {
+    background-color: #C7ADFF;
+}
+QPushButton#flork_done_btn:pressed {
+    background-color: #AD87FF;
+}
+/* FLORK_CHECKBOX */
+QCheckBox#checkbox_flork {
+    spacing: 8px;
+    color: black;
+    font-size: 20px;
+    font-weight: regular;
+    font-family: 'PT Mono';
+            }
+/* Квадратик в невыбранном состоянии */
+QCheckBox#checkbox_flork::indicator {
+    width: 25px;
+    height: 25px;
+    border: 2px solid #0F0F94;  /* Рамка */
+    border-radius: 6px;
+    background: #E8DEFF;  /* Фон */
+}
+/* При наведении */
+QCheckBox#checkbox_flork::indicator:hover {
+    background:#C7ADFF;
+    border: 2px solid #0F0F94;
+}
+/* В выбранном состоянии */
+QCheckBox#checkbox_flork::indicator:checked {
+    background: #AD87FF;  /* Фон выбранного */
+    border: 2px solid #0F0F94;
+    font-size: 20px;
+    font-weighflork_done_btn
+    font-family: 'PT Mono';
+    image: url(./drawable/flork/checkmark.png);
+}
+
+
+
+
+
+
+
+
+/* APRICOT SETTINGS */
+QLabel#ApricotSettingsWindow {
+    background-color:#FFC89E;
+    border-radius:15px;
+    border:2px solid #692D00;
+}
+QPushButton#apricot_done_btn {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #FFC89E;
+    border: 2px solid #692D00;
+    border-radius:6px;
+}
+QPushButton#apricot_done_btn:hover {
+    background-color: #CF844B;
+}
+QPushButton#apricot_done_btn:pressed {
+    background-color: #CF844B;
+}
+/* APRICOT_CHECKBOX */
+QCheckBox#checkbox_apricot {
+    spacing: 8px;
+    color: black;
+    font-size: 20px;
+    font-weight: regular;
+    font-family: 'PT Mono';
+            }
+/* Квадратик в невыбранном состоянии */
+QCheckBox#checkbox_apricot::indicator {
+    width: 25px;
+    height: 25px;
+    border: 2px solid #692D00;  /* Рамка */
+    border-radius: 6px;
+    background: #FFC89E;  /* Фон */
+}
+/* При наведении */
+QCheckBox#checkbox_apricot::indicator:hover {
+    background:#CF844B;
+    border: 2px solid #692D00;
+}
+/* В выбранном состоянии */
+QCheckBox#checkbox_apricot::indicator:checked {
+    background: #CF844B;  /* Фон выбранного */
+    border: 2px solid #692D00;
+    font-size: 20px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    image: url(./drawable/cat/checkmark.png);
+}
+QLineEdit#apricot_cat_hiding_delay {
+    border: 2px solid #692D00;
+    border-radius: 6px;
+    padding: 5px;
+    color: #692D00;
+    font-size: 20px;
+    background-color: #FFE0C9;
+}
+QLabel#apricot_text_cat_hiding_delay {
+    color: black;
+    font-size: 16px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}

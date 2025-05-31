@@ -3,11 +3,10 @@ from pathlib import Path
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QApplication
 from pynput import keyboard
 
 from bongo.bongo_settings import BongoSettingsWindow
-from character_abstract import Character
+from utils.character_abstract import Character
 from utils.enums import BongoType
 from utils.utils import get_bongo_enum
 

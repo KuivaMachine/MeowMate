@@ -1,6 +1,6 @@
 {
-    "sounds": false,
+    "sounds": true,
     "pacman": true,
-    "fly": false,
+    "fly": true,
     "cat_hiding_delay": "0"
 }

@@ -38,15 +38,11 @@ class FlorkSettingsWindow(SettingsWindow):
 
         self.sounds_check = QCheckBox("Включить звуки")
         self.sounds_check.setChecked(self.enable_sounds)
-        self.sounds_check.setObjectName('checkbox_flork')
+        self.sounds_check.setStyleSheet(self.get_stylesheet())
 
         self.question = Question("Разрешает коту\nгоняться за мухой\n(шанс появления - 1.25%)")
-        self.hbox = QHBoxLayout()
-        self.hbox.addWidget(self.sounds_check, alignment=Qt.AlignLeft)
-        self.hbox.addWidget(self.question, alignment=Qt.AlignLeft)
 
-        self.vbox.addLayout(self.hbox)
-
+        self.vbox.addWidget(self.sounds_check, alignment=Qt.AlignLeft)
 
 
 
@@ -54,6 +50,34 @@ class FlorkSettingsWindow(SettingsWindow):
         self.ok.setGeometry((320-90)//2,390,90,40)
         self.ok.clicked.connect(self.save_settings)
 
+    def get_stylesheet(self):
+        return f"""
+        /* FLORK_CHECKBOX */
+        QCheckBox {{
+            spacing: 8px;
+            color: black;
+            font-size: 20px;
+            font-weight: regular;
+            font-family: 'PT Mono';
+        }}
+        /* Квадратик в невыбранном состоянии */
+        QCheckBox::indicator {{
+            width: 25px;
+            height: 25px;
+            border: 2px solid #0F0F94;  /* Рамка */
+            border-radius: 6px;
+            background: #E8DEFF;  /* Фон */
+        }}
+        /* При наведении */
+        QCheckBox::indicator:hover {{
+            background:#C7ADFF;
+            border: 2px solid #0F0F94;
+        }}
+        /* В выбранном состоянии */
+        QCheckBox::indicator:checked {{
+            background: #AD87FF;  /* Фон выбранного */
+            image: url({(self.resource_path/'checkmark.png').as_posix()});
+        }}"""
 
     def save_settings(self):
         settings = {
@@ -62,7 +86,7 @@ class FlorkSettingsWindow(SettingsWindow):
         self.on_close.emit()
         self.close()
 
-        with open("./settings/flork_settings.json", "w", encoding='utf-8') as f:
+        with open(str(self.app_directory/"settings/flork_settings.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
 
