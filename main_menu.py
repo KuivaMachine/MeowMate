@@ -50,7 +50,6 @@ class MainMenuWindow(QMainWindow):
 
         with open(self.get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
             theme = json.load(f)
-        print("READ   ",theme, self.get_resource_path('settings/theme_mode.json'))
 
         if theme['mode'] == 'dark':
             is_dark_theme = True
@@ -204,7 +203,6 @@ class MainMenuWindow(QMainWindow):
 
         with open(self.get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
-            print("write    ",settings,self.get_resource_path("settings/theme_mode.json") )
 
     # ЗАГОЛОВОК
     def setup_header(self,is_light_theme):
