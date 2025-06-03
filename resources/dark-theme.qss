@@ -197,36 +197,6 @@ QComboBox#toolbar_bongo_combo QAbstractItemView {
     color: black;
     outline: none;
 }
-/* BONGO_CHECKBOX */
-QCheckBox#checkbox_bongo {
-    spacing: 8px;
-    color: black;
-    font-size: 20px;
-    font-weight: light;
-    font-family: 'PT Mono';
-            }
-/* Квадратик в невыбранном состоянии */
-QCheckBox#checkbox_bongo::indicator {
-    width: 25px;
-    height: 25px;
-    border: 2px solid #8F3C43;  /* Рамка */
-    border-radius: 6px;
-    background: #FFE0E0;  /* Фон */
-}
-/* При наведении */
-QCheckBox#checkbox_bongo::indicator:hover {
-    background:#E3B3B5;
-    border: 2px solid #8F3C43;
-}
-/* В выбранном состоянии */
-QCheckBox#checkbox_bongo::indicator:checked {
-    background: #E3B3B5;  /* Фон выбранного */
-    border: 2px solid #8F3C43;
-    font-size: 20px;
-    font-weight: light;
-    font-family: 'PT Mono';
-    image: url(./drawable/bongo/checkmark.png);
-}
 
 
 
@@ -316,36 +286,6 @@ QPushButton#apricot_done_btn:hover {
 }
 QPushButton#apricot_done_btn:pressed {
     background-color: #CF844B;
-}
-/* APRICOT_CHECKBOX */
-QCheckBox#checkbox_apricot {
-    spacing: 8px;
-    color: black;
-    font-size: 20px;
-    font-weight: regular;
-    font-family: 'PT Mono';
-            }
-/* Квадратик в невыбранном состоянии */
-QCheckBox#checkbox_apricot::indicator {
-    width: 25px;
-    height: 25px;
-    border: 2px solid #692D00;  /* Рамка */
-    border-radius: 6px;
-    background: #FFC89E;  /* Фон */
-}
-/* При наведении */
-QCheckBox#checkbox_apricot::indicator:hover {
-    background:#CF844B;
-    border: 2px solid #692D00;
-}
-/* В выбранном состоянии */
-QCheckBox#checkbox_apricot::indicator:checked {
-    background: #CF844B;  /* Фон выбранного */
-    border: 2px solid #692D00;
-    font-size: 20px;
-    font-weight: light;
-    font-family: 'PT Mono';
-    image: url(./drawable/cat/checkmark.png);
 }
 QLineEdit#apricot_cat_hiding_delay {
     border: 2px solid #692D00;

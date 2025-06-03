@@ -38,7 +38,7 @@ class CharactersList (Enum):
     CAT = CharacterModel('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
     FLORK =  CharacterModel('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130)
     BONGO = CharacterModel('БОНГО-КОТ', 'Описание бонго-кота', str(resource_path / 'bongo' / 'cat_preview.gif'), QSize(160, 160), 100)
-    HAM = CharacterModel('ХАМЕЛИОН', 'Описание хамелиона', str(resource_path / 'ham' / 'ham_preview.gif'), QSize(160, 160), 120)
+    HAM = CharacterModel('ЛЕНУСИК', 'Описание хамелиона', str(resource_path / 'ham' / 'ham_preview.gif'), QSize(160, 160), 120)
 
     @classmethod
     def getFirst(cls):

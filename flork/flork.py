@@ -24,8 +24,6 @@ class Flork(Character):
         super().__init__()
         self.enable_sounds = settings["sounds"]
 
-
-
         self.drag_pos = None
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
@@ -47,6 +45,11 @@ class Flork(Character):
         self.dance.setScaledSize(QSize(200, 200))
         self.dance.setSpeed(120)
         self.dance.frameChanged.connect(self.check_frame_change)
+
+        self.cool = QMovie(str(self.resource_path / "flork_cool.gif"))
+        self.cool.setScaledSize(QSize(200, 200))
+        self.cool.setSpeed(120)
+        self.cool.frameChanged.connect(self.check_frame_change)
 
         self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(200, 200,
                                                                                             Qt.AspectRatioMode.KeepAspectRatio,
@@ -104,7 +107,7 @@ class Flork(Character):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.isAnimationPlaying:
-                random_int = random.randint(1, 2)
+                random_int = random.randint(1, 3)
                 self.playAnimation(random_int)
 
         super().mousePressEvent(event)
@@ -129,12 +132,13 @@ class Flork(Character):
         match number:
             case (1):
                 self.current_gif = self.shy
-                self.current_gif.start()
-                self.flork_main.setMovie(self.current_gif)
             case (2):
                 self.current_gif = self.dance
-                self.current_gif.start()
-                self.flork_main.setMovie(self.current_gif)
+            case (3):
+                self.current_gif = self.cool
+
+        self.current_gif.start()
+        self.flork_main.setMovie(self.current_gif)
         self.isAnimationPlaying = True
 
     def get_taskbar_height(self):
@@ -153,4 +157,3 @@ class Flork(Character):
     @staticmethod
     def getSettingWindow(root_container, settings):
         return FlorkSettingsWindow(root_container, settings)
-

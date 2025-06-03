@@ -6,6 +6,7 @@ from PyQt5.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer
 from PyQt5.QtGui import QMovie, QPixmap
 from PyQt5.QtWidgets import QApplication, QLabel
 
+from ham.ham_settings import HamSettingsWindow
 from utils.character_abstract import Character
 
 
@@ -30,6 +31,7 @@ class Ham(Character):
         self.setMouseTracking(True)
 
         self.main_movie = QMovie(str(self.resource_path / "main.gif"))
+        self.main_movie.setSpeed(120)
         self.main_movie.setScaledSize(QSize(267, 150))
         self.main_movie.start()
 
@@ -66,7 +68,6 @@ class Ham(Character):
     def make_transparent(self):
         self.ham_main.setPixmap(self.transparent_pix)
 
-
     def stop_run_animation(self):
         self.run_movie.stop()
         self.ham_main.setMovie(self.main_movie)
@@ -82,6 +83,8 @@ class Ham(Character):
 
     def mousePressEvent(self, event):
         self.main_movie.stop()
+        self.timer.stop()
+        self.timer.start()
         self.ham_main.setMovie(self.run_movie)
         self.run_movie.start()
 
@@ -105,6 +108,9 @@ class Ham(Character):
             new_x = current_x - shift
         return new_x
 
+    @staticmethod
+    def getSettingWindow(root_container, settings):
+        return HamSettingsWindow(root_container, settings)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

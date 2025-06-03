@@ -252,36 +252,6 @@ QPushButton#apricot_done_btn:hover {
 QPushButton#apricot_done_btn:pressed {
    background-color: #CF844B;
 }
-/* APRICOT_CHECKBOX */
-QCheckBox#checkbox_apricot {
-    spacing: 8px;
-    color: black;
-    font-size: 20px;
-    font-weight: regular;
-    font-family: 'PT Mono';
-            }
-/* Квадратик в невыбранном состоянии */
-QCheckBox#checkbox_apricot::indicator {
-    width: 25px;
-    height: 25px;
-    border: 2px solid #692D00;  /* Рамка */
-    border-radius: 6px;
-    background: #FFC89E;  /* Фон */
-}
-/* При наведении */
-QCheckBox#checkbox_apricot::indicator:hover {
-    background:#CF844B;
-    border: 2px solid #692D00;
-}
-/* В выбранном состоянии */
-QCheckBox#checkbox_apricot::indicator:checked {
-    background: #CF844B;  /* Фон выбранного */
-    border: 2px solid #692D00;
-    font-size: 20px;
-    font-weight: light;
-    font-family: 'PT Mono';
-    image: url(./drawable/cat/checkmark.png);
-}
 QLineEdit#apricot_cat_hiding_delay {
     border: 2px solid #692D00;
     border-radius: 6px;
@@ -296,4 +266,28 @@ QLabel#apricot_text_cat_hiding_delay {
     font-weight: light;
     font-family: 'JetBrains Mono';
     border: none;
+}
+
+
+
+/* HAMELION SETTINGS */
+QLabel#HamSettingsWindow {
+    background-color:#9064BF;
+    border-radius:15px;
+    border:2px solid #220A5F;
+}
+QPushButton#ham_done_btn {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #9064BF;
+    border: 2px solid #220A5F;
+    border-radius:6px;
+}
+QPushButton#ham_done_btn:hover {
+    background-color: #72489E;
+}
+QPushButton#ham_done_btn:pressed {
+    background-color: #72489E;
 }

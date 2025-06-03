@@ -11,6 +11,7 @@ from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLab
 from bongo.bongo import Bongo
 from cat.apricot import Cat
 from flork.flork import Flork
+from ham.ham import Ham
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.portal import Portal
@@ -156,6 +157,9 @@ class MainMenuWindow(QMainWindow):
                 case 'АБРИКОС':
                     settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
+                case 'ЛЕНУСИК':
+                    settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
+                    self.settings_window = Ham.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
             self.settings_window.show()
