@@ -302,3 +302,29 @@ QLabel#apricot_text_cat_hiding_delay {
     font-family: 'JetBrains Mono';
     border: none;
 }
+
+
+
+
+
+/* HAMELION SETTINGS */
+QLabel#HamSettingsWindow {
+    background-color:#9064BF;
+    border-radius:15px;
+    border:2px solid #220A5F;
+}
+QPushButton#ham_done_btn {
+    color: #000000;
+    font-size: 15px;
+    font-weight: bold;
+    font-family: 'JetBrains Mono';
+    background-color: #EC54B3;
+    border: 2px solid #220A5F;
+    border-radius:6px;
+}
+QPushButton#ham_done_btn:hover {
+    background-color: #72489E;
+}
+QPushButton#ham_done_btn:pressed {
+    background-color: #72489E;
+}

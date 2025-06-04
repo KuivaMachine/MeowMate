@@ -281,7 +281,7 @@ QPushButton#ham_done_btn {
     font-size: 15px;
     font-weight: bold;
     font-family: 'JetBrains Mono';
-    background-color: #9064BF;
+    background-color: #EC54B3;
     border: 2px solid #220A5F;
     border-radius:6px;
 }
