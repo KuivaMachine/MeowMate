@@ -18,8 +18,10 @@ class Ham(Character):
         app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'ham'
 
-    def __init__(self):
+    def __init__(self, settings):
         super().__init__()
+        self.enable_sounds = settings["sounds"]
+
         self.is_first_frame = None
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |

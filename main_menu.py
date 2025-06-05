@@ -131,6 +131,9 @@ class MainMenuWindow(QMainWindow):
             case 'АБРИКОС':
                 settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
                 selected_character = Cat(settings)
+            case 'ЛЕНУСИК':
+                settings = self.load_settings(self.get_resource_path("settings/ham_settings.json"))
+                selected_character = Ham(settings)
 
         self.windows.append(selected_character)
         portal_destination = QPoint(selected_character.pos().x() + (selected_character.width() - 360) // 2,
@@ -158,7 +161,7 @@ class MainMenuWindow(QMainWindow):
                     settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
                 case 'ЛЕНУСИК':
-                    settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
+                    settings = self.load_settings(self.get_resource_path("settings/ham_settings.json"))
                     self.settings_window = Ham.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
