@@ -95,6 +95,34 @@ class Ham(Character):
         self.run_animation.start()
         super().mousePressEvent(event)
 
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            if self.drag_pos:
+                # Вычисляем новую позицию
+                new_pos = self.pos() + event.globalPos() - self.drag_pos
+
+                # Получаем геометрию родительского окна
+                parent_rect = QApplication.primaryScreen().geometry()
+
+                left_maximum = parent_rect.left()
+                right_maximum = parent_rect.right() - 250
+                top_maximum = parent_rect.top()
+                bottom_maximum = parent_rect.bottom()-140
+
+                # Ограничиваем перемещение
+                x = max(left_maximum,
+                        min(new_pos.x(),
+                            right_maximum))
+
+                y = max(top_maximum,
+                        min(new_pos.y(),
+                            bottom_maximum))
+
+                # Перемещаем виджет
+                self.move(x, y)
+                self.drag_pos = event.globalPos()
+                event.accept()
+
     def get_x_value(self, current_x):
         max_right = 60  # Максимум вправо от 0
         max_left = -65  # Максимум влево от 0
@@ -114,8 +142,3 @@ class Ham(Character):
     def getSettingWindow(root_container, settings):
         return HamSettingsWindow(root_container, settings)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ham = Ham()
-    ham.show()
-    sys.exit(app.exec())

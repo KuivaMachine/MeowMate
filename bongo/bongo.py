@@ -1,17 +1,20 @@
+import json
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import Qt
+from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QMetaObject, QThread, QObject, pyqtSignal
+from PyQt5.QtMultimedia import QSound
 from PyQt5.QtSvg import QSvgWidget
 from pynput import keyboard
 
 from bongo.bongo_settings import BongoSettingsWindow
+from ui.tap_counter_window import Counter
 from utils.character_abstract import Character
 from utils.enums import BongoType
 from utils.utils import get_bongo_enum
 
 
-#TODO:НАСТРОЙКИ:
+# TODO:НАСТРОЙКИ:
 # Выключить звуки
 # ыбрать инструмент
 # Включить счетчик нажатий
@@ -24,11 +27,11 @@ class Bongo(Character):
         app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'bongo'
 
-    def __init__(self,settings):
+    def __init__(self, settings):
         super().__init__()
         self.bongo_type = get_bongo_enum(settings["bongo_type"])
-        self.enable_sounds = settings["sounds"]
         self.enable_tap_counter = settings["tap_counter"]
+        self.count = settings["count"]
 
         self.is_close_btn_showing = False
         self.cat_main_pixmap = None
@@ -41,9 +44,7 @@ class Bongo(Character):
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setGeometry(100, 100, 100, 100)
-
-
+        self.setGeometry(900, 600, 392, 392)
 
         self.cat = QSvgWidget()
         self.cat.setFixedSize(392, 392)
@@ -103,29 +104,35 @@ class Bongo(Character):
         )
         self.listener.start()
 
-
+        if self.enable_tap_counter:
+            self.counter = Counter(self.count, self)
 
     # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
-    def on_press(self, key):
+    def on_press(self, _):
         if self.flag:
             self.cat.load(self.left_pixmap)
             self.flag = False
         else:
             self.cat.load(self.right_pixmap)
             self.flag = True
+        self.count = int(self.count)+1
+        if self.enable_tap_counter:
+            self.counter.setText(str(self.count))
 
     # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
-    def on_release(self, key):
+    def on_release(self, _):
         self.cat.load(self.cat_main_pixmap)
 
+    def closeEvent(self, a0):
+        settings = {
+            "tap_counter": self.enable_tap_counter,
+            "bongo_type": self.bongo_type.value,
+            "count": self.count
+        }
+        with open(str(self.app_directory / "settings/bongo_settings.json"), "w", encoding='utf-8') as f:
+            json.dump(settings, f, indent=4, ensure_ascii=False)
 
 
     @staticmethod
-    def getSettingWindow(root_container,settings):
-        return BongoSettingsWindow(root_container,settings)
-
-
-
-
-
-
+    def getSettingWindow(root_container, settings):
+        return BongoSettingsWindow(root_container, settings)
