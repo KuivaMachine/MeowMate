@@ -112,8 +112,8 @@ class Cat(Character):
         self.eye_right_big = QPixmap(str(resource_path / "eye2_big.png"))
         self.cat_dragged = QPixmap(str(resource_path / "cat_dragged.png"))
         self.cat_fall = QPixmap(str(resource_path / "cat_fall.png"))
-        self.main_cat = QPixmap(str(resource_path / 'PET_t.png'))
-        self.cat_pixmap_stat = QPixmap(str(resource_path / "PET_stat.png"))
+        self.main_cat = QPixmap(str(resource_path / 'main_cat.png'))
+        self.cat_pixmap_stat = QPixmap(str(resource_path / "cat_stat.png"))
 
         # ЗАГРУЖАЕМ ГИФКИ
         self.top_lapa_gif = QMovie(str(resource_path / "lapa_top.gif"))
