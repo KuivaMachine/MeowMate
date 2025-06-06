@@ -72,6 +72,7 @@ QLabel#name_text {
     font-weight: light;
     font-family: 'JetBrains Mono';
     border: none;
+
 }
 QLabel#description_text {
     color: #000000;

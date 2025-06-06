@@ -63,6 +63,16 @@ class Flork(Character):
         self.heart.setSpeed(120)
         self.heart.frameChanged.connect(self.check_frame_change)
 
+        self.birthday = QMovie(str(self.resource_path / "flork_birthday.gif"))
+        self.birthday.setScaledSize(QSize(self.size, self.size))
+        self.birthday.setSpeed(120)
+        self.birthday.frameChanged.connect(self.check_frame_change)
+
+        self.fingers = QMovie(str(self.resource_path / "flork_fingers.gif"))
+        self.fingers.setScaledSize(QSize(self.size, self.size))
+        self.fingers.setSpeed(120)
+        self.fingers.frameChanged.connect(self.check_frame_change)
+
         self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(self.size, self.size,
                                                                                             Qt.AspectRatioMode.KeepAspectRatio,
                                                                                             Qt.TransformationMode.SmoothTransformation)
@@ -119,8 +129,8 @@ class Flork(Character):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.isAnimationPlaying:
-                random_int = random.randint(1, 5)
-                self.playAnimation(random_int)
+                random_int = random.randint(1, 7)
+                self.playAnimation(random_int )
 
         super().mousePressEvent(event)
 
@@ -152,6 +162,10 @@ class Flork(Character):
                 self.current_gif = self.rock
             case (5):
                 self.current_gif = self.heart
+            case (6):
+                self.current_gif = self.birthday
+            case (7):
+                self.current_gif = self.fingers
 
         self.current_gif.start()
         self.flork_main.setMovie(self.current_gif)

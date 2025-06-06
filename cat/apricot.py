@@ -166,7 +166,7 @@ class Cat(Character):
         # АНИМАЦИЯ ПАДЕНИЯ КОТА
         self.fall_cat_animation = QPropertyAnimation(self, b"pos")
         self.fall_cat_animation.finished.connect(self.cat_preparing)
-        self.fall_cat_animation.setDuration(400)
+        self.fall_cat_animation.setDuration(350)
 
         # АНИМАЦИЯ ВЫГЛЯДЫВАНИЯ КОТА ИЗ РАЗНЫХ МЕСТ
         self.cat_coming_animation = QPropertyAnimation(self, b"pos")

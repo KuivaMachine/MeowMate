@@ -142,8 +142,8 @@ class DescriptionWindow(QWidget):
         self.description_animation.setEndValue(QPoint(self.name_label.pos().x() + 400, self.name_label.pos().y()))
 
         description_layout = QVBoxLayout(description_container)
-        description_layout.addWidget(self.name_label, stretch=2)
-        description_layout.addWidget(self.description_label, stretch=8)
+        description_layout.addWidget(self.name_label)
+        description_layout.addWidget(self.description_label, stretch=9)
 
         return description_container
 
