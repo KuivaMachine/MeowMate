@@ -2,4 +2,4 @@
 pyinstaller app.spec
 
 
-git add .; git commit -m ""; git push origin;
+git add .; git commit -m "new flork settings"; git push origin;

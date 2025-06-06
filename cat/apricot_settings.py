@@ -62,7 +62,7 @@ class ApricotSettingsWindow(SettingsWindow):
 
 
         self.text = QLabel("Задержка перед появлением,\nсекунды:")
-        self.text.setObjectName('apricot_text_cat_hiding_delay')
+        self.text.setObjectName('text')
 
         self.input = QLineEdit()
         regex = QRegExp("^([0-9]|[1-5][0-9]|60)$")

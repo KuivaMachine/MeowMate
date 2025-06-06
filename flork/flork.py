@@ -11,7 +11,8 @@ from pynput import keyboard
 from utils.character_abstract import Character
 from flork.flork_settings import FlorkSettingsWindow
 
-#TODO: ИЗМЕНИТЬ ГИФКУ FLORK.SHY НА 800х800
+
+# TODO: ИЗМЕНИТЬ ГИФКУ FLORK.SHY НА 800х800
 
 class Flork(Character):
     base_path = getattr(sys, '_MEIPASS', None)
@@ -23,8 +24,8 @@ class Flork(Character):
 
     def __init__(self, settings):
         super().__init__()
-        self.enable_sounds = settings["sounds"]
 
+        self.size = settings["size"]
         self.drag_pos = None
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
@@ -32,50 +33,50 @@ class Flork(Character):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(100, self.screen.height() - self.get_taskbar_height() - 200, 200, 200)
+        self.setGeometry(100, self.screen.height() - self.get_taskbar_height() - self.size, self.size, self.size)
         self.setMouseTracking(True)
 
         self.current_gif = None
 
         self.shy = QMovie(str(self.resource_path / "flork_shy.gif"))
-        self.shy.setScaledSize(QSize(200, 200))
+        self.shy.setScaledSize(QSize(self.size, self.size))
         self.shy.setSpeed(110)
         self.shy.frameChanged.connect(self.check_frame_change)
 
         self.dance = QMovie(str(self.resource_path / "flork_dance.gif"))
-        self.dance.setScaledSize(QSize(200, 200))
+        self.dance.setScaledSize(QSize(self.size, self.size))
         self.dance.setSpeed(120)
         self.dance.frameChanged.connect(self.check_frame_change)
 
         self.cool = QMovie(str(self.resource_path / "flork_cool.gif"))
-        self.cool.setScaledSize(QSize(200, 200))
+        self.cool.setScaledSize(QSize(self.size, self.size))
         self.cool.setSpeed(120)
         self.cool.frameChanged.connect(self.check_frame_change)
 
         self.rock = QMovie(str(self.resource_path / "flork_rock.gif"))
-        self.rock.setScaledSize(QSize(200, 200))
+        self.rock.setScaledSize(QSize(self.size, self.size))
         self.rock.setSpeed(120)
         self.rock.frameChanged.connect(self.check_frame_change)
 
         self.heart = QMovie(str(self.resource_path / "flork_heart.gif"))
-        self.heart.setScaledSize(QSize(200, 200))
+        self.heart.setScaledSize(QSize(self.size, self.size))
         self.heart.setSpeed(120)
         self.heart.frameChanged.connect(self.check_frame_change)
 
-        self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(200, 200,
+        self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(self.size, self.size,
                                                                                             Qt.AspectRatioMode.KeepAspectRatio,
                                                                                             Qt.TransformationMode.SmoothTransformation)
-        self.flork_left_pixmap = QPixmap(str(self.resource_path / "flork_left.png")).scaled(200, 200,
+        self.flork_left_pixmap = QPixmap(str(self.resource_path / "flork_left.png")).scaled(self.size, self.size,
                                                                                             Qt.AspectRatioMode.KeepAspectRatio,
                                                                                             Qt.TransformationMode.SmoothTransformation)
-        self.flork_right_pixmap = QPixmap(str(self.resource_path / "flork_right.png")).scaled(200, 200,
+        self.flork_right_pixmap = QPixmap(str(self.resource_path / "flork_right.png")).scaled(self.size, self.size,
                                                                                               Qt.AspectRatioMode.KeepAspectRatio,
                                                                                               Qt.TransformationMode.SmoothTransformation)
 
         self.flork_main = QLabel(self)
         self.flork_main.setMouseTracking(True)
         self.flork_main.setPixmap(self.flork_main_pixmap)
-        self.flork_main.setGeometry(0, 0, 200, 200)
+        self.flork_main.setGeometry(0, 0, self.size, self.size)
 
         self.flag = True
         self.is_first_frame = False
@@ -130,13 +131,13 @@ class Flork(Character):
                 parent_rect = QApplication.primaryScreen().geometry()
 
                 left_maximum = parent_rect.left() - 20
-                right_maximum = parent_rect.right() - 200
+                right_maximum = parent_rect.right() - self.size
 
                 x = max(left_maximum,
                         min(new_pos.x(),
                             right_maximum))
 
-                self.move(x, self.screen.height() - self.get_taskbar_height() - 200)
+                self.move(x, self.screen.height() - self.get_taskbar_height() - self.size)
                 self.drag_pos = event.globalPos()
 
     def playAnimation(self, number):

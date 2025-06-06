@@ -35,7 +35,7 @@ class BongoSettingsWindow(SettingsWindow):
         self.vbox = QVBoxLayout(self)
         self.vbox.setContentsMargins(30, 120, 30, 120)
 
-        self.taps_count_check = QCheckBox("Включить счетчик")
+        self.taps_count_check = QCheckBox("Показать счетчик")
         self.taps_count_check.setChecked(self.enable_tap_counter)
         self.taps_count_check.setStyleSheet(self.get_stylesheet())
 
@@ -49,6 +49,9 @@ class BongoSettingsWindow(SettingsWindow):
             border: 2px solid #8F3C43;
             border-radius:5px;
             padding: 10px;
+        }
+        QPushButton:hover {
+            background-color: #E3BABC;
         }
         QPushButton:pressed {
             color: black;
