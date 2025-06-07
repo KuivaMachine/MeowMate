@@ -20,7 +20,9 @@ class Ham(Character):
 
     def __init__(self, settings):
         super().__init__()
-        self.enable_sounds = settings["sounds"]
+
+        self.enable_hiding = settings["hiding"]
+        self.size = int(settings["size"])
 
         self.is_first_frame = None
         self.setWindowFlags(
@@ -29,35 +31,35 @@ class Ham(Character):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(500, 500, 267, 150)
+        self.setGeometry(500, 500, int(self.size*1.78), self.size)
         self.setMouseTracking(True)
 
         self.main_movie = QMovie(str(self.resource_path / "main.gif"))
         self.main_movie.setSpeed(120)
-        self.main_movie.setScaledSize(QSize(267, 150))
+        self.main_movie.setScaledSize(QSize(int(self.size*1.78), self.size))
         self.main_movie.start()
 
         self.run_movie = QMovie(str(self.resource_path / "move.gif"))
         self.run_movie.setSpeed(140)
-        self.run_movie.setScaledSize(QSize(267, 150))
+        self.run_movie.setScaledSize(QSize(int(self.size*1.78), self.size))
         self.run_movie.frameChanged.connect(self.check_frame_change)
 
-        self.stick_pix = QPixmap(str(self.resource_path / "stick.png")).scaled(267, 150,
+        self.stick_pix = QPixmap(str(self.resource_path / "stick.png")).scaled(int(self.size*1.78), self.size,
                                                                                Qt.AspectRatioMode.KeepAspectRatio,
                                                                                Qt.TransformationMode.SmoothTransformation)
-        self.transparent_pix = QPixmap(str(self.resource_path / "transparent.png")).scaled(267, 150,
+        self.transparent_pix = QPixmap(str(self.resource_path / "transparent.png")).scaled(int(self.size*1.78), self.size,
                                                                                            Qt.AspectRatioMode.KeepAspectRatio,
                                                                                            Qt.TransformationMode.SmoothTransformation)
 
         self.stick = QLabel(self)
         self.stick.setMouseTracking(True)
         self.stick.setPixmap(self.stick_pix)
-        self.stick.setGeometry(0, 0, 267, 150)
+        self.stick.setGeometry(0, 0, int(self.size*1.78), self.size)
 
         self.ham_main = QLabel(self)
         self.ham_main.setMouseTracking(True)
         self.ham_main.setMovie(self.main_movie)
-        self.ham_main.setGeometry(0, 0, 267, 150)
+        self.ham_main.setGeometry(0, 0, int(self.size*1.78), self.size)
 
         self.run_animation = QPropertyAnimation(self.ham_main, b"pos")
         self.run_animation.setDuration(300)
@@ -65,7 +67,8 @@ class Ham(Character):
         self.timer = QTimer(self)
         self.timer.setInterval(300000) #5 минут
         self.timer.timeout.connect(self.make_transparent)
-        self.timer.start()
+        if self.enable_hiding:
+            self.timer.start()
 
     def make_transparent(self):
         self.ham_main.setPixmap(self.transparent_pix)
@@ -85,8 +88,9 @@ class Ham(Character):
 
     def mousePressEvent(self, event):
         self.main_movie.stop()
-        self.timer.stop()
-        self.timer.start()
+        if self.enable_hiding:
+            self.timer.stop()
+            self.timer.start()
         self.ham_main.setMovie(self.run_movie)
         self.run_movie.start()
 
@@ -95,9 +99,38 @@ class Ham(Character):
         self.run_animation.start()
         super().mousePressEvent(event)
 
+    def mouseMoveEvent(self, event):
+        if event.buttons() & Qt.MouseButton.LeftButton:
+            if self.drag_pos:
+                # Вычисляем новую позицию
+                new_pos = self.pos() + event.globalPos() - self.drag_pos
+
+                # Получаем геометрию родительского окна
+                parent_rect = QApplication.primaryScreen().geometry()
+
+                left_maximum = parent_rect.left()
+                right_maximum = parent_rect.right() - int(self.size*1.78)
+                top_maximum = parent_rect.top()
+                bottom_maximum = parent_rect.bottom()-self.size
+
+                # Ограничиваем перемещение
+                x = max(left_maximum,
+                        min(new_pos.x(),
+                            right_maximum))
+
+                y = max(top_maximum,
+                        min(new_pos.y(),
+                            bottom_maximum))
+
+                # Перемещаем виджет
+                self.move(x, y)
+                self.drag_pos = event.globalPos()
+                event.accept()
+
     def get_x_value(self, current_x):
-        max_right = 60  # Максимум вправо от 0
-        max_left = -65  # Максимум влево от 0
+        brach_size = self.size/1.2
+        max_right = int(brach_size*0.48)  # Максимум вправо от 0
+        max_left = int(-brach_size*0.52)  # Максимум влево от 0
         # Определяем доступное расстояние для движения в каждом направлении
         available_right = max_right - current_x
         available_left = current_x - max_left
@@ -114,8 +147,3 @@ class Ham(Character):
     def getSettingWindow(root_container, settings):
         return HamSettingsWindow(root_container, settings)
 
-if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    ham = Ham()
-    ham.show()
-    sys.exit(app.exec())

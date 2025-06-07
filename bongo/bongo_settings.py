@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtCore import pyqtSignal
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox, QPushButton
 from PyQt5.QtWidgets import QVBoxLayout, QToolBar, QComboBox
 
 from ui.settings_window import SettingsWindow, OkButton
@@ -25,8 +25,8 @@ class BongoSettingsWindow(SettingsWindow):
         self.setObjectName('BongoSettingsWindow')
 
         self.bongo_type = settings["bongo_type"]
-        self.enable_sounds = settings["sounds"]
         self.enable_tap_counter = settings["tap_counter"]
+        self.count = settings["count"]
 
         self.bongo_label = QSvgWidget(self)
         self.bongo_label.setGeometry(30, 30, 150, 28)
@@ -35,13 +35,35 @@ class BongoSettingsWindow(SettingsWindow):
         self.vbox = QVBoxLayout(self)
         self.vbox.setContentsMargins(30, 120, 30, 120)
 
-        self.taps_count_check = QCheckBox("Включить счетчик")
+        self.taps_count_check = QCheckBox("Показать счетчик")
         self.taps_count_check.setChecked(self.enable_tap_counter)
         self.taps_count_check.setStyleSheet(self.get_stylesheet())
 
-        self.sounds_check = QCheckBox("Включить звуки")
-        self.sounds_check.setChecked(self.enable_sounds)
-        self.sounds_check.setStyleSheet(self.get_stylesheet())
+        self.reset_btn = QPushButton("Сбросить счетчик")
+        self.reset_btn.setStyleSheet("""QPushButton {
+            color: black;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono';
+            background-color: #FFE0E0;
+            border: 2px solid #8F3C43;
+            border-radius:5px;
+            padding: 10px;
+        }
+        QPushButton:hover {
+            background-color: #E3BABC;
+        }
+        QPushButton:pressed {
+            color: black;
+            font-size: 15px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono';
+            background-color: #E38D91;
+            border: 2px solid black;
+            border-radius:5px;
+        }""")
+        self.reset_btn.clicked.connect(self.reset_counter)
+
 
         self.toolbar = QToolBar()
         self.toolbar.setObjectName('toolbar_bongo')
@@ -51,13 +73,16 @@ class BongoSettingsWindow(SettingsWindow):
         self.combo.setCurrentText(self.bongo_type)
         self.toolbar.addWidget(self.combo)
 
-        self.vbox.addWidget(self.sounds_check)
+
         self.vbox.addWidget(self.taps_count_check)
+        self.vbox.addWidget(self.reset_btn)
         self.vbox.addWidget(self.toolbar)
 
         self.ok = OkButton(self, 'ok_button')
         self.ok.setGeometry((320 - 90) // 2, 390, 90, 40)
         self.ok.clicked.connect(self.save_settings)
+    def reset_counter(self):
+        self.count = 0
 
     def get_stylesheet(self):
         return f"""
@@ -95,9 +120,9 @@ class BongoSettingsWindow(SettingsWindow):
 
     def save_settings(self):
         settings = {
-            "sounds": self.sounds_check.isChecked(),
             "tap_counter": self.taps_count_check.isChecked(),
-            "bongo_type": self.combo.currentText()
+            "bongo_type": self.combo.currentText(),
+            "count": self.count
         }
         self.on_close.emit()
         self.close()

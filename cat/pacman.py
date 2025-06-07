@@ -38,7 +38,6 @@ class Pacman(QLabel):
         self.pacman_label = QLabel(self)
         self.pacman_label.setGeometry(700, 0, 800, 300)
 
-        print(str(self.resource_path /"pacman.gif"))
         self.pacman_gif = QMovie(str(self.resource_path /"pacman.gif"))
         self.pacman_gif.setScaledSize(QSize(800, 300))
         self.pacman_label.setMovie(self.pacman_gif)

@@ -4,7 +4,7 @@ from pathlib import Path
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox
+from PyQt5.QtWidgets import QCheckBox, QLabel, QSlider
 from PyQt5.QtWidgets import QVBoxLayout
 
 from ui.settings_window import SettingsWindow, OkButton
@@ -24,7 +24,8 @@ class HamSettingsWindow(SettingsWindow):
         super().__init__(parent)
         self.setObjectName('HamSettingsWindow')
 
-        self.enable_sounds = settings["sounds"]
+        self.enable_hiding = settings["hiding"]
+        self.size = settings["size"]
 
 
 
@@ -33,26 +34,60 @@ class HamSettingsWindow(SettingsWindow):
         self.ham_label.load(str(self.resource_path / 'ham_label.svg'))
 
         self.vbox = QVBoxLayout(self)
-        self.vbox.setContentsMargins(30,70,30,220)
+        self.vbox.setSpacing(20)
+        self.vbox.setContentsMargins(30,130,30,180)
 
-        self.sounds_check = QCheckBox("Включить звуки")
-        self.sounds_check.setChecked(self.enable_sounds)
-        self.sounds_check.setStyleSheet(self.get_stylesheet())
+        self.text = QLabel(f"Размер, пиксели: {self.size}")
+        self.text.setObjectName('text')
 
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setStyleSheet("""
+                QSlider::groove:horizontal {
+                    height: 10px;
+                    background-color:#9064BF;
+                    border-radius: 3px;
+                    border:2px solid #220A5F;
+                }
 
-        self.vbox.addWidget(self.sounds_check, alignment=Qt.AlignLeft)
+                QSlider::handle:horizontal {
+                    width: 10px;
+                    height: 25px;
+                    margin: -5px 0;
+                    background-color:#5300AB;
+                    border: 2px solid #220A5F;
+                    border-radius: 3px;
+                }
 
+                QSlider::sub-page:horizontal {
+                    background-color:#5300AB;
+                    border-radius: 3px;
+                    border:2px solid #220A5F;
+                }
+                """)
+        self.slider.setRange(100, 400)
+        self.slider.setValue(int(self.size))
+        self.slider.valueChanged.connect(lambda: self.text.setText(f"Размер, пиксели: {self.slider.value()}"))
+
+        self.enable_hiding_check = QCheckBox("Прятаться")
+        self.enable_hiding_check.setChecked(self.enable_hiding)
+        self.enable_hiding_check.setStyleSheet(self.get_stylesheet())
+
+        self.vbox.addWidget(self.text)
+        self.vbox.addWidget(self.slider)
+        self.vbox.addWidget(self.enable_hiding_check, alignment=Qt.AlignLeft)
 
 
         self.ok = OkButton(self,'ham_done_btn')
         self.ok.setGeometry((320-90)//2,390,90,40)
         self.ok.clicked.connect(self.save_settings)
 
+
+
     def get_stylesheet(self):
         return f"""
         /* HAM_CHECKBOX */
         QCheckBox {{
-            spacing: 8px;
+            margin:20px 0px;
             color: black;
             font-size: 20px;
             font-weight: regular;
@@ -78,7 +113,8 @@ class HamSettingsWindow(SettingsWindow):
 
     def save_settings(self):
         settings = {
-                "sounds": self.sounds_check.isChecked(),
+            "size": self.slider.value(),
+            "hiding": self.enable_hiding_check.isChecked()
         }
         self.on_close.emit()
         self.close()

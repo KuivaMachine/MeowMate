@@ -1,5 +1,5 @@
 {
-    "sounds": true,
     "tap_counter": false,
-    "bongo_type": "Пианино"
+    "bongo_type": "Электрогитара",
+    "count": 7
 }

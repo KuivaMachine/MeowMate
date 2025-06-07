@@ -25,7 +25,7 @@ class ApricotSettingsWindow(SettingsWindow):
         super().__init__(parent)
         self.setObjectName('ApricotSettingsWindow')
 
-        self.enable_sounds = settings["sounds"]
+
         self.enable_fly = settings["fly"]
         self.enable_pacman = settings["pacman"]
         self.cat_hiding_delay = settings["cat_hiding_delay"]
@@ -37,9 +37,6 @@ class ApricotSettingsWindow(SettingsWindow):
         self.vbox = QVBoxLayout(self)
         self.vbox.setContentsMargins(30, 120, 30, 120)
 
-        self.sounds_check = QCheckBox("Включить звуки")
-        self.sounds_check.setChecked(self.enable_sounds)
-        self.sounds_check.setStyleSheet(self.get_stylesheet())
 
         self.pacman_check = QCheckBox("Пакмен")
         self.pacman_check.setChecked(self.enable_pacman)
@@ -62,7 +59,7 @@ class ApricotSettingsWindow(SettingsWindow):
 
 
         self.text = QLabel("Задержка перед появлением,\nсекунды:")
-        self.text.setObjectName('apricot_text_cat_hiding_delay')
+        self.text.setObjectName('text')
 
         self.input = QLineEdit()
         regex = QRegExp("^([0-9]|[1-5][0-9]|60)$")
@@ -72,7 +69,7 @@ class ApricotSettingsWindow(SettingsWindow):
         self.input.setObjectName('apricot_cat_hiding_delay')
         self.input.setPlaceholderText("от 0 до 60")
 
-        self.vbox.addWidget(self.sounds_check)
+
         self.vbox.addLayout(self.pacman_hbox)
         self.vbox.addLayout(self.fly_hbox)
         self.vbox.addWidget(self.text)
@@ -117,7 +114,6 @@ class ApricotSettingsWindow(SettingsWindow):
 
     def save_settings(self):
         settings = {
-            "sounds": self.sounds_check.isChecked(),
             "pacman": self.pacman_check.isChecked(),
             "fly": self.fly_check.isChecked(),
             "cat_hiding_delay": self.input.text() if self.input.text() != "" else "0",

@@ -35,7 +35,7 @@ class ThemeColor (Enum):
 
 
 class CharactersList (Enum):
-    CAT = CharacterModel('АБРИКОС', 'Описание кота', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
+    CAT = CharacterModel('АБРИКОС', '✨ Солнечный проказник с пушистой душой! Этот рыжий комочек радости не просто сидит на экране — он живёт в нём: следит за твоим курсором с любопытством котёнка, а если ты подойдёшь слишком близко… Ха-ап! Нажмёшь на него — исчезнет в облачке смеха и тут же материализуется в новом месте, подмигивая))', str(resource_path / 'cat' / 'cat_preview.gif'), QSize(160, 160), 130)
     FLORK =  CharacterModel('ФЛОРК', 'ОПИСАНИЕ ФЛОРКА', str(resource_path / 'flork' / 'flork_dance.gif'), QSize(160, 160), 130)
     BONGO = CharacterModel('БОНГО-КОТ', 'Описание бонго-кота', str(resource_path / 'bongo' / 'cat_preview.gif'), QSize(160, 160), 100)
     HAM = CharacterModel('ЛЕНУСИК', 'Описание хамелиона', str(resource_path / 'ham' / 'ham_preview.gif'), QSize(160, 160), 120)

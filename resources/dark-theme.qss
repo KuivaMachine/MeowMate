@@ -138,6 +138,13 @@ QLabel#toggle{
 }
 
 
+QLabel#text {
+    color: black;
+    font-size: 16px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
 
 
 
@@ -295,13 +302,10 @@ QLineEdit#apricot_cat_hiding_delay {
     font-size: 20px;
     background-color: #FFE0C9;
 }
-QLabel#apricot_text_cat_hiding_delay {
-    color: black;
-    font-size: 16px;
-    font-weight: light;
-    font-family: 'JetBrains Mono';
-    border: none;
-}
+
+
+
+
 
 
 

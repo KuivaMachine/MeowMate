@@ -4,10 +4,9 @@ from pathlib import Path
 
 from PyQt5.QtCore import pyqtSignal, Qt
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox, QHBoxLayout
+from PyQt5.QtWidgets import QSlider, QLabel
 from PyQt5.QtWidgets import QVBoxLayout
 
-from ui.question_window import Question
 from ui.settings_window import SettingsWindow, OkButton
 
 
@@ -25,7 +24,7 @@ class FlorkSettingsWindow(SettingsWindow):
         super().__init__(parent)
         self.setObjectName('FlorkSettingsWindow')
 
-        self.enable_sounds = settings["sounds"]
+        self.size = settings["size"]
 
 
 
@@ -34,19 +33,67 @@ class FlorkSettingsWindow(SettingsWindow):
         self.flork_label.load(str(self.resource_path / 'flork_label.svg'))
 
         self.vbox = QVBoxLayout(self)
-        self.vbox.setContentsMargins(30,70,30,220)
+        self.vbox.setContentsMargins(30,100,30,300)
 
-        self.sounds_check = QCheckBox("Включить звуки")
-        self.sounds_check.setChecked(self.enable_sounds)
-        self.sounds_check.setStyleSheet(self.get_stylesheet())
+        self.text = QLabel(f"Размер, пиксели: {self.size}")
+        self.text.setObjectName('text')
 
-        self.vbox.addWidget(self.sounds_check, alignment=Qt.AlignLeft)
+
+        self.slider = QSlider(Qt.Horizontal)
+        self.slider.setStyleSheet("""
+        QSlider::groove:horizontal {
+            height: 10px;
+            background-color:#E8DEFF;
+            border-radius: 3px;
+            border:2px solid #0F0F94;
+        }
+
+        QSlider::handle:horizontal {
+            width: 10px;
+            height: 25px;
+            margin: -5px 0;
+            background-color:#0F0F94;
+            border: 2px solid #0F0F94;
+            border-radius: 3px;
+        }
+
+        QSlider::sub-page:horizontal {
+            background-color:#9F73FF;
+            border-radius: 3px;
+            border:2px solid #0F0F94;
+        }
+          
+        """)
+        self.slider.setRange(100, 500)
+        self.slider.setValue(int(self.size))  # значение по умолчанию
+        self.slider.setTickPosition(QSlider.TicksBelow)
+        self.slider.setTickInterval(100)
+
+        # Подписываемся на изменение положения ползунка
+        self.slider.valueChanged.connect(self.update_label_and_fix_position)
+
+
+
+
+        self.vbox.addWidget(self.text)
+        self.vbox.addWidget(self.slider)
+
 
 
 
         self.ok = OkButton(self,'flork_done_btn')
         self.ok.setGeometry((320-90)//2,390,90,40)
         self.ok.clicked.connect(self.save_settings)
+
+    def update_label_and_fix_position(self, value):
+        """
+        Этот метод обновляет отображаемое значение и гарантирует, что ползунок находится точно на одной из позиций риска.
+        """
+        fixed_value = round(value / 50) * 50
+        self.slider.setValue(fixed_value)
+        self.size = fixed_value
+        self.text.setText(f"Размер, пиксели: {self.size}")
+
 
     def get_stylesheet(self):
         return f"""
@@ -79,7 +126,7 @@ class FlorkSettingsWindow(SettingsWindow):
 
     def save_settings(self):
         settings = {
-                "sounds": self.sounds_check.isChecked(),
+                "size": self.slider.value(),
         }
         self.on_close.emit()
         self.close()

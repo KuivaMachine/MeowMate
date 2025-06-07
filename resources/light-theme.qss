@@ -72,6 +72,7 @@ QLabel#name_text {
     font-weight: light;
     font-family: 'JetBrains Mono';
     border: none;
+
 }
 QLabel#description_text {
     color: #000000;
@@ -142,6 +143,13 @@ QLabel#toggle{
 }
 
 
+QLabel#text {
+    color: black;
+    font-size: 16px;
+    font-weight: light;
+    font-family: 'JetBrains Mono';
+    border: none;
+}
 
 
 
@@ -230,7 +238,6 @@ QPushButton#flork_done_btn:pressed {
 
 
 
-
 /* APRICOT SETTINGS */
 QLabel#ApricotSettingsWindow {
     background-color:#FFC89E;
@@ -259,13 +266,6 @@ QLineEdit#apricot_cat_hiding_delay {
     color: #692D00;
     font-size: 20px;
     background-color: #FFE0C9;
-}
-QLabel#apricot_text_cat_hiding_delay {
-    color: black;
-    font-size: 16px;
-    font-weight: light;
-    font-family: 'JetBrains Mono';
-    border: none;
 }
 
 
