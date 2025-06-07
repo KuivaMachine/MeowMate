@@ -68,6 +68,7 @@ class DescriptionWindow(QWidget):
 
 
 
+
     def setup_buttons(self):
         buttons_container = QWidget()
         buttons_container.setFixedSize(260,130)
@@ -127,8 +128,8 @@ class DescriptionWindow(QWidget):
         self.name_animation.setDuration(500)
         self.name_animation.setDirection(QAbstractAnimation.Direction.Backward)
         self.name_animation.setEasingCurve(QEasingCurve.Type.InExpo)
-        self.name_animation.setStartValue(QPoint(self.name_label.pos().x(),self.name_label.pos().y()))
-        self.name_animation.setEndValue(QPoint(self.name_label.pos().x()-200,self.name_label.pos().y()))
+        self.name_animation.setStartValue(QPoint(self.name_label.pos().x()+10,self.name_label.pos().y()+10))
+        self.name_animation.setEndValue(QPoint(self.name_label.pos().x()-200,self.name_label.pos().y()+10))
 
         self.description_label = QLabel(self.description)
         self.description_label.setObjectName('description_text')
@@ -138,12 +139,12 @@ class DescriptionWindow(QWidget):
         self.description_animation.setDuration(500)
         self.description_animation.setDirection(QAbstractAnimation.Direction.Backward)
         self.description_animation.setEasingCurve(QEasingCurve.Type.InOutCirc)
-        self.description_animation.setStartValue(QPoint(self.name_label.pos().x() + 10, self.name_label.pos().y()))
-        self.description_animation.setEndValue(QPoint(self.name_label.pos().x() + 400, self.name_label.pos().y()))
+        self.description_animation.setStartValue(QPoint(self.name_label.pos().x() + 10, self.name_label.pos().y()+60))
+        self.description_animation.setEndValue(QPoint(self.name_label.pos().x() + 400, self.name_label.pos().y()+60))
 
         description_layout = QVBoxLayout(description_container)
         description_layout.addWidget(self.name_label)
-        description_layout.addWidget(self.description_label, stretch=9)
+        description_layout.addWidget(self.description_label)
 
         return description_container
 
