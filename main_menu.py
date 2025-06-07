@@ -50,7 +50,7 @@ class MainMenuWindow(QMainWindow):
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
-        # self.load_fonts()
+        self.load_fonts()
         with open(self.get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
             theme = json.load(f)
 
