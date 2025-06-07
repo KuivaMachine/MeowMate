@@ -8,7 +8,6 @@ from PyQt5.QtWidgets import QCheckBox, QPushButton
 from PyQt5.QtWidgets import QVBoxLayout, QToolBar, QComboBox
 
 from ui.settings_window import SettingsWindow, OkButton
-from utils.utils import get_bongo_enum
 
 
 class BongoSettingsWindow(SettingsWindow):

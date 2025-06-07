@@ -1,6 +1,4 @@
-import os
-
-from PyQt5.QtCore import Qt, QTimer, QPointF, pyqtSignal, QUrl
+from PyQt5.QtCore import Qt, QTimer, QPointF, pyqtSignal
 from PyQt5.QtGui import QPainter, QBrush, QColor, QConicalGradient, QPen, QMovie
 from PyQt5.QtWidgets import QLabel, QGraphicsDropShadowEffect, QApplication
 

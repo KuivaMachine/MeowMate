@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QTime, QTimer
+from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 

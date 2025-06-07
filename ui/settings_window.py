@@ -1,12 +1,5 @@
-import json
-import os
-import sys
-from pathlib import Path
-
-from PyQt5.QtCore import Qt, pyqtSignal
-from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QCheckBox
-from PyQt5.QtWidgets import QLabel, QVBoxLayout, QPushButton
+from PyQt5.QtCore import Qt
+from PyQt5.QtWidgets import QLabel, QPushButton
 
 
 class OkButton(QPushButton):

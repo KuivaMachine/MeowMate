@@ -1,8 +1,6 @@
-import sys
-
 from PyQt5.QtCore import Qt, QTimer
 from PyQt5.QtGui import QPainter, QLinearGradient, QColor, QBrush
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel
+from PyQt5.QtWidgets import QLabel
 
 class Blinker(QLabel):
     def __init__(self,parent):

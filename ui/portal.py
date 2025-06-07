@@ -2,8 +2,9 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QTimer, QSize, QPoint
-from PyQt5.QtGui import QPainter, QLinearGradient, QColor, QBrush, QMovie
-from PyQt5.QtWidgets import QWidget, QApplication, QLabel
+from PyQt5.QtGui import QMovie
+from PyQt5.QtWidgets import QWidget, QLabel
+
 
 class Portal(QWidget):
     # Определяем путь к каталогу с данными в зависимости от режима исполнения

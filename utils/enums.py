@@ -5,6 +5,7 @@ from pathlib import Path
 from PyQt5.QtCore import QSize
 
 from utils.character_model import CharacterModel
+
 base_path = getattr(sys, '_MEIPASS', None)
 if base_path is not None:
     app_directory = Path(base_path)

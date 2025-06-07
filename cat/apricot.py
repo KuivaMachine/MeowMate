@@ -458,7 +458,7 @@ class Cat(Character):
     # ФУНКЦИЯ "ДОСТАТЬ ЛАПУ"
     def throwLapa(self):
         if not self.isLapaOut:
-            match (self.cat_position):
+            match self.cat_position:
                 case (CatState.BOTTOM):
                     self.lapa_gif.start()
                 case (CatState.TOP):

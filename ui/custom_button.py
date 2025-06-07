@@ -97,18 +97,18 @@ class CustomAnimatedButton(QPushButton):
         if self.menu_window.parent.theme_color == ThemeColor.LIGHT:
             self.shadow_effect.setColor(QColor(0, 0, 0, 250))
         else:
-            if (self.text() == 'НАСТРОИТЬ'):
+            if self.text() == 'НАСТРОИТЬ':
                 self.shadow_effect.setColor(QColor(85, 212, 0, 250))
-            if (self.text() == 'ЗАПУСТИТЬ'):
+            if self.text() == 'ЗАПУСТИТЬ':
                 self.shadow_effect.setColor(QColor(251, 6, 173, 250))
 
         self.shadow_animation.setStartValue(0)
         self.shadow_animation.setEndValue(15)
         self.shadow_animation.start()
         self.gif_label.movie.start()
-        if (self.text() == 'НАСТРОИТЬ'):
+        if self.text() == 'НАСТРОИТЬ':
             self.menu_window.start_gears_animation()
-        if (self.text() == 'ЗАПУСТИТЬ'):
+        if self.text() == 'ЗАПУСТИТЬ':
             self.menu_window.start_rockets_animation()
 
         super().enterEvent(event)
@@ -122,9 +122,9 @@ class CustomAnimatedButton(QPushButton):
         self.shadow_animation.start()
         self.gif_label.movie.stop()
 
-        if (self.text() == 'НАСТРОИТЬ'):
+        if self.text() == 'НАСТРОИТЬ':
             self.menu_window.hide_gears_animation()
-        if (self.text() == 'ЗАПУСТИТЬ'):
+        if self.text() == 'ЗАПУСТИТЬ':
             self.menu_window.hide_rockets_animation()
 
         super().leaveEvent(event)

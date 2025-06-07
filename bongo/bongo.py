@@ -2,8 +2,7 @@ import json
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QTimer, pyqtSlot, QMetaObject, QThread, QObject, pyqtSignal
-from PyQt5.QtMultimedia import QSound
+from PyQt5.QtCore import Qt
 from PyQt5.QtSvg import QSvgWidget
 from pynput import keyboard
 

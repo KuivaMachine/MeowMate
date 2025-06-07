@@ -12,6 +12,53 @@ from PyQt5.QtWidgets import QApplication, QLabel
 from utils.enums import Direction
 
 
+def init_start_position():
+   return  QPointF(random.randint(0, 1980), -50)
+
+
+def create_sine_wave_path(start_point: QPointF,
+                          amplitude: float,
+                          wavelength: float,
+                          num_oscillations: int,
+                          step_pixels: int = 10,
+                          direction: Direction = Direction.POSITIVE
+                          ) -> QPainterPath:
+
+    """
+    Создает QPainterPath в виде синусоиды.
+
+    :param direction: Направление синусоиды
+    :param start_point: Начальная точка (QPointF)
+    :param amplitude: Амплитуда (высота волны)
+    :param wavelength: Длина волны (расстояние между пиками)
+    :param num_oscillations: Количество полных колебаний
+    :param step_pixels: Шаг аппроксимации (чем меньше, тем плавнее кривая)
+    :return: QPainterPath, представляющий синусоиду
+    """
+
+    path = QPainterPath()
+    path.moveTo(start_point)
+    total_length = wavelength * num_oscillations
+    x_start = start_point.x()
+    y_start = start_point.y()
+
+    for x in range(0, int(total_length), step_pixels):
+        # Вычисляем y по формуле синуса: y = amplitude * sin(2πx / wavelength)
+        relative_x = x / wavelength * (2 * math.pi)  # Переводим в радианы
+        y_offset = amplitude * math.sin(relative_x)
+
+        current_x = x_start + x
+        current_y = y_start + y_offset
+
+        match direction:
+            case(Direction.POSITIVE):
+                path.lineTo(QPointF(current_x, current_y))
+            case (Direction.NEGATIVE):
+                path.lineTo(QPointF(-current_x, current_y))
+
+    return path
+
+
 class Fly(QLabel):
     position_changed = pyqtSignal(int, int)
     finished = pyqtSignal()
@@ -37,7 +84,7 @@ class Fly(QLabel):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(0, 0, QApplication.primaryScreen().geometry().width(),
                          QApplication.primaryScreen().geometry().height() - 50)
-        self.start_position = self.init_start_position()
+        self.start_position = init_start_position()
         self.last_position = self.start_position
 
         # Настройка QLabel с мухой
@@ -61,10 +108,6 @@ class Fly(QLabel):
         self.path = QPainterPath()
         QTimer.singleShot(100, self.fly_path_init)  # Отложенная инициализация
 
-
-    def init_start_position(self):
-       return  QPointF(random.randint(0, 1980), -50)
-
     def update_pos(self, progress):
         point = self.path.pointAtPercent(progress)
         x, y = round(point.x()), round(point.y())
@@ -81,7 +124,7 @@ class Fly(QLabel):
         path = QPainterPath()
 
         # Стартовая точка
-        path.moveTo(self.init_start_position())
+        path.moveTo(init_start_position())
 
         for i in range(1, random.randint(6, 10)):
             radius = 50 * random.randint(3, 6)
@@ -100,57 +143,10 @@ class Fly(QLabel):
         path.cubicTo(control1, control2, end_point)
 
         if self.cat.pos().x()<QApplication.primaryScreen().geometry().width()/2:
-            path.addPath(self.create_sine_wave_path( end_point, 60, 1500, 2, direction=Direction.POSITIVE))
+            path.addPath(create_sine_wave_path(end_point, 60, 1500, 2, direction=Direction.POSITIVE))
         else:
-            path.addPath(self.create_sine_wave_path(end_point, 60, 1500, 2, direction=Direction.NEGATIVE))
+            path.addPath(create_sine_wave_path(end_point, 60, 1500, 2, direction=Direction.NEGATIVE))
         return path
-
-    def create_sine_wave_path(self,
-                              start_point: QPointF,
-                              amplitude: float,
-                              wavelength: float,
-                              num_oscillations: int,
-                              step_pixels: int = 10,
-                              direction: Direction = Direction.POSITIVE
-                              ) -> QPainterPath:
-
-        """
-        Создает QPainterPath в виде синусоиды.
-
-        :param direction: Направление синусоиды
-        :param start_point: Начальная точка (QPointF)
-        :param amplitude: Амплитуда (высота волны)
-        :param wavelength: Длина волны (расстояние между пиками)
-        :param num_oscillations: Количество полных колебаний
-        :param step_pixels: Шаг аппроксимации (чем меньше, тем плавнее кривая)
-        :return: QPainterPath, представляющий синусоиду
-        """
-
-        path = QPainterPath()
-        path.moveTo(start_point)
-        total_length = wavelength * num_oscillations
-        x_start = start_point.x()
-        y_start = start_point.y()
-
-        for x in range(0, int(total_length), step_pixels):
-            # Вычисляем y по формуле синуса: y = amplitude * sin(2πx / wavelength)
-            relative_x = x / wavelength * (2 * math.pi)  # Переводим в радианы
-            y_offset = amplitude * math.sin(relative_x)
-
-            current_x = x_start + x
-            current_y = y_start + y_offset
-
-            match direction:
-                case(Direction.POSITIVE):
-                    path.lineTo(QPointF(current_x, current_y))
-                case (Direction.NEGATIVE):
-                    path.lineTo(QPointF(-current_x, current_y))
-
-        return path
-
-
-
-
 
     def cleanup(self):
         self.finished.emit()

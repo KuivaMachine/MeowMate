@@ -8,11 +8,25 @@ from PyQt5.QtGui import QPixmap, QMovie
 from PyQt5.QtWidgets import QApplication, QLabel
 from pynput import keyboard
 
-from utils.character_abstract import Character
 from flork.flork_settings import FlorkSettingsWindow
+from utils.character_abstract import Character
 
 
-# TODO: ИЗМЕНИТЬ ГИФКУ FLORK.SHY НА 800х800
+
+
+def get_taskbar_height():
+    screen = QApplication.primaryScreen()
+    screen_rect = screen.geometry()
+    available_rect = screen.availableGeometry()
+    dpi_scale = screen.devicePixelRatio()
+
+    if screen_rect.bottom() != available_rect.bottom():
+        return int((screen_rect.bottom() - available_rect.bottom()) / dpi_scale)
+    elif screen_rect.top() != available_rect.top():
+        return int((available_rect.top() - screen_rect.top()) / dpi_scale)
+    else:
+        return int(40 / dpi_scale)
+
 
 class Flork(Character):
     base_path = getattr(sys, '_MEIPASS', None)
@@ -33,7 +47,7 @@ class Flork(Character):
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(100, self.screen.height() - self.get_taskbar_height() - self.size, self.size, self.size)
+        self.setGeometry(100, self.screen.height() - get_taskbar_height() - self.size, self.size, self.size)
         self.setMouseTracking(True)
 
         self.current_gif = None
@@ -108,7 +122,7 @@ class Flork(Character):
                 self.is_first_frame = True
 
     # ОБРАБОТКА НАЖАТИЯ НА КЛАВИАТУРУ
-    def on_press(self, key):
+    def on_press(self, _):
         if self.flag:
             self.flork_main.setPixmap(self.flork_left_pixmap)
             self.flag = False
@@ -118,7 +132,7 @@ class Flork(Character):
 
         # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
 
-    def on_release(self, key):
+    def on_release(self, _):
         self.flork_main.setPixmap(self.flork_main_pixmap)
 
     def stopAnimation(self):
@@ -147,7 +161,7 @@ class Flork(Character):
                         min(new_pos.x(),
                             right_maximum))
 
-                self.move(x, self.screen.height() - self.get_taskbar_height() - self.size)
+                self.move(x, self.screen.height() - get_taskbar_height() - self.size)
                 self.drag_pos = event.globalPos()
 
     def playAnimation(self, number):
@@ -170,19 +184,6 @@ class Flork(Character):
         self.current_gif.start()
         self.flork_main.setMovie(self.current_gif)
         self.isAnimationPlaying = True
-
-    def get_taskbar_height(self):
-        screen = QApplication.primaryScreen()
-        screen_rect = screen.geometry()
-        available_rect = screen.availableGeometry()
-        dpi_scale = screen.devicePixelRatio()
-
-        if screen_rect.bottom() != available_rect.bottom():
-            return int((screen_rect.bottom() - available_rect.bottom()) / dpi_scale)
-        elif screen_rect.top() != available_rect.top():
-            return int((available_rect.top() - screen_rect.top()) / dpi_scale)
-        else:
-            return int(40 / dpi_scale)
 
     @staticmethod
     def getSettingWindow(root_container, settings):

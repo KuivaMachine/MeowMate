@@ -1,4 +1,3 @@
-import ctypes
 import json
 import os
 import sys
@@ -23,6 +22,24 @@ from ui.switch_button import SwitchButton
 from utils.enums import ThemeColor, CharactersList
 
 
+def get_resource_path(relative_path):
+    try:
+        base_path = sys._MEIPASS
+    except AttributeError:
+        base_path = os.path.dirname(os.path.abspath(__file__))
+
+    return Path(base_path) / relative_path
+
+
+def load_settings(path):
+    try:
+        with open(path, "r", encoding='utf-8') as f:
+            return json.load(f)
+    except (FileNotFoundError, json.JSONDecodeError):
+        print("Файл настроек не найден или поврежден")
+        return None
+
+
 class MainMenuWindow(QMainWindow):
     base_path = getattr(sys, '_MEIPASS', None)
     if base_path is not None:
@@ -34,14 +51,6 @@ class MainMenuWindow(QMainWindow):
     theme_color = ThemeColor.LIGHT
     theme_change_signal = pyqtSignal(ThemeColor)
 
-    def get_resource_path(self, relative_path):
-        try:
-            base_path = sys._MEIPASS
-        except AttributeError:
-            base_path = os.path.dirname(os.path.abspath(__file__))
-
-        return Path(base_path) / relative_path
-
     def __init__(self):
         super().__init__()
         self.is_contacts_showing = None
@@ -51,7 +60,7 @@ class MainMenuWindow(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
         self.load_fonts()
-        with open(self.get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
+        with open(get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
             theme = json.load(f)
 
         if theme['mode'] == 'dark':
@@ -102,9 +111,9 @@ class MainMenuWindow(QMainWindow):
         self.windows = []
 
         # Читаем и применяем стиль
-        with open(self.get_resource_path('resources/dark-theme.qss'), 'r') as f:
+        with open(get_resource_path('resources/dark-theme.qss'), 'r') as f:
             self.dark_style = f.read()
-        with open(self.get_resource_path('resources/light-theme.qss'), 'r') as f:
+        with open(get_resource_path('resources/light-theme.qss'), 'r') as f:
             self.light_style = f.read()
 
         self.change_theme(is_dark_theme)
@@ -124,18 +133,9 @@ class MainMenuWindow(QMainWindow):
             "resources/fonts/PTMono.ttf"
         ]
         for font_file in fonts:
-            font_path = self.get_resource_path(font_file)
+            font_path = get_resource_path(font_file)
             print(font_path)
             font_db.addApplicationFont(str(font_path))
-
-
-    def load_settings(self, path):
-        try:
-            with open(path, "r", encoding='utf-8') as f:
-                return json.load(f)
-        except (FileNotFoundError, json.JSONDecodeError):
-            print("Файл настроек не найден или поврежден")
-            return None
 
     # КНОПКА "ЗАПУСТИТЬ"
     def on_start_button_push(self):
@@ -143,16 +143,16 @@ class MainMenuWindow(QMainWindow):
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
-                settings = self.load_settings(self.get_resource_path("settings/bongo_settings.json"))
+                settings = load_settings(get_resource_path("settings/bongo_settings.json"))
                 selected_character = Bongo(settings)
             case 'ФЛОРК':
-                settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
+                settings = load_settings(get_resource_path("settings/flork_settings.json"))
                 selected_character = Flork(settings)
             case 'АБРИКОС':
-                settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
+                settings = load_settings(get_resource_path("settings/apricot_settings.json"))
                 selected_character = Cat(settings)
             case 'ЛЕНУСИК':
-                settings = self.load_settings(self.get_resource_path("settings/ham_settings.json"))
+                settings = load_settings(get_resource_path("settings/ham_settings.json"))
                 selected_character = Ham(settings)
 
         self.windows.append(selected_character)
@@ -172,16 +172,16 @@ class MainMenuWindow(QMainWindow):
             self.settings_window = None
             match self.characters_panel.selected_card.character_name:
                 case 'БОНГО-КОТ':
-                    settings = self.load_settings(self.get_resource_path("settings/bongo_settings.json"))
+                    settings = load_settings(get_resource_path("settings/bongo_settings.json"))
                     self.settings_window = Bongo.getSettingWindow(self.root_container, settings)
                 case 'ФЛОРК':
-                    settings = self.load_settings(self.get_resource_path("settings/flork_settings.json"))
+                    settings = load_settings(get_resource_path("settings/flork_settings.json"))
                     self.settings_window = Flork.getSettingWindow(self.root_container, settings)
                 case 'АБРИКОС':
-                    settings = self.load_settings(self.get_resource_path("settings/apricot_settings.json"))
+                    settings = load_settings(get_resource_path("settings/apricot_settings.json"))
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
                 case 'ЛЕНУСИК':
-                    settings = self.load_settings(self.get_resource_path("settings/ham_settings.json"))
+                    settings = load_settings(get_resource_path("settings/ham_settings.json"))
                     self.settings_window = Ham.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
@@ -227,7 +227,7 @@ class MainMenuWindow(QMainWindow):
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
-        with open(self.get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
+        with open(get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
     # ЗАГОЛОВОК

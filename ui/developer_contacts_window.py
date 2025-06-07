@@ -2,13 +2,17 @@
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import Qt, QUrl, QSize, QRect
+from PyQt5.QtCore import Qt, QUrl, QSize
 from PyQt5.QtGui import QDesktopServices, QMovie
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QLabel, QPushButton, QHBoxLayout, QVBoxLayout, QWidget
+from PyQt5.QtWidgets import QLabel, QHBoxLayout, QVBoxLayout, QWidget
 
 from ui.service_button import SvgButton
 from ui.settings_window import SettingsWindow
+
+
+def open_link(url):
+    QDesktopServices.openUrl(QUrl(url))
 
 
 class ContactWindow(SettingsWindow):
@@ -59,7 +63,7 @@ class ContactWindow(SettingsWindow):
         self.tg_icon = QSvgWidget(str(self.resource_path / "tg.svg"))
         self.tg_icon.setFixedSize(30, 30)
         self.tg_label = QLabel('<a href="https://t.me/olezha_zaostrovtsev" style=" font-size: 14px; font-weight: light; font-family: PT Mono; color: black; text-decoration: none;">Telegram: @olezha_zaostrovtsev</a>', self)
-        self.tg_label.linkActivated.connect(self.open_link)
+        self.tg_label.linkActivated.connect(open_link)
         self.hbox_tg.addWidget(self.tg_icon)
         self.hbox_tg.addWidget(self.tg_label,alignment=Qt.AlignLeft)
         # GITGUB
@@ -67,7 +71,7 @@ class ContactWindow(SettingsWindow):
         self.github_icon = QSvgWidget(str(self.resource_path / "github.svg"))
         self.github_icon.setFixedSize(30, 30)
         self.github = QLabel('<a href="https://github.com/KuivaMachine" style=" font-size: 14px; font-weight: light; font-family: PT Mono; color: black; text-decoration: none;">GitHub: KuivaMachine</a>', self)
-        self.github.linkActivated.connect(self.open_link)
+        self.github.linkActivated.connect(open_link)
         self.hbox_github.addWidget(self.github_icon)
         self.hbox_github.addWidget(self.github,alignment=Qt.AlignLeft)
         # EMAIL
@@ -75,7 +79,7 @@ class ContactWindow(SettingsWindow):
         self.email_icon = QSvgWidget(str(self.resource_path / "email.svg"))
         self.email_icon.setFixedSize(30, 21)
         self.email = QLabel('<a href="mailto:olegzaostrovtsev19@yandex.ru" style=" font-size: 12px; font-weight: light; font-family: PT Mono; color: black; text-decoration: none;">Email: olegzaostrovtsev19@yandex.ru</a>', self)
-        self.email.linkActivated.connect(self.open_link)
+        self.email.linkActivated.connect(open_link)
         self.hbox_email.addWidget(self.email_icon)
         self.hbox_email.addWidget(self.email,alignment=Qt.AlignLeft)
 
@@ -139,5 +143,3 @@ class ContactWindow(SettingsWindow):
             """)
 
 
-    def open_link(self, url):
-        QDesktopServices.openUrl(QUrl(url))

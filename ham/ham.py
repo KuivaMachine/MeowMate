@@ -1,6 +1,6 @@
+import random
 import sys
 from pathlib import Path
-import random
 
 from PyQt5.QtCore import Qt, QSize, QPropertyAnimation, QPoint, QTimer
 from PyQt5.QtGui import QMovie, QPixmap

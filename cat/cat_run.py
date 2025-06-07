@@ -1,7 +1,7 @@
 import sys
 from pathlib import Path
 
-from PyQt5.QtCore import QPropertyAnimation, Qt, QPoint, QTimer, QEasingCurve, QSize
+from PyQt5.QtCore import QPropertyAnimation, Qt, QPoint, QEasingCurve, QSize
 from PyQt5.QtGui import QMovie
 from PyQt5.QtWidgets import QApplication, QLabel
 
