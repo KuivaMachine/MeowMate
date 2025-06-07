@@ -2,4 +2,4 @@
 pyinstaller app.spec
 
 
-git add .; git commit -m "all descriptions"; git push origin;
+git add .; git commit -m "contacts window + font import"; git push origin;

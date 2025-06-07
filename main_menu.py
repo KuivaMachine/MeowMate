@@ -5,8 +5,9 @@ import sys
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
+from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton
 
 from bongo.bongo import Bongo
 from cat.apricot import Cat
@@ -14,6 +15,7 @@ from flork.flork import Flork
 from ham.ham import Ham
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
+from ui.developer_contacts_window import ContactWindow
 from ui.portal import Portal
 from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
@@ -42,13 +44,13 @@ class MainMenuWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.is_contacts_showing = None
         self.drag_pos = None
         self.is_setting_showing = False
         self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
-
-
+        # self.load_fonts()
         with open(self.get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
             theme = json.load(f)
 
@@ -74,12 +76,11 @@ class MainMenuWindow(QMainWindow):
 
         # ФОНОВАЯ СЕТКА ДЛЯ DESCRIPTION
         self.right_shadow = QSvgWidget(self.root_container)
-        self.right_shadow_pixmap_light =  str(self.resource_path / 'menu' / "right_shadow.svg")
-        self.right_shadow_pixmap_dark =  str(self.resource_path / 'menu' / "right_shadow_white.svg")
+        self.right_shadow_pixmap_light = str(self.resource_path / 'menu' / "right_shadow.svg")
+        self.right_shadow_pixmap_dark = str(self.resource_path / 'menu' / "right_shadow_white.svg")
 
         self.right_shadow.load(self.right_shadow_pixmap_light)
         self.right_shadow.lower()
-
 
         # ФОНОВАЯ СЕТКА ДЛЯ CHARACTERS
         self.left_shadow = QSvgWidget(self.root_container)
@@ -89,6 +90,13 @@ class MainMenuWindow(QMainWindow):
         self.left_shadow.load(self.left_shadow_pixmap_light)
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
+
+        # КНОПКА КОНТАКТОВ
+        self.contacts = QPushButton('Контакты', self.root_container)
+        self.contacts.setGeometry(710,560,70,30)
+        self.contacts.setObjectName('contacts_btn')
+        self.contacts.clicked.connect(self.show_contacts)
+
 
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
         self.windows = []
@@ -101,13 +109,25 @@ class MainMenuWindow(QMainWindow):
 
         self.change_theme(is_dark_theme)
 
-    # ВОЗВРАЩАЕТ МАСШТАБ ЭКНАНА (100, 125, 150 и т.д.)
-    def get_screen_scale_factor(self):
-        shcore = ctypes.windll.shcore
-        monitor = ctypes.windll.user32.MonitorFromWindow(ctypes.windll.user32.GetDesktopWindow(), 0)
-        scale = ctypes.c_uint()
-        shcore.GetScaleFactorForMonitor(monitor, ctypes.byref(scale))
-        return scale.value
+    def show_contacts(self):
+        if not self.is_contacts_showing:
+            self.contacts_window = ContactWindow(self)
+            self.contacts_window.show()
+            self.is_contacts_showing = True
+
+    def load_fonts(self):
+        font_db = QFontDatabase()
+        fonts = [
+            "resources/fonts/JetBrainsMono-Bold.ttf",
+            "resources/fonts/JetBrainsMono-Light.ttf",
+            "resources/fonts/JetBrainsMono-Regular.ttf",
+            "resources/fonts/PTMono.ttf"
+        ]
+        for font_file in fonts:
+            font_path = self.get_resource_path(font_file)
+            print(font_path)
+            font_db.addApplicationFont(str(font_path))
+
 
     def load_settings(self, path):
         try:
@@ -207,12 +227,11 @@ class MainMenuWindow(QMainWindow):
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
-
         with open(self.get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
     # ЗАГОЛОВОК
-    def setup_header(self,is_light_theme):
+    def setup_header(self, is_light_theme):
         header = QWidget()
         header.setObjectName('header')
         header.setFixedHeight(55)

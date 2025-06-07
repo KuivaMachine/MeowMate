@@ -7,8 +7,8 @@ from PyQt5.QtWidgets import QWidget
 class SvgButton(QWidget):
     clicked = pyqtSignal()
 
-    def __init__(self, svg_file_path):
-        super().__init__()
+    def __init__(self, svg_file_path, parent = None):
+        super().__init__(parent)
         self.path = svg_file_path
         self.icon = QSvgWidget(self)
         self.icon.load(svg_file_path)

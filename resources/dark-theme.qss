@@ -21,7 +21,23 @@ QWidget#main_container{
     border-radius: 15px;
     border: 3px solid #ffffff;
 }
-
+QPushButton#contacts_btn {
+    font-size: 12px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    color: #CCCCCC;
+    background-color: transparent;
+    border-radius: 15px;
+    padding: 3px;
+}
+QPushButton#contacts_btn:hover{
+    border:1px solid white;
+}
+QPushButton#contacts_btn:pressed{
+    color: white;
+    background-color: #1A1A1A;
+    border:1px solid white;
+}
 
 
 
