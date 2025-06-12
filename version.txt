@@ -1,0 +1,5 @@
+[ProductVersion]
+1.0.0.0
+
+[DownloadUrl]
+https://github.com/ValdikSS/GoodbyeDPI/releases/download/0.2.2/goodbyedpi-0.2.2.zip
