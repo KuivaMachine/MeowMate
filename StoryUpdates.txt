@@ -11,5 +11,5 @@ MD5 = af30fd1a6259d88b9a55cbbcf8fd462f
 ServerFileName = MeowMate_demo.exe
 Flags = SilentInstall|NoCache
 RegistryKey = HKUD\Software\KuivaMachine\MeowMate\Version
-Version = 1.0.0.0
+Version = 3.0.0.0
 Enhancement = ��� ������ ����������� ����������
