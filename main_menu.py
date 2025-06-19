@@ -104,7 +104,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts = QPushButton('Контакты', self.root_container)
         self.contacts.setGeometry(710,560,70,30)
         self.contacts.setObjectName('contacts_btn')
-        self.contacts.clicked.connect(self.show_contacts)
+        # self.contacts.clicked.connect(self.show_contacts)
 
 
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
