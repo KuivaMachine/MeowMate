@@ -2,7 +2,7 @@
 
 [MeowMate2.0]
 Name = MeowMate
-ProductVersion = 1.0.0.0
+ProductVersion = 2.0.0.0
 URL = https://github.com/KuivaMachine/MeowMate/releases/download/v1.0.0/MeowMate_demo.exe
 Size = 93691955
 ReleaseDate = 19/06/2025
@@ -12,4 +12,4 @@ ServerFileName = MeowMate_demo.exe
 Flags = SilentInstall|NoCache
 RegistryKey = HKUD\Software\KuivaMachine\MeowMate\Version
 Version = 1.0.0.0
-Enhancement = Это просто невероятное обновление
+Enhancement = пїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ
