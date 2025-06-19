@@ -1,12 +1,12 @@
 ;aiu;
 
-[MeowMate2.0]
+[MeowMate]
 Name = MeowMate
 ProductVersion = 1.0.1.0
 URL = https://github.com/KuivaMachine/MeowMate/releases/download/v1.0.1/MeowMate_v1.0.1.exe
-Size = 94225740
-SHA256 = C6DD31F1DDC0AA18C7071724BD39021D02B0C1828A940304A880CD86D278E646
-MD5 = f868c5b2a941a8b56b602f47eb296366
+Size = 94439287
+SHA256 = E3AD05400CE89CD43F487D9E0FFB339B51E40CC34138AAC1EF1177EBF2395C14
+MD5 = b7170d998ef7384198d5523c7e4d39e1
 ServerFileName = MeowMate_update.exe
 Flags = SilentInstall|NoCache|NoRedetect
 RegistryKey = HKUD\Software\KuivaMachine\MeowMate\Version

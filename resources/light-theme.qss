@@ -18,6 +18,14 @@ QLabel#title {
     border:3px solid #000000;
     border-radius:15px;
 }
+QLabel#version_label {
+    font-size: 12px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    color: #999999;
+    background-color: transparent;
+    padding: 3px;
+}
 QWidget#header {
     background-color: #FFD300;
     border-radius: 15px;

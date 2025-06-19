@@ -11,6 +11,14 @@ QLabel#title {
     border:3px solid #000000;
     border-radius:15px;
 }
+QLabel#version_label {
+    font-size: 12px;
+    font-weight: light;
+    font-family: 'PT Mono';
+    color: #808080;
+    background-color: transparent;
+    padding: 3px;
+}
 QWidget#header {
     background: qlineargradient(x1:0, y1:0, x2:1, y2:1, stop:0 #FF0062, stop:1 #FFAE00);
     border-radius: 15px;
