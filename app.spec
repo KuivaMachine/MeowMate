@@ -70,7 +70,7 @@ coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
-    name='MeowMate_v1.0.2',
+    name='MeowMate_v1.0.3',
     strip=False,
     upx=True,
     upx_exclude=[],
