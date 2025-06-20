@@ -2,4 +2,4 @@
 pyinstaller app.spec
 
 
-git add .; git commit -m "auto silent update"; git push origin;
+git add .; git commit -m "v1.0.2"; git push origin;

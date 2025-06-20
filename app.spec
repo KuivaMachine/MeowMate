@@ -63,14 +63,14 @@ exe = EXE(
     target_arch=None,
     codesign_identity=None,
     entitlements_file=None,
-    icon='resources/favicon.ico',
+    icon='resources/icon.ico',
 )
 
 coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
-    name='MeowMate_v1.0.1',
+    name='MeowMate_v1.0.2',
     strip=False,
     upx=True,
     upx_exclude=[],
