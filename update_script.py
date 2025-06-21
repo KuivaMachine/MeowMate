@@ -1,4 +1,5 @@
 import sys
+import tempfile
 from pathlib import Path
 
 import requests
@@ -35,8 +36,8 @@ def load_settings(path):
         return None
 
 def download_and_install(url):
-    update_file = os.path.join(APPDIR, "MeowMate_update.exe")
-    print(f"начинаю качать в {update_file}")
+    update_file = os.path.join(tempfile.gettempdir(), "MeowMate_update.exe")
+    print(f"Начинаю скачивать в {update_file}")
     with requests.get(url, stream=True) as r:
         with open(update_file, "wb") as f:
             for chunk in r.iter_content(chunk_size=8192):
