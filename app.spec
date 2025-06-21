@@ -33,10 +33,7 @@ a = Analysis(
     ('drawable/ham/*.gif', 'drawable/ham'),
     ('drawable/menu/*.svg', 'drawable/menu'),
     ('drawable/menu/*.png', 'drawable/menu'),
-    ('drawable/menu/*.gif', 'drawable/menu'),
-
-
-    ],
+    ('drawable/menu/*.gif', 'drawable/menu'),],
     hiddenimports=[],
     hookspath=[],
     hooksconfig={},
