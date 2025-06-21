@@ -5,7 +5,7 @@ a = Analysis(
     ['main_menu.py'],
     pathex=[],
     binaries=[],
-    datas=[('settings/*.json', 'settings'),
+    datas=[
     ('resources/*.qss', 'resources'),
     ('resources/*.ico', 'resources'),
     ('resources/fonts/*.ttf', 'resources/fonts'),
@@ -67,7 +67,7 @@ coll = COLLECT(
     exe,
     a.binaries,
     a.datas,
-    name='MeowMate_v1.0.3',
+    name='MeowMate_v1.0.4',
     strip=False,
     upx=True,
     upx_exclude=[],

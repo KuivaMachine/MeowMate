@@ -2,4 +2,4 @@
 pyinstaller app.spec
 
 
-git add .; git commit -m "own updater"; git push origin;
+git add .; git commit -m "v1.0.4"; git push origin;
