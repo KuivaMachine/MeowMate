@@ -1,0 +1,5 @@
+{
+    "pacman": true,
+    "fly": true,
+    "cat_hiding_delay": "5"
+}

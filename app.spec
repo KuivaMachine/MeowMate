@@ -6,6 +6,7 @@ a = Analysis(
     pathex=[],
     binaries=[],
     datas=[
+    ('settings/new_settings.json', 'settings'),
     ('resources/*.qss', 'resources'),
     ('resources/*.ico', 'resources'),
     ('resources/fonts/*.ttf', 'resources/fonts'),
