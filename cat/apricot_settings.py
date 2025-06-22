@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -11,13 +12,13 @@ from PyQt5.QtWidgets import QVBoxLayout
 from ui.question_window import Question
 from ui.settings_window import SettingsWindow, OkButton
 
+def get_appdata_path(relative_path):
+    appdata = os.getenv('APPDATA')
+    app_dir = Path(appdata) / "MeowMate" / relative_path
+    return app_dir
 
 class ApricotSettingsWindow(SettingsWindow):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent.parent
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'cat'
     on_close = pyqtSignal()
 
@@ -121,5 +122,5 @@ class ApricotSettingsWindow(SettingsWindow):
         self.on_close.emit()
         self.close()
 
-        with open(str(self.app_directory/"settings/apricot_settings.json"), "w", encoding='utf-8') as f:
+        with open(str(get_appdata_path("settings/apricot_settings.json")), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)

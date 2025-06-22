@@ -1,4 +1,5 @@
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -13,17 +14,13 @@ from utils.enums import BongoType
 from utils.utils import get_bongo_enum
 
 
-# TODO:НАСТРОЙКИ:
-# Выключить звуки
-# ыбрать инструмент
-# Включить счетчик нажатий
+def get_appdata_path(relative_path):
+    appdata = os.getenv('APPDATA')
+    app_dir = Path(appdata) / "MeowMate" / relative_path
+    return app_dir
 
 class Bongo(Character):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent.parent
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'bongo'
 
     def __init__(self, settings):
@@ -128,7 +125,7 @@ class Bongo(Character):
             "bongo_type": self.bongo_type.value,
             "count": self.count
         }
-        with open(str(self.app_directory / "settings/bongo_settings.json"), "w", encoding='utf-8') as f:
+        with open(str(get_appdata_path("settings/bongo_settings.json")), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
 

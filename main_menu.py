@@ -22,12 +22,35 @@ from ui.switch_button import SwitchButton
 from utils.enums import ThemeColor, CharactersList
 
 
-def get_resource_path(relative_path):
-    try:
-        base_path = sys._MEIPASS
-    except AttributeError:
-        base_path = os.path.dirname(os.path.abspath(__file__))
+def check_settings():
+    appdata_dir = Path(os.getenv('APPDATA')) / "MeowMate/settings"
+    appdata_dir.mkdir(parents=True,exist_ok=True)
 
+    # Дефолтные настройки для каждого файла
+    default_files = {
+        "theme_mode.json": {"mode": "light"},
+        "apricot_settings.json": {"pacman": True, "fly": True, "cat_hiding_delay": "5"},
+        "bongo_settings.json": {"tap_counter": False, "bongo_type": "Классика", "count": 0},
+        "flork_settings.json": {"size": 200},
+        "ham_settings.json": {"size": 150, "hiding": True}
+    }
+
+    # Проверяем и создаем каждый файл
+    for filename, default_content in default_files.items():
+        file_path = appdata_dir / filename
+        if not file_path.exists():
+            with open(file_path, 'w', encoding='utf-8') as f:
+                json.dump(default_content, f, indent=4)
+
+
+def get_appdata_path(relative_path):
+    appdata = os.getenv('APPDATA')
+    app_dir = Path(appdata) / "MeowMate" / relative_path
+    return app_dir
+
+
+def get_resource_path(relative_path):
+    base_path = os.path.dirname(os.path.abspath(__file__))
     return Path(base_path) / relative_path
 
 
@@ -60,8 +83,8 @@ class MainMenuWindow(QMainWindow):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setFixedSize(800, 600)
         self.load_fonts()
-        with open(get_resource_path('settings/theme_mode.json'), "r", encoding='utf-8') as f:
-            theme = json.load(f)
+
+        theme = load_settings(get_appdata_path('settings/theme_mode.json'))
 
         if theme['mode'] == 'dark':
             is_dark_theme = True
@@ -102,7 +125,7 @@ class MainMenuWindow(QMainWindow):
 
         # КНОПКА КОНТАКТОВ
         self.contacts = QPushButton('Контакты', self.root_container)
-        self.contacts.setGeometry(710,560,70,30)
+        self.contacts.setGeometry(710, 560, 70, 30)
         self.contacts.setObjectName('contacts_btn')
         self.contacts.clicked.connect(self.show_contacts)
 
@@ -110,8 +133,6 @@ class MainMenuWindow(QMainWindow):
         self.version_label = QLabel('v1.0.4', self.root_container)
         self.version_label.setGeometry(10, 568, 70, 30)
         self.version_label.setObjectName('version_label')
-
-
 
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
         self.windows = []
@@ -140,7 +161,6 @@ class MainMenuWindow(QMainWindow):
         ]
         for font_file in fonts:
             font_path = get_resource_path(font_file)
-            print(font_path)
             font_db.addApplicationFont(str(font_path))
 
     # КНОПКА "ЗАПУСТИТЬ"
@@ -149,16 +169,16 @@ class MainMenuWindow(QMainWindow):
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
-                settings = load_settings(get_resource_path("settings/bongo_settings.json"))
+                settings = load_settings(get_appdata_path("settings/bongo_settings.json"))
                 selected_character = Bongo(settings)
             case 'ФЛОРК':
-                settings = load_settings(get_resource_path("settings/flork_settings.json"))
+                settings = load_settings(get_appdata_path("settings/flork_settings.json"))
                 selected_character = Flork(settings)
             case 'АБРИКОС':
-                settings = load_settings(get_resource_path("settings/apricot_settings.json"))
+                settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
                 selected_character = Cat(settings)
             case 'ЛЕНУСИК':
-                settings = load_settings(get_resource_path("settings/ham_settings.json"))
+                settings = load_settings(get_appdata_path("settings/ham_settings.json"))
                 selected_character = Ham(settings)
 
         self.windows.append(selected_character)
@@ -178,16 +198,16 @@ class MainMenuWindow(QMainWindow):
             self.settings_window = None
             match self.characters_panel.selected_card.character_name:
                 case 'БОНГО-КОТ':
-                    settings = load_settings(get_resource_path("settings/bongo_settings.json"))
+                    settings = load_settings(get_appdata_path("settings/bongo_settings.json"))
                     self.settings_window = Bongo.getSettingWindow(self.root_container, settings)
                 case 'ФЛОРК':
-                    settings = load_settings(get_resource_path("settings/flork_settings.json"))
+                    settings = load_settings(get_appdata_path("settings/flork_settings.json"))
                     self.settings_window = Flork.getSettingWindow(self.root_container, settings)
                 case 'АБРИКОС':
-                    settings = load_settings(get_resource_path("settings/apricot_settings.json"))
+                    settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
                 case 'ЛЕНУСИК':
-                    settings = load_settings(get_resource_path("settings/ham_settings.json"))
+                    settings = load_settings(get_appdata_path("settings/ham_settings.json"))
                     self.settings_window = Ham.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
@@ -233,7 +253,7 @@ class MainMenuWindow(QMainWindow):
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
-        with open(get_resource_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
+        with open(get_appdata_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
     # ЗАГОЛОВОК
@@ -324,6 +344,7 @@ class MainMenuWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    check_settings()
     window = MainMenuWindow()
     window.show()
     app.exec()

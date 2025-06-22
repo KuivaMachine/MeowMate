@@ -3,4 +3,4 @@ pyinstaller app.spec
 
 pyinstaller --onefile --upx-dir=C:/Users/olegz/Desktop/upx-5.0.1-win64 --name updater update_script.py
 
-git add .; git commit -m "v1.0.4"; git push origin;
+git add .; git commit -m "replace settings files to appdata"; git push origin;
