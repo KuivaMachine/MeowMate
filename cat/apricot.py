@@ -45,7 +45,6 @@ class Cat(Character):
         self.enable_pacman = settings["pacman"]
         self.enable_fly = settings["fly"]
         self.cat_hiding_delay = int(settings["cat_hiding_delay"])*1000    # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
-        self.isFlying = False
         self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
         self.cat_window_size = 300
         self.CAT_GAP = 40
@@ -68,7 +67,8 @@ class Cat(Character):
 
 
         # ФЛАГИ
-        self.isOne = False
+
+        self.isFlying = False
         self.isLapaOut = False
         self.isEyesBig = False
         self.isTimerStarted = False
@@ -80,10 +80,10 @@ class Cat(Character):
         self.is_stretching = False       # ФЛАГ РАССТЯГИВАНИЯ КОТА
 
         # ПОТОК ДЛЯ ОТСЛЕЖИВАНИЯ МЫШИ
-        self.mouse_tracker = MouseTrackerThread()
-        self.mouse_tracker.mouse_moved.connect(self.update_mouse_position)
-        self.mouse_tracker.start()
-        self.mouse_tracker.left_clicked.connect(self.handle_left_click)
+        mouse_tracker = MouseTrackerThread()
+        mouse_tracker.mouse_moved.connect(self.update_mouse_position)
+        mouse_tracker.start()
+
 
         # РАЗМЕРЫ ОКНА МОНИТОРА
         self.monitor_width = QApplication.primaryScreen().geometry().width()
@@ -95,14 +95,8 @@ class Cat(Character):
         self.setGeometry(QRect(100, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
                                self.cat_window_size))
 
-        # Определяем путь к каталогу с данными в зависимости от режима исполнения
-        base_path = getattr(sys, '_MEIPASS', None)
-        if base_path is not None:
-            # Мы находимся в упакованном виде (PyInstaller)
-            app_directory = Path(base_path)
-        else:
-            # Обычный режим разработки
-            app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+
+        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
         resource_path = app_directory / 'drawable' / 'cat'
 
         # ЗАГРУЖАЕМ ИЗОБРАЖЕНИЯ
@@ -204,7 +198,7 @@ class Cat(Character):
         self.small_eyes_timer.setInterval(500)
         self.small_eyes_timer.timeout.connect(self.do_small_eyes)
 
-        # ТАЙМЕР НА LONG TAP НА КОТЕ (2 секунды)
+        # ТАЙМЕР НА LONG TAP НА КОТЕ (1 секунды)
         self.long_drag_timer = QTimer(self)
         self.long_drag_timer.setInterval(1000)
         self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
@@ -244,15 +238,66 @@ class Cat(Character):
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
+            self.hiding_cat_animation.setStartValue(self.pos())
+            match self.cat_position:
+                case (CatState.BOTTOM):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() + self.cat_window_size))
+                case (CatState.TOP):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() - self.cat_window_size))
+                case (CatState.LEFT):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x() - self.cat_window_size, self.pos().y()))
+                case (CatState.RIGHT):
+                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x() + self.cat_window_size, self.pos().y()))
+
+
+            # self.hiding_cat_animation.start()
+
+            self.long_drag_timer.start()
+
             self.dragging = True
-            self.isOne = not self.isOne
+
             self.initial_pos = event.pos()
             self.original_height = self.cat.height()
             self.original_y = self.cat.y()
             self.bounce_animation.stop()
         else:
-            super().mousePressEvent(event)
+            if not self.is_window_dragging:
+                super().mousePressEvent(event)
+            self.long_tap = False
+            self.is_window_dragging = False
+            self.long_drag_timer.stop()
 
+
+
+     # СЛУШАТЕЛЬ ОТПУСКАНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
+    def mouseReleaseEvent(self, event):
+        if event.button() == Qt.MouseButton.LeftButton:
+            self.long_drag_timer.stop()
+            self.is_window_dragging = False
+
+            if self.dragging:
+                self.dragging = False
+                self.initial_pos = None
+
+                self.cat.setPixmap(self.main_cat)
+
+                target_rect = QRect(
+                    0,
+                    self.height() - self.cat_window_size,
+                    self.cat_window_size,
+                    self.cat_window_size
+                )
+
+                self.bounce_animation.setStartValue(self.cat.geometry())
+                self.bounce_animation.setEndValue(target_rect)
+                self.bounce_animation.start()
+
+            # СРАБАТЫВАЕТ, КОГДА КОТ ПЕРЕМЕЩАЕТСЯ ЗА КУРСОРОМ И ЛЕВАЯ КНОПКА ОТПУСКАЕТСЯ
+            if self.is_window_dragging:
+                self.cat.setPixmap(self.cat_fall)
+                self.fall_cat_animation.setStartValue(self.pos())
+                self.fall_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() + self.monitor_height))
+                self.fall_cat_animation.start()
 
     # СЛУШАТЕЛЬ ДВИЖЕНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mouseMoveEvent(self, event):
@@ -374,67 +419,11 @@ class Cat(Character):
             event.accept()
 
 
-    # СЛУШАТЕЛЬ ОТПУСКАНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
-    def mouseReleaseEvent(self, event):
-        if event.button() == Qt.MouseButton.LeftButton and self.dragging:
-            self.dragging = False
-            self.initial_pos = None
-
-            self.cat.setPixmap(self.main_cat)
-
-            target_rect = QRect(
-                0,
-                self.height() - self.cat_window_size,
-                self.cat_window_size,
-                self.cat_window_size
-            )
-
-            self.bounce_animation.setStartValue(self.cat.geometry())
-            self.bounce_animation.setEndValue(target_rect)
-            self.bounce_animation.start()
-
-            event.accept()
 
 
-    # СЛУШАТЕЛЬ ЛЕВОГО КЛИКА МЫШИ
-    def handle_left_click(self, x, y, left_pressed):
-        # if not left_pressed:
-        #     print (f"{x}  {y}")
 
-        # РАМКИ ОКНА КОТА
-        window_rect = self.frameGeometry()
-        # СРАБАТЫВАЕТ ПРИ ПРОСТОМ КЛИКЕ НА КОТА
-        if not self.is_window_dragging and not left_pressed and window_rect.contains(QPoint(x, y)):
-            self.hiding_cat_animation.setStartValue(self.pos())
-            match self.cat_position:
-                case (CatState.BOTTOM):
-                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() + self.cat_window_size))
-                case (CatState.TOP):
-                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() - self.cat_window_size))
-                case (CatState.LEFT):
-                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x() - self.cat_window_size, self.pos().y()))
-                case (CatState.RIGHT):
-                    self.hiding_cat_animation.setEndValue(QPoint(self.pos().x() + self.cat_window_size, self.pos().y()))
-            if not self.isOne:
-                self.hiding_cat_animation.start()
 
-        # СРАБАТЫВАЕТ, КОГДА КОТ ПЕРЕМЕЩАЕТСЯ ЗА КУРСОРОМ И ЛЕВАЯ КНОПКА ОТПУСКАЕТСЯ
-        if self.is_window_dragging:
-            if not left_pressed:
-                self.cat.setPixmap(self.cat_fall)
-                self.fall_cat_animation.setStartValue(self.pos())
-                self.fall_cat_animation.setEndValue(QPoint(self.pos().x(), self.pos().y() + self.monitor_height))
-                self.fall_cat_animation.start()
 
-        # СРАБАТЫВАЕТ КОГДА ЛЕВАЯ КНОПКА НАЖАТА В ОБЛАСТИ КОТА
-        if left_pressed:
-            if window_rect.contains(QPoint(x, y)):
-                self.long_drag_timer.start()
-
-        else:
-            self.long_tap = False
-            self.is_window_dragging = False
-            self.long_drag_timer.stop()
 
     # ТАЙМЕР ДОЛГОГО ЗАЖАТИЯ
     def on_long_drag_timer_out(self):
@@ -473,6 +462,15 @@ class Cat(Character):
     # ФУНКЦИЯ "СПРЯТАТЬ ЛАПУ"
     def hideLapa(self):
         if self.isLapaOut:
+            match self.cat_position:
+                case (CatState.BOTTOM):
+                    self.lapa_gif.stop()
+                case (CatState.TOP):
+                    self.top_lapa_gif.stop()
+                case (CatState.LEFT):
+                    self.left_lapa_gif.stop()
+                case (CatState.RIGHT):
+                    self.right_lapa_gif.stop()
             self.hide_lapa_animation.start()
             self.isLapaOut = False
 
@@ -494,13 +492,10 @@ class Cat(Character):
         self.move_cat_animation.setEndValue(
             QPoint(mouse_x - int(self.cat_window_size / 2), mouse_y - int(self.cat_window_size / 3)))
 
-        # ПРЯМОУГОЛЬНИК ОКНА КОТА
-        window_rect = self.frameGeometry()
 
-        # ЕСЛИ МЫШЬ НАХОДИТСЯ В ПРЕДЕЛАХ ОКНА КОТА
-        if window_rect.contains(QPoint(mouse_x, mouse_y)):
-            # ЕСЛИ ДОЛГОЕ НАЖАТИЕ (2000 мс)
-            if self.long_tap:
+
+        # ЕСЛИ ДОЛГОЕ НАЖАТИЕ (1000 мс)
+        if self.long_tap:
                 self.is_window_dragging = True
                 self.dragging = False
                 self.eye_l.setVisible(False)
@@ -552,7 +547,7 @@ class Cat(Character):
 
         QTimer.singleShot(self.cat_hiding_delay, lambda: (
             self.cat_coming_animation.start(),
-            self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 20) == 1 else None
+            self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 5) == 1 else None
         ))
 
 
