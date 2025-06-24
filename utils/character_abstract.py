@@ -14,6 +14,8 @@ class Character (QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_pos = event.globalPos()
+            self.close_button.close()
+            self.is_close_btn_showing = False
 
         if event.button() == Qt.MouseButton.RightButton:
             if not self.is_close_btn_showing:

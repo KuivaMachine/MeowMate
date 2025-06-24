@@ -44,14 +44,13 @@ class Pacman(QLabel):
         self.pacman_gif.start()
 
         self.pacman_animation = QPropertyAnimation(self.pacman_label, b"pos")
-        self.pacman_animation.setDuration(17000)
+        self.pacman_animation.setDuration(1000)
         self.pacman_animation.setStartValue(QPoint(self.monitor_width, 0))
         self.pacman_animation.setEndValue(QPoint(0 - self.pacman_label.width(), 0))
         self.pacman_animation.finished.connect(self.remove_pacman)
 
     def remove_pacman(self):
         self.pacman_animation.stop()
-        self.pacman_animation.deleteLater()
         self.pacman_gif.stop()
         self.hide()
 

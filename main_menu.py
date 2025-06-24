@@ -176,7 +176,8 @@ class MainMenuWindow(QMainWindow):
                 selected_character = Flork(settings)
             case 'АБРИКОС':
                 settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
-                selected_character = Cat(settings)
+                print(self.is_character_exists(Cat))
+                selected_character = Cat(settings, True)
             case 'ЛЕНУСИК':
                 settings = load_settings(get_appdata_path("settings/ham_settings.json"))
                 selected_character = Ham(settings)
@@ -190,6 +191,11 @@ class MainMenuWindow(QMainWindow):
 
         if self.is_setting_showing:
             self.settings_window.close()
+
+    def is_character_exists(self,character):
+        return isinstance(character, Cat)
+
+
 
     # КНОПКА "НАСТРОИТЬ"
     def on_settings_button_push(self):
