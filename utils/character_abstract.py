@@ -1,10 +1,13 @@
-from PyQt5.QtCore import Qt
-from PyQt5.QtWidgets import QMainWindow, QApplication
+from PyQt5.QtCore import Qt, pyqtSignal
+from PyQt5.QtWidgets import QApplication, QWidget
 
 from ui.close_characher_btn import CloseButton
 
 
-class Character (QMainWindow):
+
+
+class Character(QWidget):
+    on_close = pyqtSignal()
     def __init__(self):
         super().__init__()
         self.drag_pos = None
@@ -14,8 +17,9 @@ class Character (QMainWindow):
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             self.drag_pos = event.globalPos()
-            self.close_button.close()
             self.is_close_btn_showing = False
+            if self.close_button:
+                self.close_button.close()
 
         if event.button() == Qt.MouseButton.RightButton:
             if not self.is_close_btn_showing:
@@ -82,3 +86,6 @@ class Character (QMainWindow):
 
     def mouseReleaseEvent(self, event):
         self.drag_pos = None
+
+    def closeEvent(self, a0):
+        self.on_close.emit()

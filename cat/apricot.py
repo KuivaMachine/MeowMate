@@ -15,27 +15,26 @@ from utils.character_abstract import Character
 from utils.enums import CatState
 
 
-# Дополнительны поток для отслеживания движения мыши
+# Дополнительны поток для отслеживания мыши
 class MouseTrackerThread(QThread):
     mouse_moved = pyqtSignal(int, int)
-    left_clicked = pyqtSignal(int, int, bool)
+    left_clicked = pyqtSignal(bool)
 
     def run(self):
-        # Функция при движении мыши
+        # движение мыши
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
 
-        # Функция при нажатии/отпускании кнопки мыши
+        # Нажатие/отпускание левой кнопки мыши
         def on_click(x, y, button, pressed):
             if button == mouse.Button.left:
-                self.left_clicked.emit(x, y, pressed)
+                self.left_clicked.emit(pressed)
 
-        # Слушатель мыши
+        # Слушатель
         with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
 
-#TODO: ПАКМАН ДОЛЖЕН БЫТЬ ТОЛЬКО ОДИН
-# МУХА ПЛОХО РАБОТАЕТ
+
 class Cat(Character):
     def __init__(self, settings, is_first_cat_instance):
         super().__init__()
@@ -187,9 +186,9 @@ class Cat(Character):
         self.small_eyes_timer.setInterval(500)
         self.small_eyes_timer.timeout.connect(self.do_small_eyes)
 
-        # ТАЙМЕР НА LONG TAP НА КОТЕ (1 секунды)
+        # ТАЙМЕР НА LONG TAP НА КОТЕ
         self.long_drag_timer = QTimer(self)
-        self.long_drag_timer.setInterval(500)
+        self.long_drag_timer.setInterval(150)
         self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
 
     def start_fly(self):
@@ -211,11 +210,11 @@ class Cat(Character):
         window_rect = self.cat.frameGeometry()
         if window_rect.contains(mouse_pos) and not self.isHidden():
             self.hide()
-            crazy = CatRun(self)
-            crazy.run_crazy_start(self.pos().x())
+            self.crazy = CatRun(self)
+            self.crazy.run_crazy_start(self.pos().x())
 
     # ГЛОБАЛЬНЫЙ СЛУШАТЕЛЬ НАЖАТИЯ ЛЕВОЙ КНОПКИ
-    def update_mouse_left_click(self, _, __, pressed):
+    def update_mouse_left_click(self, pressed):
         if not pressed:
             self.long_drag_timer.stop()
             self.long_tap = False
@@ -535,10 +534,14 @@ class Cat(Character):
         self.cat_coming_animation.setEndValue(values[6])
         self.lapa.setVisible(False)
         self.is_it_second_click = False
-        QTimer.singleShot(self.cat_hiding_delay, lambda: (
-            self.cat_coming_animation.start(),
-            self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 25) == 1 else None
-        ))
+        QTimer.singleShot(self.cat_hiding_delay, lambda: self.cat_coming(position))
+
+
+
+    def cat_coming(self, position):
+        self.cat_coming_animation.start(),
+        self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 5)==1 else None,
+        self.show()
 
     # ФУНКЦИЯ ПОВОРОТА КОТА И ГЛАЗ В ЗАВИСИМОСТИ ОТ ВЫБРАННОГО И ТЕКУЩЕГО ПОЛОЖЕНИЯ КОТА
     def random_rotate(self, current_position, direction):

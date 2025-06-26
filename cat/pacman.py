@@ -9,15 +9,8 @@ from utils.utils import get_taskbar_height
 
 
 class Pacman(QLabel):
-    # Определяем путь к каталогу с данными в зависимости от режима исполнения
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        # Мы находимся в упакованном виде (PyInstaller)
-        app_directory = Path(base_path)
-    else:
-        # Обычный режим разработки
-        app_directory = Path(__file__).parent.parent # Найти родительский каталог проекта
-    # Теперь можем обратиться к нужным ресурсам
+
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable'/'cat'
 
     def __init__(self):
@@ -44,7 +37,7 @@ class Pacman(QLabel):
         self.pacman_gif.start()
 
         self.pacman_animation = QPropertyAnimation(self.pacman_label, b"pos")
-        self.pacman_animation.setDuration(1000)
+        self.pacman_animation.setDuration(17000)
         self.pacman_animation.setStartValue(QPoint(self.monitor_width, 0))
         self.pacman_animation.setEndValue(QPoint(0 - self.pacman_label.width(), 0))
         self.pacman_animation.finished.connect(self.remove_pacman)

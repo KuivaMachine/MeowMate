@@ -29,7 +29,7 @@ def check_settings():
     # Дефолтные настройки для каждого файла
     default_files = {
         "theme_mode.json": {"mode": "light"},
-        "apricot_settings.json": {"pacman": True, "fly": True, "cat_hiding_delay": "5"},
+        "apricot_settings.json": {"pacman": True, "fly": True, "cat_hiding_delay": "0"},
         "bongo_settings.json": {"tap_counter": False, "bongo_type": "Классика", "count": 0},
         "flork_settings.json": {"size": 200},
         "ham_settings.json": {"size": 150, "hiding": True}
@@ -64,11 +64,8 @@ def load_settings(path):
 
 
 class MainMenuWindow(QMainWindow):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent
+
+    app_directory = Path(__file__).parent
     resource_path = app_directory / 'drawable'
 
     theme_color = ThemeColor.LIGHT
@@ -76,6 +73,11 @@ class MainMenuWindow(QMainWindow):
 
     def __init__(self):
         super().__init__()
+        self.BONGO_CAT_MAX_COUNT = 15
+        self.FLORK_CAT_MAX_COUNT = 15
+        self.APRICOT_CAT_MAX_COUNT = 5
+        self.CHAM_CAT_MAX_COUNT = 5
+
         self.is_contacts_showing = None
         self.drag_pos = None
         self.is_setting_showing = False
@@ -169,20 +171,27 @@ class MainMenuWindow(QMainWindow):
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
+                if self.get_created_characters_count(Bongo)>self.BONGO_CAT_MAX_COUNT: return
                 settings = load_settings(get_appdata_path("settings/bongo_settings.json"))
                 selected_character = Bongo(settings)
             case 'ФЛОРК':
+                if self.get_created_characters_count(Flork) > self.FLORK_CAT_MAX_COUNT: return
                 settings = load_settings(get_appdata_path("settings/flork_settings.json"))
                 selected_character = Flork(settings)
             case 'АБРИКОС':
+                if self.get_created_characters_count(Cat) > self.APRICOT_CAT_MAX_COUNT: return
                 settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
-                print(self.is_character_exists(Cat))
-                selected_character = Cat(settings, True)
+                if not self.is_cat_exists():
+                    selected_character = Cat(settings, True)
+                else:
+                    selected_character = Cat(settings, False)
             case 'ЛЕНУСИК':
+                if self.get_created_characters_count(Ham) > self.CHAM_CAT_MAX_COUNT: return
                 settings = load_settings(get_appdata_path("settings/ham_settings.json"))
                 selected_character = Ham(settings)
 
         self.windows.append(selected_character)
+        selected_character.on_close.connect(lambda: self.windows.remove(selected_character))
         portal_destination = QPoint(selected_character.pos().x() + (selected_character.width() - 360) // 2,
                                     selected_character.pos().y() + (selected_character.height() - 400) // 2)
         self.portal = Portal(portal_destination)
@@ -192,9 +201,11 @@ class MainMenuWindow(QMainWindow):
         if self.is_setting_showing:
             self.settings_window.close()
 
-    def is_character_exists(self,character):
-        return isinstance(character, Cat)
+    def is_cat_exists(self):
+        return any(isinstance(x, Cat) for x in self.windows)
 
+    def get_created_characters_count(self, character):
+        return sum(1 for x in self.windows if isinstance(x, character))
 
 
     # КНОПКА "НАСТРОИТЬ"
@@ -218,6 +229,9 @@ class MainMenuWindow(QMainWindow):
 
             self.settings_window.on_close.connect(self.update_settings)
             self.settings_window.show()
+        else:
+            self.settings_window.save_settings()
+
 
     def update_settings(self):
         self.is_setting_showing = False

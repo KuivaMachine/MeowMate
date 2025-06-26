@@ -49,3 +49,5 @@ class SettingsWindow(QLabel):
             self.drag_position = None
             event.accept()
 
+    def save_settings(self):
+        pass

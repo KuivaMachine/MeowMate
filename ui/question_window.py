@@ -7,11 +7,8 @@ from PyQt5.QtWidgets import QWidget, QLabel, QVBoxLayout
 
 
 class Question (QWidget):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent.parent
+
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'menu'
     def __init__(self, hint):
         super().__init__()

@@ -80,5 +80,6 @@ class CatRun(QLabel):
         self.crazy_gif.stop()
         self.crazy_gif_backward.stop()
         self.hide()
-        self.cat.cat_preparing(),
-        self.cat.show()
+        self.deleteLater()
+        self.cat.cat_preparing()
+

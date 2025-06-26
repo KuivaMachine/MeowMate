@@ -29,11 +29,8 @@ def get_taskbar_height():
 
 
 class Flork(Character):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent.parent
+
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'flork'
 
     def __init__(self, settings):

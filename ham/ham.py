@@ -11,11 +11,8 @@ from utils.character_abstract import Character
 
 
 class Ham(Character):
-    base_path = getattr(sys, '_MEIPASS', None)
-    if base_path is not None:
-        app_directory = Path(base_path)
-    else:
-        app_directory = Path(__file__).parent.parent
+
+    app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'ham'
 
     def __init__(self, settings):
@@ -35,6 +32,7 @@ class Ham(Character):
         self.setMouseTracking(True)
 
         self.main_movie = QMovie(str(self.resource_path / "main.gif"))
+        self.main_movie.setCacheMode(QMovie.CacheMode.CacheAll)
         self.main_movie.setSpeed(120)
         self.main_movie.setScaledSize(QSize(int(self.size*1.78), self.size))
         self.main_movie.start()
@@ -64,10 +62,11 @@ class Ham(Character):
         self.run_animation = QPropertyAnimation(self.ham_main, b"pos")
         self.run_animation.setDuration(300)
 
-        self.timer = QTimer(self)
-        self.timer.setInterval(300000) #5 минут
-        self.timer.timeout.connect(self.make_transparent)
+
         if self.enable_hiding:
+            self.timer = QTimer(self)
+            self.timer.setInterval(300000)  # 5 минут
+            self.timer.timeout.connect(self.make_transparent)
             self.timer.start()
 
     def make_transparent(self):
@@ -104,7 +103,6 @@ class Ham(Character):
             if self.drag_pos:
                 # Вычисляем новую позицию
                 new_pos = self.pos() + event.globalPos() - self.drag_pos
-
                 # Получаем геометрию родительского окна
                 parent_rect = QApplication.primaryScreen().geometry()
 
@@ -125,7 +123,6 @@ class Ham(Character):
                 # Перемещаем виджет
                 self.move(x, y)
                 self.drag_pos = event.globalPos()
-                event.accept()
 
     def get_x_value(self, current_x):
         brach_size = self.size/1.2
