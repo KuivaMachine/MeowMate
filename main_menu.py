@@ -76,7 +76,7 @@ class MainMenuWindow(QMainWindow):
         self.BONGO_CAT_MAX_COUNT = 15
         self.FLORK_CAT_MAX_COUNT = 15
         self.APRICOT_CAT_MAX_COUNT = 5
-        self.CHAM_CAT_MAX_COUNT = 5
+        self.CHAM_CAT_MAX_COUNT = 1
 
         self.is_contacts_showing = None
         self.drag_pos = None
@@ -268,6 +268,7 @@ class MainMenuWindow(QMainWindow):
                 "mode": 'light',
             }
         self.theme_change_signal.emit(self.theme_color)
+
         # БЛИК СВЕТА ПРИ СМЕНЕ ТЕМЫ
         blink = Blinker(self.root_container)
         blink.show()

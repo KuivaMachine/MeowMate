@@ -29,7 +29,6 @@ class Ham(Character):
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.screen = QApplication.primaryScreen().geometry()
         self.setGeometry(500, 500, int(self.size*1.78), self.size)
-        self.setMouseTracking(True)
 
         self.main_movie = QMovie(str(self.resource_path / "main.gif"))
         self.main_movie.setCacheMode(QMovie.CacheMode.CacheAll)
@@ -125,9 +124,9 @@ class Ham(Character):
                 self.drag_pos = event.globalPos()
 
     def get_x_value(self, current_x):
-        brach_size = self.size/1.2
-        max_right = int(brach_size*0.48)  # Максимум вправо от 0
-        max_left = int(-brach_size*0.52)  # Максимум влево от 0
+        branch_size = self.size/1.2
+        max_right = int(branch_size*0.48)  # Максимум вправо от 0
+        max_left = int(-branch_size*0.52)  # Максимум влево от 0
         # Определяем доступное расстояние для движения в каждом направлении
         available_right = max_right - current_x
         available_left = current_x - max_left

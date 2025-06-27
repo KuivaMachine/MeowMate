@@ -49,41 +49,6 @@ class Flork(Character):
 
         self.current_gif = None
 
-        self.shy = QMovie(str(self.resource_path / "flork_shy.gif"))
-        self.shy.setScaledSize(QSize(self.size, self.size))
-        self.shy.setSpeed(110)
-        self.shy.frameChanged.connect(self.check_frame_change)
-
-        self.dance = QMovie(str(self.resource_path / "flork_dance.gif"))
-        self.dance.setScaledSize(QSize(self.size, self.size))
-        self.dance.setSpeed(120)
-        self.dance.frameChanged.connect(self.check_frame_change)
-
-        self.cool = QMovie(str(self.resource_path / "flork_cool.gif"))
-        self.cool.setScaledSize(QSize(self.size, self.size))
-        self.cool.setSpeed(120)
-        self.cool.frameChanged.connect(self.check_frame_change)
-
-        self.rock = QMovie(str(self.resource_path / "flork_rock.gif"))
-        self.rock.setScaledSize(QSize(self.size, self.size))
-        self.rock.setSpeed(120)
-        self.rock.frameChanged.connect(self.check_frame_change)
-
-        self.heart = QMovie(str(self.resource_path / "flork_heart.gif"))
-        self.heart.setScaledSize(QSize(self.size, self.size))
-        self.heart.setSpeed(120)
-        self.heart.frameChanged.connect(self.check_frame_change)
-
-        self.birthday = QMovie(str(self.resource_path / "flork_birthday.gif"))
-        self.birthday.setScaledSize(QSize(self.size, self.size))
-        self.birthday.setSpeed(120)
-        self.birthday.frameChanged.connect(self.check_frame_change)
-
-        self.fingers = QMovie(str(self.resource_path / "flork_fingers.gif"))
-        self.fingers.setScaledSize(QSize(self.size, self.size))
-        self.fingers.setSpeed(120)
-        self.fingers.frameChanged.connect(self.check_frame_change)
-
         self.flork_main_pixmap = QPixmap(str(self.resource_path / "flork_main.png")).scaled(self.size, self.size,
                                                                                             Qt.AspectRatioMode.KeepAspectRatio,
                                                                                             Qt.TransformationMode.SmoothTransformation)
@@ -127,8 +92,7 @@ class Flork(Character):
             self.flork_main.setPixmap(self.flork_right_pixmap)
             self.flag = True
 
-        # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
-
+    # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
     def on_release(self, _):
         self.flork_main.setPixmap(self.flork_main_pixmap)
 
@@ -164,20 +128,23 @@ class Flork(Character):
     def playAnimation(self, number):
         match number:
             case (1):
-                self.current_gif = self.shy
+                self.current_gif = QMovie(str(self.resource_path / "flork_shy.gif"))
             case (2):
-                self.current_gif = self.dance
+                self.current_gif = QMovie(str(self.resource_path / "flork_dance.gif"))
             case (3):
-                self.current_gif = self.cool
+                self.current_gif = QMovie(str(self.resource_path / "flork_cool.gif"))
             case (4):
-                self.current_gif = self.rock
+                self.current_gif = QMovie(str(self.resource_path / "flork_rock.gif"))
             case (5):
-                self.current_gif = self.heart
+                self.current_gif = QMovie(str(self.resource_path / "flork_heart.gif"))
             case (6):
-                self.current_gif = self.birthday
+                self.current_gif = QMovie(str(self.resource_path / "flork_birthday.gif"))
             case (7):
-                self.current_gif = self.fingers
+                self.current_gif = QMovie(str(self.resource_path / "flork_fingers.gif"))
 
+        self.current_gif.setScaledSize(QSize(self.size, self.size))
+        self.current_gif.setSpeed(120)
+        self.current_gif.frameChanged.connect(self.check_frame_change)
         self.current_gif.start()
         self.flork_main.setMovie(self.current_gif)
         self.isAnimationPlaying = True
