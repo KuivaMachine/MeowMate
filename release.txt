@@ -3,4 +3,4 @@
 
 pyinstaller --onefile  --name updater update_script.py
 
-git add .; git commit -m "optimization of all"; git push origin;
+git add .; git commit -m "added comments"; git push origin;

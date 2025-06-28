@@ -22,9 +22,10 @@ from ui.switch_button import SwitchButton
 from utils.enums import ThemeColor, CharactersList
 
 
+# ЧИТАЕМ НАСТРОЙКИ ИЗ ПАПКИ APPDATA И СОЗДАЕМ, ЕСЛИ ИХ НЕТ
 def check_settings():
     appdata_dir = Path(os.getenv('APPDATA')) / "MeowMate/settings"
-    appdata_dir.mkdir(parents=True,exist_ok=True)
+    appdata_dir.mkdir(parents=True, exist_ok=True)
 
     # Дефолтные настройки для каждого файла
     default_files = {
@@ -43,51 +44,60 @@ def check_settings():
                 json.dump(default_content, f, indent=4)
 
 
-def get_appdata_path(relative_path):
-    appdata = os.getenv('APPDATA')
-    app_dir = Path(appdata) / "MeowMate" / relative_path
-    return app_dir
-
-
+# ВОЗВРАЩАЕТ АБСОЛЮТНЫЙ ПУТЬ
 def get_resource_path(relative_path):
     base_path = os.path.dirname(os.path.abspath(__file__))
     return Path(base_path) / relative_path
 
 
+# ВОЗВРАЩАЕТ НАСТРОЙКИ ИЗ APPDATA
 def load_settings(path):
+    appdata = os.getenv('APPDATA')
+    app_dir = Path(appdata) / "MeowMate" / path
     try:
-        with open(path, "r", encoding='utf-8') as f:
+        with open(app_dir, "r", encoding='utf-8') as f:
             return json.load(f)
     except (FileNotFoundError, json.JSONDecodeError):
         print("Файл настроек не найден или поврежден")
         return None
 
+# ЗАГРУЖАЕТ ШРИФТЫ В ЛОКАЛЬНУЮ БАЗУ
+def load_fonts():
+    font_db = QFontDatabase()
+    fonts = [
+        "resources/fonts/JetBrainsMono-Bold.ttf",
+        "resources/fonts/JetBrainsMono-Light.ttf",
+        "resources/fonts/JetBrainsMono-Regular.ttf",
+        "resources/fonts/PTMono.ttf"
+    ]
+    for font_file in fonts:
+        font_path = get_resource_path(font_file)
+        font_db.addApplicationFont(str(font_path))
+
 
 class MainMenuWindow(QMainWindow):
-
-    app_directory = Path(__file__).parent
-    resource_path = app_directory / 'drawable'
-
-    theme_color = ThemeColor.LIGHT
-    theme_change_signal = pyqtSignal(ThemeColor)
+    resource_path = Path(__file__).parent / 'drawable'                  # ПУТЬ К ПАПКЕ С РЕСУРСАМИ
+    theme_color = ThemeColor.LIGHT                                      # ТЕМА ПО УМОЛЧАНИЮ СВЕТЛАЯ
+    theme_change_signal = pyqtSignal(ThemeColor)                        # СИГНАЛ О СМЕНЕ ТЕМЫ
 
     def __init__(self):
         super().__init__()
-        self.BONGO_CAT_MAX_COUNT = 15
-        self.FLORK_CAT_MAX_COUNT = 15
-        self.APRICOT_CAT_MAX_COUNT = 5
-        self.CHAM_CAT_MAX_COUNT = 1
-
-        self.is_contacts_showing = None
-        self.drag_pos = None
-        self.is_setting_showing = False
-        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)
-        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
+        self.BONGO_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
+        self.FLORK_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
+        self.APRICOT_CAT_MAX_COUNT = 5                                  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
+        self.CHAM_CAT_MAX_COUNT = 1                                     # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ЛЕНУСИК
+        self.is_contacts_showing = False                                # ПОКАЗЫВАЕТСЯ ЛИ ОКНО КОНТАКТОВ
+        self.drag_pos = None                                            # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
+        self.is_setting_showing = False                                 # ПОКАЗЫВАЕТСЯ ЛИ ОКНО НАСТРОЕК
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)           # БЕЗ ГРАНИЦ
+        self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)  # БЕЗ ФОНА
         self.setFixedSize(800, 600)
-        self.load_fonts()
 
-        theme = load_settings(get_appdata_path('settings/theme_mode.json'))
+        # ЗАГРУЖАЕТ ШРИФТЫ В ЛОКАЛЬНУЮ БАЗУ
+        load_fonts()
 
+        # ЗАГРУЖАЕТ ТЕМУ
+        theme = load_settings('settings/theme_mode.json')
         if theme['mode'] == 'dark':
             is_dark_theme = True
         else:
@@ -95,7 +105,6 @@ class MainMenuWindow(QMainWindow):
 
         # ФОН ОКНА
         self.root_container = QWidget(self)
-
         self.root_container.setGeometry(0, 0, 800, 600)
         self.root_container.setObjectName('main_container')
 
@@ -112,7 +121,6 @@ class MainMenuWindow(QMainWindow):
         self.right_shadow = QSvgWidget(self.root_container)
         self.right_shadow_pixmap_light = str(self.resource_path / 'menu' / "right_shadow.svg")
         self.right_shadow_pixmap_dark = str(self.resource_path / 'menu' / "right_shadow_white.svg")
-
         self.right_shadow.load(self.right_shadow_pixmap_light)
         self.right_shadow.lower()
 
@@ -120,7 +128,6 @@ class MainMenuWindow(QMainWindow):
         self.left_shadow = QSvgWidget(self.root_container)
         self.left_shadow_pixmap_light = str(self.resource_path / 'menu' / "left_shadow.svg")
         self.left_shadow_pixmap_dark = str(self.resource_path / 'menu' / "left_shadow_white.svg")
-
         self.left_shadow.load(self.left_shadow_pixmap_light)
         self.left_shadow.lower()
         QTimer.singleShot(50, self.update_bg_position)
@@ -139,31 +146,19 @@ class MainMenuWindow(QMainWindow):
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
         self.windows = []
 
-        # Читаем и применяем стиль
+        # ЧИТАЕТ И ПРИМЕНЯЕТ СВЕТЛЫЙ И ТЕМНЫЙ СТИЛИ ДЛЯ ВИДЖЕТОВ
         with open(get_resource_path('resources/dark-theme.qss'), 'r') as f:
             self.dark_style = f.read()
         with open(get_resource_path('resources/light-theme.qss'), 'r') as f:
             self.light_style = f.read()
-
         self.change_theme(is_dark_theme)
 
+    # ПОКАЗЫВАЕТ ОКНО КОНТАКТОВ
     def show_contacts(self):
         if not self.is_contacts_showing:
             self.contacts_window = ContactWindow(self)
             self.contacts_window.show()
             self.is_contacts_showing = True
-
-    def load_fonts(self):
-        font_db = QFontDatabase()
-        fonts = [
-            "resources/fonts/JetBrainsMono-Bold.ttf",
-            "resources/fonts/JetBrainsMono-Light.ttf",
-            "resources/fonts/JetBrainsMono-Regular.ttf",
-            "resources/fonts/PTMono.ttf"
-        ]
-        for font_file in fonts:
-            font_path = get_resource_path(font_file)
-            font_db.addApplicationFont(str(font_path))
 
     # КНОПКА "ЗАПУСТИТЬ"
     def on_start_button_push(self):
@@ -171,23 +166,23 @@ class MainMenuWindow(QMainWindow):
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
-                if self.get_created_characters_count(Bongo)>self.BONGO_CAT_MAX_COUNT: return
-                settings = load_settings(get_appdata_path("settings/bongo_settings.json"))
+                if self.get_created_characters_count(Bongo) >= self.BONGO_CAT_MAX_COUNT: return
+                settings = load_settings("settings/bongo_settings.json")
                 selected_character = Bongo(settings)
             case 'ФЛОРК':
-                if self.get_created_characters_count(Flork) > self.FLORK_CAT_MAX_COUNT: return
-                settings = load_settings(get_appdata_path("settings/flork_settings.json"))
+                if self.get_created_characters_count(Flork) >= self.FLORK_CAT_MAX_COUNT: return
+                settings = load_settings("settings/flork_settings.json")
                 selected_character = Flork(settings)
             case 'АБРИКОС':
-                if self.get_created_characters_count(Cat) > self.APRICOT_CAT_MAX_COUNT: return
-                settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
+                if self.get_created_characters_count(Cat) >= self.APRICOT_CAT_MAX_COUNT: return
+                settings = load_settings("settings/apricot_settings.json")
                 if not self.is_cat_exists():
                     selected_character = Cat(settings, True)
                 else:
                     selected_character = Cat(settings, False)
             case 'ЛЕНУСИК':
-                if self.get_created_characters_count(Ham) > self.CHAM_CAT_MAX_COUNT: return
-                settings = load_settings(get_appdata_path("settings/ham_settings.json"))
+                if self.get_created_characters_count(Ham) >= self.CHAM_CAT_MAX_COUNT: return
+                settings = load_settings("settings/ham_settings.json")
                 selected_character = Ham(settings)
 
         self.windows.append(selected_character)
@@ -201,12 +196,13 @@ class MainMenuWindow(QMainWindow):
         if self.is_setting_showing:
             self.settings_window.close()
 
+    # ПРОВЕРЯЕТ, ЕСТЬ ЛИ ЗАПУЩЕННЫЙ ПЕРСОНАЖ "АБРИКОС"
     def is_cat_exists(self):
         return any(isinstance(x, Cat) for x in self.windows)
 
+    # ВОЗВРАЩАЕТ ЧИСЛО ЗАПУЩЕННЫХ ПЕРСНАЖЕЙ ОДНОГО ТИПА
     def get_created_characters_count(self, character):
         return sum(1 for x in self.windows if isinstance(x, character))
-
 
     # КНОПКА "НАСТРОИТЬ"
     def on_settings_button_push(self):
@@ -215,16 +211,16 @@ class MainMenuWindow(QMainWindow):
             self.settings_window = None
             match self.characters_panel.selected_card.character_name:
                 case 'БОНГО-КОТ':
-                    settings = load_settings(get_appdata_path("settings/bongo_settings.json"))
+                    settings = load_settings("settings/bongo_settings.json")
                     self.settings_window = Bongo.getSettingWindow(self.root_container, settings)
                 case 'ФЛОРК':
-                    settings = load_settings(get_appdata_path("settings/flork_settings.json"))
+                    settings = load_settings("settings/flork_settings.json")
                     self.settings_window = Flork.getSettingWindow(self.root_container, settings)
                 case 'АБРИКОС':
-                    settings = load_settings(get_appdata_path("settings/apricot_settings.json"))
+                    settings = load_settings("settings/apricot_settings.json")
                     self.settings_window = Cat.getSettingWindow(self.root_container, settings)
                 case 'ЛЕНУСИК':
-                    settings = load_settings(get_appdata_path("settings/ham_settings.json"))
+                    settings = load_settings("settings/ham_settings.json")
                     self.settings_window = Ham.getSettingWindow(self.root_container, settings)
 
             self.settings_window.on_close.connect(self.update_settings)
@@ -232,10 +228,11 @@ class MainMenuWindow(QMainWindow):
         else:
             self.settings_window.save_settings()
 
-
+    # СНЯТИЕ ФЛАГА НАСТРОЕК ПОСЛЕ ЗАКРЫТИЯ ОКНА
     def update_settings(self):
         self.is_setting_showing = False
 
+    # УСТАНОВКА КООРДИНАТ
     def update_bg_position(self):
         # УСТАНОВКА КООРДИНАТ ДЛЯ DESCRIPTION
         global_pos = self.description_panel.mapToGlobal(QPoint(0, 0))
@@ -246,6 +243,7 @@ class MainMenuWindow(QMainWindow):
         local_pos = self.root_container.mapFromGlobal(global_pos)
         self.left_shadow.setGeometry(local_pos.x() - 5, local_pos.y() + 5, 450, 485)
 
+    # СМЕНА ТЕМЫ ПРИЛОЖЕНИЯ
     def change_theme(self, is_change):
         if is_change:
             self.theme_color = ThemeColor.DARK
@@ -274,7 +272,7 @@ class MainMenuWindow(QMainWindow):
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
-        with open(get_appdata_path("settings/theme_mode.json"), "w", encoding='utf-8') as f:
+        with open(Path(os.getenv('APPDATA')) / "MeowMate" /"settings/theme_mode.json", "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
     # ЗАГОЛОВОК
@@ -341,26 +339,26 @@ class MainMenuWindow(QMainWindow):
 
         return content
 
+    # ИНИЦИАЛИЗАЦИЯ КОНТЕЙНЕРА С ПЕРСОНАЖАМИ
     def setup_gif_container(self):
         characters = CharactersGallery(self, list(CharactersList))
         characters.character_signal.connect(self.update_character_info)
         return characters
 
+    # ОБНОВЛЕНИЕ ВЫБРАННОГО ПЕРСОНАЖА ПРИ КЛИКЕ
     def update_character_info(self, character_a):
         self.description_panel.update_info(character_a)
 
-    # Обработчики событий для перемещения окна
+    # СРАБАТЫВАЕТ ПРИ НАЖАТИИ
     def mousePressEvent(self, event):
         if event.button() == Qt.LeftButton and event.pos().y() < 40:
             self.drag_pos = event.globalPos()
 
+    # СРАБАТЫВАЕТ ПРИ ПЕРЕМЕЩЕНИИ
     def mouseMoveEvent(self, event):
         if hasattr(self, 'drag_pos') and self.drag_pos is not None:
             self.move(self.pos() + event.globalPos() - self.drag_pos)
             self.drag_pos = event.globalPos()
-
-    def mouseReleaseEvent(self, event):
-        self.drag_pos = None
 
 
 if __name__ == "__main__":

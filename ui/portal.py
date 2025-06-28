@@ -26,11 +26,9 @@ class Portal(QWidget):
         self.portal.setMovie(self.portal_gif)
         self.portal_gif.setSpeed(120)
         self.portal_gif.start()
+        QTimer.singleShot(2400, self.close)
 
-
-        QTimer.singleShot(3350, self.on_gif_finished)
-
-    def on_gif_finished(self):
+    def closeEvent(self, event):
         self.portal_gif.stop()
         self.portal_gif.deleteLater()
         self.hide()

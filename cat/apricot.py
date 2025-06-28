@@ -15,21 +15,18 @@ from utils.character_abstract import Character
 from utils.enums import CatState
 
 
-# Дополнительны поток для отслеживания мыши
+# ПОТОК ДЛЯ ОТСЛЕЖИВАНИЯ МЫШИ
 class MouseTrackerThread(QThread):
     mouse_moved = pyqtSignal(int, int)
     left_clicked = pyqtSignal(bool)
-
     def run(self):
         # движение мыши
         def on_move(x, y):
             self.mouse_moved.emit(x, y)
-
         # Нажатие/отпускание левой кнопки мыши
         def on_click(x, y, button, pressed):
             if button == mouse.Button.left:
                 self.left_clicked.emit(pressed)
-
         # Слушатель
         with mouse.Listener(on_click=on_click, on_move=on_move) as listener:
             listener.join()
@@ -40,41 +37,38 @@ class Cat(Character):
         super().__init__()
 
         # ПЕРЕМЕННЫЕ
-        self.is_first_cat_instance = is_first_cat_instance
-        self.enable_pacman = settings["pacman"]
-        self.enable_fly = settings["fly"]
-        self.cat_hiding_delay = int(settings["cat_hiding_delay"]) * 1000  # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
-        self.cat_position = CatState.BOTTOM  # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
-        self.cat_window_size = 300
-        self.CAT_GAP = 40
-        self.min_height = self.cat_window_size
-        self.max_height = 400
-        self.original_height = self.cat_window_size
-        self.original_width = self.cat_window_size
-        self.initial_pos = None  # НАЧАЛЬНАЯ ПОЗИЦИЯ ДЛЯ РАСТЯГИВАНИЯ КОТА
-        self.eyes_distance = 250
-        self.bottom_lapa_react_zone = QRect(0, 140, 90, 120)
-        self.left_lapa_react_zone = QRect(40, 0, 120, 90)
-        self.right_lapa_react_zone = QRect(150, 210, 120, 90)
-        self.top_lapa_react_zone = QRect(210, 30, 90, 120)
-        self.lapa_react_zone = self.bottom_lapa_react_zone
-        self.pacman = Pacman()
-        self.max_eyes_offset_x = 11  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
-        self.max_eyes_offset_y = 5  # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
+        self.enable_pacman = settings["pacman"]                             # ПАКМАН РАЗРЕШЕН
+        self.enable_fly = settings["fly"]                                   # МУХА РАЗРЕШЕНА
+        self.cat_hiding_delay = int(settings["cat_hiding_delay"]) * 1000    # ЗАДЕРЖКА ПЕРЕД ПОЯВЛЕНИЕМ
+        self.cat_position = CatState.BOTTOM                                 # ПОЛОЖЕНИЕ КОТА НА ЭКРАНЕ
+        self.cat_window_size = 300                                          # РАЗМЕР ОКНА
+        self.CAT_GAP = 40                                                   # ВЕЛИЧИНА СМЕЩЕНИЯ КОТА ВНИЗ ЗА ПРЕДЕЛ ЭКРАНА
+        self.min_height = self.cat_window_size                              # МИНИМАЛЬНАЯ ВЫСОТА КОТА
+        self.max_height = 400                                               # МАКСИМАЛЬНАЯ ВЫСОТА КОТА
+        self.original_height = self.cat_window_size                         # НАЧАЛЬНАЯ ВЫСОТА КОТА ПЕРЕД РАСТЯГИВАЕМ
+        self.original_width = self.cat_window_size                          # НАЧАЛЬНАЯ ШИРИНА КОТА ПЕРЕД РАСТЯГИВАЕМ
+        self.initial_pos = None                                             # НАЧАЛЬНАЯ ПОЗИЦИЯ ДЛЯ РАСТЯГИВАНИЯ КОТА
+        self.eyes_distance = 250                                            # МИНИМАЛЬНАЯ ДИСТАНЦИЯ ДЛЯ НАЧАЛА РАСШИРЕНИЯ ГЛАЗ
+        self.bottom_lapa_react_zone = QRect(0, 140, 90, 120)                # ЗОНА РЕАКЦИИ ДЛЯ ЛАПЫ КОТА, КОГДА КОТ СНИЗУ
+        self.top_lapa_react_zone = QRect(210, 30, 90, 120)                  # ЗОНА РЕАКЦИИ ДЛЯ ЛАПЫ КОТА, КОГДА КОТ СВЕРХУ
+        self.left_lapa_react_zone = QRect(40, 0, 120, 90)                   # ЗОНА РЕАКЦИИ ДЛЯ ЛАПЫ КОТА, КОГДА КОТ СЛЕВА
+        self.right_lapa_react_zone = QRect(150, 210, 120, 90)               # ЗОНА РЕАКЦИИ ДЛЯ ЛАПЫ КОТА, КОГДА КОТ СПРАВА
+        self.lapa_react_zone = self.bottom_lapa_react_zone                  # ТЕКУЩАЯ ЗОНА РЕАКЦИИ ДЛЯ ЛАПЫ КОТА
+        self.max_eyes_offset_x = 11                                         # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ГОРИЗОНТАЛИ
+        self.max_eyes_offset_y = 5                                          # ДИАПАЗОН ДВИЖЕНИЯ ГЛАЗ ПО ВЕРТИКАЛИ
         self.pointer = 0
 
         # ФЛАГИ
-        self.is_it_second_click = False  # ФЛАГ, ОЗНАЧАЮЩИЙ ПЕРВЫЙ ЭТО КЛИК ПО КОТУ ИЛИ НЕТ
-        self.isFlying = False
-        self.isLapaOut = False
-        self.isEyesBig = False
-        self.isTimerStarted = False
-        self.setMouseTracking(True)
-        self.dragging = False
-        self.key_pressed = False  # КЛАВИША КЛАВИАТУРЫ НАЖАТА
-        self.long_tap = False  # ФЛАГ ДОЛГОГО ЗАЖАТИЯ
-        self.is_window_dragging = False  # КОТ ПЕРЕМЕЩАЕТСЯ
-        self.is_stretching = False  # ФЛАГ РАССТЯГИВАНИЯ КОТА
+        self.is_first_cat_instance = is_first_cat_instance                  # ЯВЛЯЕТСЯ ЛИ КОТ ЕДИНСТВЕННЫМ ИЗ СОЗДАННЫХ
+        self.is_it_second_click = False                                     # ФЛАГ, ОЗНАЧАЮЩИЙ ПЕРВЫЙ ЭТО КЛИК ПО КОТУ ИЛИ НЕТ
+        self.isFlying = False                                               # МУХА ЛЕТАЕТ
+        self.isLapaOut = False                                              # ЛАПА ИГРАЕТ
+        self.isEyesBig = False                                              # ГЛАЗА РАСШИРЕНЫ
+        self.dragging = False                                               # КОТ РАССТЯГИВАЕТСЯ СЕЙЧАС
+        self.key_pressed = False                                            # КЛАВИША КЛАВИАТУРЫ НАЖАТА
+        self.long_tap = False                                               # ФЛАГ ДОЛГОГО ЗАЖАТИЯ
+        self.is_window_dragging = False                                     # КОТ ПЕРЕМЕЩАЕТСЯ
+        self.is_stretching = False                                          # ФЛАГ РАССТЯГИВАНИЯ КОТА
 
         # ПОТОК ДЛЯ ОТСЛЕЖИВАНИЯ МЫШИ
         mouse_tracker = MouseTrackerThread()
@@ -86,13 +80,13 @@ class Cat(Character):
         self.monitor_width = QApplication.primaryScreen().geometry().width()
         self.monitor_height = QApplication.primaryScreen().geometry().height()
 
-        # Настройки окна
+        # НАСТРОЙКИ ОКНА
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.setGeometry(QRect(100, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
+        self.setGeometry(QRect(800, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
                                self.cat_window_size))
 
-        app_directory = Path(__file__).parent.parent  # Найти родительский каталог проекта
+        app_directory = Path(__file__).parent.parent  # Ищет родительский каталог проекта
         resource_path = app_directory / 'drawable' / 'cat'
 
         # ЗАГРУЖАЕМ ИЗОБРАЖЕНИЯ
@@ -191,6 +185,7 @@ class Cat(Character):
         self.long_drag_timer.setInterval(150)
         self.long_drag_timer.timeout.connect(self.on_long_drag_timer_out)
 
+    # ЗАПУСК МУХИ
     def start_fly(self):
         self.fly = Fly(self)
         self.fly.position_changed.connect(self.on_fly_update)
@@ -199,10 +194,12 @@ class Cat(Character):
         self.fly.anim.start()
         self.isFlying = True
 
+    # ПОСЛЕ ПОЛЕТА МУХИ
     def on_fly_finished(self):
         self.isFlying = False
         self.fly.deleteLater()
 
+    # ВО ВРЕМЯ ПОЛЕТА МУХИ
     def on_fly_update(self, x, y):
         mouse_pos = self.cat.mapFromGlobal(QPoint(x, y))
         self.move_eye(self.eye_l, self.center_l, QPoint(mouse_pos.x(), mouse_pos.y()))
@@ -219,7 +216,7 @@ class Cat(Character):
             self.long_drag_timer.stop()
             self.long_tap = False
 
-
+    # СКРЫВАНИЕ КОТА ЗА ЭКРАН
     def hide_cat(self):
         if self.is_it_second_click:
             self.is_it_second_click = False
@@ -228,8 +225,6 @@ class Cat(Character):
             self.hiding_cat_animation.start()
         else:
             self.is_it_second_click = True
-
-
 
     # СЛУШАТЕЛЬ НАЖАТИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mousePressEvent(self, event):
@@ -536,8 +531,7 @@ class Cat(Character):
         self.is_it_second_click = False
         QTimer.singleShot(self.cat_hiding_delay, lambda: self.cat_coming(position))
 
-
-
+    # ПОЯВЛЕНИЕ КОТА ПОСЛЕ СКРЫТИЯ
     def cat_coming(self, position):
         self.cat_coming_animation.start(),
         self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 5)==1 else None,
@@ -690,7 +684,7 @@ class Cat(Character):
 
         return values
 
-    # ФУНКЦИЯ ДВИЖЕНИЯ ГЛАЗ
+    # ФУНКЦИЯ СЛЕЖЕНИЯ ГЛАЗ ЗА МЫШЬЮ
     def move_eye(self, eye_label, center, mouse_pos):
 
         delta_x = mouse_pos.x() - center.x()
@@ -723,7 +717,7 @@ class Cat(Character):
         # # Запускаем анимацию
         eye_label.move(new_pos)
 
-
+    # СЛУШАТЕЛЬ НАЖАТИЙ КЛАВИАТУРЫ (ТОЛЬКО КОГДА КОТ В ФОКУСЕ)
     def keyPressEvent(self, event):
         if not self.enable_pacman and not self.is_first_cat_instance:
             return
@@ -741,9 +735,11 @@ class Cat(Character):
             self.pointer = 0
 
         if self.pointer == 6:
+            self.pacman = Pacman()
             self.pacman.show_and_start()
             self.pointer = 0
 
+    # ВОЗВРАЩАЕТ ОКНО НАСТРОЕК
     @staticmethod
     def getSettingWindow(root_container, settings):
         return ApricotSettingsWindow(root_container, settings)

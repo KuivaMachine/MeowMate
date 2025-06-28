@@ -13,7 +13,7 @@ from utils.character_abstract import Character
 from utils.enums import BongoType
 from utils.utils import get_bongo_enum
 
-
+# ЧИТАЕТ НАСТРОЙКИ ИЗ ПАПКИ APPDATA
 def get_appdata_path(relative_path):
     appdata = os.getenv('APPDATA')
     app_dir = Path(appdata) / "MeowMate" / relative_path
@@ -25,15 +25,15 @@ class Bongo(Character):
 
     def __init__(self, settings):
         super().__init__()
-        self.bongo_type = get_bongo_enum(settings["bongo_type"])
-        self.enable_tap_counter = settings["tap_counter"]
-        self.count = settings["count"]
+        self.bongo_type = get_bongo_enum(settings["bongo_type"])    # ТИП ИНСТРУМЕНТА
+        self.enable_tap_counter = settings["tap_counter"]           # РАЗРЕШЕН ЛИ СЧЕТЧИК
+        self.count = settings["count"]                              # ЧИСЛО НА СЧЕТЧИКЕ
 
         self.is_close_btn_showing = False
-        self.cat_main_pixmap = None
-        self.right_pixmap = None
-        self.left_pixmap = None
-        self.drag_pos = None
+        self.cat_main_pixmap = None                                 # ГЛАВНАЯ КАРТИНКА
+        self.left_pixmap = None                                     # ЛЕВАЯ ЛАПА УДАРИЛА
+        self.right_pixmap = None                                    # ПРАВАЯ ЛАПА УДАРИЛА
+        self.drag_pos = None                                        # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
@@ -44,49 +44,29 @@ class Bongo(Character):
         self.cat = QLabel(self)
         self.cat.setFixedSize(392, 392)
 
-        self.cat_piano_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano.png"))
-        self.cat_piano_left_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano_left.png"))
-        self.cat_piano_right_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano_right.png"))
-
-        self.cat_rock_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock.png"))
-        self.cat_rock_left_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock_left.png"))
-        self.cat_rock_right_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock_right.png"))
-
-        self.cat_classic_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic.png"))
-        self.cat_classic_left_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic_left.png"))
-        self.cat_classic_right_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic_right.png"))
-
-        self.cat_guitar_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar.png"))
-        self.cat_guitar_left_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar_left.png"))
-        self.cat_guitar_right_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar_right.png"))
-
-        self.cat_bongo_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo.png"))
-        self.cat_bongo_left_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo_left.png"))
-        self.cat_bongo_right_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo_right.png"))
-
         self.flag = True
-
         match self.bongo_type:
             case (BongoType.ROCK):
-                self.cat_main_pixmap = self.cat_rock_pixmap
-                self.left_pixmap = self.cat_rock_left_pixmap
-                self.right_pixmap = self.cat_rock_right_pixmap
+                self.cat_main_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock.png"))
+                self.left_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock_left.png"))
+                self.right_pixmap = QPixmap(str(self.resource_path / 'rock' / "cat_rock_right.png"))
             case (BongoType.PIANO):
-                self.cat_main_pixmap = self.cat_piano_pixmap
-                self.left_pixmap = self.cat_piano_left_pixmap
-                self.right_pixmap = self.cat_piano_right_pixmap
+                self.cat_main_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano.png"))
+                self.left_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano_left.png"))
+                self.right_pixmap = QPixmap(str(self.resource_path / 'piano' / "cat_piano_right.png"))
             case (BongoType.CLASSIC):
-                self.cat_main_pixmap = self.cat_classic_pixmap
-                self.left_pixmap = self.cat_classic_left_pixmap
-                self.right_pixmap = self.cat_classic_right_pixmap
+                self.cat_main_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic.png"))
+                self.left_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic_left.png"))
+                self.right_pixmap = QPixmap(str(self.resource_path / 'classic' / "cat_classic_right.png"))
             case (BongoType.GUITAR):
-                self.cat_main_pixmap = self.cat_guitar_pixmap
-                self.left_pixmap = self.cat_guitar_left_pixmap
-                self.right_pixmap = self.cat_guitar_right_pixmap
+                self.cat_main_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar.png"))
+                self.left_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar_left.png"))
+                self.right_pixmap = QPixmap(str(self.resource_path / 'guitar' / "cat_guitar_right.png"))
             case (BongoType.BONGO):
-                self.cat_main_pixmap = self.cat_bongo_pixmap
-                self.left_pixmap = self.cat_bongo_left_pixmap
-                self.right_pixmap = self.cat_bongo_right_pixmap
+                self.cat_main_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo.png"))
+                self.left_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo_left.png"))
+                self.right_pixmap = QPixmap(str(self.resource_path / 'bongo' / "cat_bongo_right.png"))
+
 
         self.cat.setPixmap(self.cat_main_pixmap)
 
@@ -114,11 +94,11 @@ class Bongo(Character):
             self.counter.setText(str(self.count))
 
 
-
     # ОБРАБОТКА ОТПУСКАНИЯ КЛАВИШИ КЛАВИАТУРЫ
     def on_release(self, _):
         self.cat.setPixmap(self.cat_main_pixmap)
 
+    # СЛУШАТЕЛЬ ЗАКРЫТИЯ ОКНА
     def closeEvent(self, event):
         settings = {
             "tap_counter": self.enable_tap_counter,
@@ -127,9 +107,12 @@ class Bongo(Character):
         }
         with open(str(get_appdata_path("settings/bongo_settings.json")), "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
+
+
+        self.listener.stop()
         super().closeEvent(event)
 
-
+    # ВОЗВРАЩАЕТ ОКНО НАСТРОЕК
     @staticmethod
     def getSettingWindow(root_container, settings):
         return BongoSettingsWindow(root_container, settings)

@@ -18,16 +18,14 @@ class Ham(Character):
     def __init__(self, settings):
         super().__init__()
 
-        self.enable_hiding = settings["hiding"]
-        self.size = int(settings["size"])
-
-        self.is_first_frame = None
+        self.enable_hiding = settings["hiding"]         # РАЗРЕШЕНО ЛИ ПРЯТАТЬСЯ
+        self.size = int(settings["size"])               # РАЗМЕР ХАМЕЛИОНА
+        self.is_first_frame = False                     # ФЛАГ ДЛЯ ПЕРВОГО КАДРА ГИФКИ
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.screen = QApplication.primaryScreen().geometry()
         self.setGeometry(500, 500, int(self.size*1.78), self.size)
 
         self.main_movie = QMovie(str(self.resource_path / "main.gif"))
@@ -37,6 +35,7 @@ class Ham(Character):
         self.main_movie.start()
 
         self.run_movie = QMovie(str(self.resource_path / "move.gif"))
+        self.run_movie.setCacheMode(QMovie.CacheMode.CacheAll)
         self.run_movie.setSpeed(140)
         self.run_movie.setScaledSize(QSize(int(self.size*1.78), self.size))
         self.run_movie.frameChanged.connect(self.check_frame_change)
@@ -49,12 +48,10 @@ class Ham(Character):
                                                                                            Qt.TransformationMode.SmoothTransformation)
 
         self.stick = QLabel(self)
-        self.stick.setMouseTracking(True)
         self.stick.setPixmap(self.stick_pix)
         self.stick.setGeometry(0, 0, int(self.size*1.78), self.size)
 
         self.ham_main = QLabel(self)
-        self.ham_main.setMouseTracking(True)
         self.ham_main.setMovie(self.main_movie)
         self.ham_main.setGeometry(0, 0, int(self.size*1.78), self.size)
 
@@ -68,14 +65,17 @@ class Ham(Character):
             self.timer.timeout.connect(self.make_transparent)
             self.timer.start()
 
+    # СТАТЬ ПРОЗРАЧНЫМ
     def make_transparent(self):
         self.ham_main.setPixmap(self.transparent_pix)
 
+    # ОСТАНОВИТЬ АНИМАЦИЮ ПЕРЕБЕГАНИЯ ПО ВЕТКЕ
     def stop_run_animation(self):
         self.run_movie.stop()
         self.ham_main.setMovie(self.main_movie)
         self.main_movie.start()
 
+    # ОСТАНАВЛИВАЕТ ГИФКУ ПО ДОСТИЖЕНИЮ ПОСЛЕДНЕГО КАДРА
     def check_frame_change(self, frame_number):
         if frame_number == 0:
             if self.is_first_frame:
@@ -84,6 +84,7 @@ class Ham(Character):
             else:
                 self.is_first_frame = True
 
+    # ОБРАБОТКА НАЖАТИЯ НА ХАМЕЛИОНА
     def mousePressEvent(self, event):
         self.main_movie.stop()
         if self.enable_hiding:
@@ -97,6 +98,7 @@ class Ham(Character):
         self.run_animation.start()
         super().mousePressEvent(event)
 
+    # ОБРАБОТКА ПЕРЕМЕЩЕНИЯ ХАМЕЛИОНА
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             if self.drag_pos:
@@ -109,7 +111,6 @@ class Ham(Character):
                 right_maximum = parent_rect.right() - int(self.size*1.78)
                 top_maximum = parent_rect.top()
                 bottom_maximum = parent_rect.bottom()-self.size
-
                 # Ограничиваем перемещение
                 x = max(left_maximum,
                         min(new_pos.x(),
@@ -118,11 +119,11 @@ class Ham(Character):
                 y = max(top_maximum,
                         min(new_pos.y(),
                             bottom_maximum))
-
                 # Перемещаем виджет
                 self.move(x, y)
                 self.drag_pos = event.globalPos()
 
+    # ВОЗВРАЩАЕТ СЛУЧАЙНУЮ ВЕЛИЧИНУ ПЕРЕМЕЩЕНИЯ ХАМЕЛИОНА ПО ОСИ Х
     def get_x_value(self, current_x):
         branch_size = self.size/1.2
         max_right = int(branch_size*0.48)  # Максимум вправо от 0
@@ -139,6 +140,8 @@ class Ham(Character):
             new_x = current_x - shift
         return new_x
 
+
+    # ВОЗВРАЩАЕТ ОКНО НАСТРОЕК
     @staticmethod
     def getSettingWindow(root_container, settings):
         return HamSettingsWindow(root_container, settings)

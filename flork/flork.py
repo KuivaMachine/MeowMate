@@ -10,42 +10,28 @@ from pynput import keyboard
 
 from flork.flork_settings import FlorkSettingsWindow
 from utils.character_abstract import Character
-
-
-
-
-def get_taskbar_height():
-    screen = QApplication.primaryScreen()
-    screen_rect = screen.geometry()
-    available_rect = screen.availableGeometry()
-    dpi_scale = screen.devicePixelRatio()
-
-    if screen_rect.bottom() != available_rect.bottom():
-        return int((screen_rect.bottom() - available_rect.bottom()) / dpi_scale)
-    elif screen_rect.top() != available_rect.top():
-        return int((available_rect.top() - screen_rect.top()) / dpi_scale)
-    else:
-        return int(40 / dpi_scale)
+from utils.utils import get_taskbar_height
 
 
 class Flork(Character):
-
     app_directory = Path(__file__).parent.parent
     resource_path = app_directory / 'drawable' / 'flork'
 
     def __init__(self, settings):
         super().__init__()
 
-        self.size = settings["size"]
-        self.drag_pos = None
+        self.size = settings["size"]                # РАЗМЕР ПЕРСОНАЖА
+        self.drag_pos = None                        # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
+        self.flag = True                            # ФЛАГ ДЛЯ ОЧЕРЕДНОСТИ ПРАВО/ЛЕВО
+        self.is_first_frame = False                 # ФЛАГ ДЛЯ ПЕРВОГО КАДРА ГИФКИ
+        self.isAnimationPlaying = False             # ИГРАЕТ ЛИ СЕЙЧАС АНИМАЦИЯ
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
             Qt.WindowType.WindowStaysOnTopHint
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
-        self.screen = QApplication.primaryScreen().geometry()
-        self.setGeometry(100, self.screen.height() - get_taskbar_height() - self.size, self.size, self.size)
-        self.setMouseTracking(True)
+        screen = QApplication.primaryScreen()
+        self.setGeometry(100, screen.geometry().height() - get_taskbar_height(screen) - self.size, self.size, self.size)
 
         self.current_gif = None
 
@@ -60,13 +46,9 @@ class Flork(Character):
                                                                                               Qt.TransformationMode.SmoothTransformation)
 
         self.flork_main = QLabel(self)
-        self.flork_main.setMouseTracking(True)
         self.flork_main.setPixmap(self.flork_main_pixmap)
         self.flork_main.setGeometry(0, 0, self.size, self.size)
 
-        self.flag = True
-        self.is_first_frame = False
-        self.isAnimationPlaying = False
 
         # СЛУШАТЕЛЬ КЛАВИАТУРЫ
         self.listener = keyboard.Listener(
@@ -75,6 +57,11 @@ class Flork(Character):
         )
         self.listener.start()
 
+    # СЛУШАТЕЛЬ ЗАКРЫТИЯ ОКНА
+    def closeEvent(self, event):
+        self.listener.stop()
+
+    # ОСТАНАВЛИВАЕТ ГИФКУ ПО ДОСТИЖЕНИЮ ПОСЛЕДНЕГО КАДРА
     def check_frame_change(self, frame_number):
         if frame_number == 0:
             if self.is_first_frame:
@@ -96,19 +83,22 @@ class Flork(Character):
     def on_release(self, _):
         self.flork_main.setPixmap(self.flork_main_pixmap)
 
+    # ОСТАНАВЛИВАЕТ АНИМАЦИЮ
     def stopAnimation(self):
         self.current_gif.stop()
         self.flork_main.setPixmap(self.flork_main_pixmap)
         self.isAnimationPlaying = False
 
+    # ОБРАБОТКА НАЖАТИЯ НА ПЕРСОНАЖА
     def mousePressEvent(self, event):
         if event.button() == Qt.MouseButton.LeftButton:
             if not self.isAnimationPlaying:
                 random_int = random.randint(1, 7)
-                self.playAnimation(random_int )
+                self.play_random_animation(random_int)
 
         super().mousePressEvent(event)
 
+    # ОБРАБОТКА ПЕРЕТАСКИВАНИЯ ОКНА
     def mouseMoveEvent(self, event):
         if event.buttons() & Qt.MouseButton.LeftButton:
             if self.drag_pos:
@@ -122,10 +112,11 @@ class Flork(Character):
                         min(new_pos.x(),
                             right_maximum))
 
-                self.move(x, self.screen.height() - get_taskbar_height() - self.size)
+                self.move(x, self.geometry().y())
                 self.drag_pos = event.globalPos()
 
-    def playAnimation(self, number):
+    # ЗАПУСКАЕТ СЛУЧАЙНУЮ АНИМАЦИЮ
+    def play_random_animation(self, number):
         match number:
             case (1):
                 self.current_gif = QMovie(str(self.resource_path / "flork_shy.gif"))
@@ -149,6 +140,7 @@ class Flork(Character):
         self.flork_main.setMovie(self.current_gif)
         self.isAnimationPlaying = True
 
+    # ВОЗВРАЩАЕТ ОКНО НАСТРОЕК
     @staticmethod
     def getSettingWindow(root_container, settings):
         return FlorkSettingsWindow(root_container, settings)
