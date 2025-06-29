@@ -61,7 +61,7 @@ class Ham(Character):
 
         if self.enable_hiding:
             self.timer = QTimer(self)
-            self.timer.setInterval(300000)  # 5 минут
+            self.timer.setInterval(200000)  # 5 минут
             self.timer.timeout.connect(self.make_transparent)
             self.timer.start()
 

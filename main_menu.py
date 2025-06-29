@@ -84,8 +84,8 @@ class MainMenuWindow(QMainWindow):
         super().__init__()
         self.BONGO_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
         self.FLORK_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
-        self.APRICOT_CAT_MAX_COUNT = 5                                  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
-        self.CHAM_CAT_MAX_COUNT = 1                                     # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ЛЕНУСИК
+        self.APRICOT_CAT_MAX_COUNT = 8                                  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
+        self.CHAM_CAT_MAX_COUNT = 8                                     # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ЛЕНУСИК
         self.is_contacts_showing = False                                # ПОКАЗЫВАЕТСЯ ЛИ ОКНО КОНТАКТОВ
         self.drag_pos = None                                            # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
         self.is_setting_showing = False                                 # ПОКАЗЫВАЕТСЯ ЛИ ОКНО НАСТРОЕК
@@ -139,7 +139,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts.clicked.connect(self.show_contacts)
 
         # ВЕРСИЯ
-        self.version_label = QLabel('v1.0.4', self.root_container)
+        self.version_label = QLabel('v1.0.5', self.root_container)
         self.version_label.setGeometry(10, 568, 70, 30)
         self.version_label.setObjectName('version_label')
 
