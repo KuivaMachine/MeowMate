@@ -317,3 +317,52 @@ QPushButton#ham_done_btn:hover {
 QPushButton#ham_done_btn:pressed {
     background-color: #72489E;
 }
+
+
+
+
+/* UPDATES INFO WINDOW */
+ QLabel#updates_info_window{
+            color: #000000;
+            border:3px solid #000000;
+            border-radius:15px;
+            background-color: #99FFBC75;
+}
+QLabel#updates_info_window_title{
+                    color: #000000;
+                    font-size: 26px;
+                    font-weight: bold;
+                    font-family: 'JetBrains Mono';
+                    text-align: center;
+                    border:3px solid #000000;
+                    background-color: #FFBC75;
+                    border-radius:10px;
+                    padding: 6px;
+        }
+QLabel#updates_info_window_whats_new{
+            color: #000000;
+            font-size: 20px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono';
+            text-align: center;
+            border-radius:10px;
+            border:3px solid #000000;
+            background-color: #FFBC75;
+            padding: 6px;
+}
+QPushButton#updates_info_window_ok_button {
+            font-size: 20px;
+            font-weight: bold;
+            font-family: 'JetBrains Mono';
+            color: #000000;
+            border:3px solid #000000;
+            background-color:#FFBC75;
+            border-radius: 8px;
+            padding: 8px;
+        }
+        QPushButton#updates_info_window_ok_button:hover{
+            background-color: #B3B3B3
+        }
+        QPushButton#updates_info_window_ok_button:pressed{
+            background-color: #666666
+        }

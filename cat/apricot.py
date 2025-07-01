@@ -66,7 +66,6 @@ class Cat(Character):
         self.isEyesBig = False                                              # ГЛАЗА РАСШИРЕНЫ
         self.dragging = False                                               # КОТ РАССТЯГИВАЕТСЯ СЕЙЧАС
         self.key_pressed = False                                            # КЛАВИША КЛАВИАТУРЫ НАЖАТА
-        self.long_tap = False                                               # ФЛАГ ДОЛГОГО ЗАЖАТИЯ
         self.is_window_dragging = False                                     # КОТ ПЕРЕМЕЩАЕТСЯ
         self.is_stretching = False                                          # ФЛАГ РАССТЯГИВАНИЯ КОТА
 
@@ -81,6 +80,7 @@ class Cat(Character):
         self.monitor_height = QApplication.primaryScreen().geometry().height()
 
         # НАСТРОЙКИ ОКНА
+
         self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(QRect(800, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
@@ -109,14 +109,12 @@ class Cat(Character):
         self.eye_l = QLabel(self)
         self.eye_l.setPixmap(self.eye_left)
         self.eye_l.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
-        self.eye_l.setMouseTracking(True)
         self.center_l = self.eye_l.geometry().center()  # Центр левого глаза
 
         # ПРАВЫЙ ГЛАЗ
         self.eye_r = QLabel(self)
         self.eye_r.setPixmap(self.eye_right)
         self.eye_r.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
-        self.eye_r.setMouseTracking(True)
         self.center_r = self.eye_r.geometry().center()  # Центр правого глаза
 
         # КОТ
@@ -124,16 +122,15 @@ class Cat(Character):
         self.cat.setGeometry(0, 0, self.cat_window_size, self.cat_window_size)
         self.cat.setPixmap(self.main_cat)
         self.cat.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.cat.setMouseTracking(True)
 
         # ЛАПА КОТА
         self.lapa = QLabel(self)
+        self.lapa.setMouseTracking(False)
         self.lapa_gif = self.bottom_lapa_gif
         self.lapa_gif.setScaledSize(QSize(120, 140))
         self.lapa.setMovie(self.lapa_gif)
         self.lapa.setGeometry(5, 150, 111, 111)
-        self.lapa.setAlignment(Qt.AlignmentFlag.AlignCenter)
-        self.lapa.setMouseTracking(True)
+        self.lapa.setAttribute(Qt.WidgetAttribute.WA_TransparentForMouseEvents)
 
         # АНИМАЦИЯ ПЕРЕТАСКИВАНИЯ КОТА МЫШКОЙ
         self.move_cat_animation = QPropertyAnimation(self, b"pos")
@@ -168,7 +165,7 @@ class Cat(Character):
         self.hide_lapa_animation = QPropertyAnimation(self.lapa, b"pos")
         self.hide_lapa_animation.setDuration(200)
         self.hide_lapa_animation.setStartValue(self.lapa.pos())
-        self.hide_lapa_animation.setEndValue(QPoint(self.lapa.pos().x(), self.lapa.pos().y() + 100))
+        self.hide_lapa_animation.setEndValue(QPoint(self.lapa.pos().x(), self.lapa.pos().y() + 200))
 
         # ТАЙМЕР НА РАСШИРЕНИЕ ГЛАЗ (500 мс)
         self.bigeyes_timer = QTimer(self)
@@ -214,7 +211,6 @@ class Cat(Character):
     def update_mouse_left_click(self, pressed):
         if not pressed:
             self.long_drag_timer.stop()
-            self.long_tap = False
 
     # СКРЫВАНИЕ КОТА ЗА ЭКРАН
     def hide_cat(self):
@@ -240,20 +236,21 @@ class Cat(Character):
                 case (CatState.RIGHT):
                     self.hiding_cat_animation.setEndValue(QPoint(self.pos().x() + self.cat_window_size, self.pos().y()))
 
-            self.long_drag_timer.start()
-            self.hide_cat()
             self.dragging = True
+            self.drag_pos = event.globalPos()
             self.initial_pos = event.pos()
             self.original_height = self.cat.height()
             self.original_y = self.cat.y()
             self.bounce_animation.stop()
+            if not self.isFlying:
+                self.long_drag_timer.start()
             super().mousePressEvent(event)
-        else:
+
+        elif event.button() == Qt.MouseButton.RightButton:
             if not self.is_window_dragging:
                 super().mousePressEvent(event)
             else:
                 self.fall()
-                self.long_tap = False
                 self.is_window_dragging = False
                 self.long_drag_timer.stop()
 
@@ -288,7 +285,10 @@ class Cat(Character):
                 self.bounce_animation.setEndValue(target_rect)
                 self.bounce_animation.start()
 
-            self.fall()
+            if self.is_window_dragging:
+                self.fall()
+            else:
+                self.hide_cat()
 
     # СЛУШАТЕЛЬ ДВИЖЕНИЯ МЫШИ В ПРЕДЕЛАХ КОТА
     def mouseMoveEvent(self, event):
@@ -412,7 +412,15 @@ class Cat(Character):
 
     # ТАЙМЕР ДОЛГОГО ЗАЖАТИЯ
     def on_long_drag_timer_out(self):
-        self.long_tap = True
+        self.dragging = False
+        self.is_window_dragging = True
+        self.dragging = False
+        self.eye_l.setVisible(False)
+        self.eye_r.setVisible(False)
+        self.cat.setPixmap(self.cat_dragged)
+        self.lapa.setVisible(False)
+        self.cat.setGeometry((self.cat_window_size - self.cat_dragged.width()), 0, self.cat_window_size,
+                             self.cat_window_size)
         self.long_drag_timer.stop()
 
     # ФУНКЦИЯ ПЕРЕКЛЮЧЕНИЯ БОЛЬШИХ ГЛАЗ
@@ -461,14 +469,13 @@ class Cat(Character):
 
     # СЛУШАТЕЛЬ МЫШИ
     def update_mouse_position(self, mouse_x, mouse_y):
-
         local_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
 
         # ЕСЛИ КУРСОР В ПРЕДЕЛАХ ТРИГГЕРНОЙ ЗОНЫ ЛАПЫ
         if self.lapa_react_zone.contains(local_pos):
-            self.lapa.setVisible(True)
             # ВЫБРАСЫВАЕМ ЛАПУ ТОЛЬКО ЕСЛИ ЕЕ НЕТ, КОТ НЕ ПЕРЕМЕЩАЕТСЯ И НЕ РАСТЯГИВАЕТСЯ
             if not self.isLapaOut and not self.is_window_dragging and not self.dragging:
+                self.lapa.setVisible(True)
                 self.throwLapa()
         else:
             if self.isLapaOut:
@@ -478,33 +485,25 @@ class Cat(Character):
         self.move_cat_animation.setEndValue(
             QPoint(mouse_x - int(self.cat_window_size / 2), mouse_y - int(self.cat_window_size / 3)))
 
-        # ЕСЛИ ДОЛГОЕ НАЖАТИЕ (1000 мс)
-        if self.long_tap:
-            self.is_window_dragging = True
-            self.dragging = False
-            self.eye_l.setVisible(False)
-            self.eye_r.setVisible(False)
-            self.cat.setPixmap(self.cat_dragged)
-            self.cat.setGeometry((self.cat_window_size - self.cat_dragged.width()), 0, self.cat_window_size,
-                                 self.cat_window_size)
-            self.lapa.setVisible(False)
-            self.move_cat_animation.start()
+        # ЕСЛИ КОТ ПЕРЕТАСКИВАЕТСЯ - ПЕРЕМЕЩАЕМ ЕГО
+        if self.is_window_dragging:
+            self.move(QPoint(mouse_x-int(self.cat.width()/2),mouse_y-int(self.cat.width()/3)))
 
-        # Преобразуем глобальные координаты мыши в координаты относительно окна
-        mouse_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
 
-        # Вычисляем расстояние от мыши до центра окна
-        distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
-                             (mouse_pos.y() - self.center_l.y()) ** 2)
+        if not self.isFlying and not self.dragging and not self.is_window_dragging:
+            # Преобразуем глобальные координаты мыши в координаты относительно окна
+            mouse_pos = self.mapFromGlobal(QPoint(mouse_x, mouse_y))
+            # Вычисляем расстояние от мыши до центра окна
+            distance = math.sqrt((mouse_pos.x() - self.center_l.x()) ** 2 +
+                                 (mouse_pos.y() - self.center_l.y()) ** 2)
 
-        # Если мышь в пределах 200 пикселей
-        if distance > self.eyes_distance and not self.small_eyes_timer.isActive():
-            self.small_eyes_timer.start()
+            # ЕСЛИ МЫШЬ В ПРЕДЕЛАХ 250 пикселей
+            if distance > self.eyes_distance and not self.small_eyes_timer.isActive():
+                self.small_eyes_timer.start()
 
-        if distance <= self.eyes_distance and not self.bigeyes_timer.isActive():
-            self.bigeyes_timer.start()
+            if distance <= self.eyes_distance and not self.bigeyes_timer.isActive():
+                self.bigeyes_timer.start()
 
-        if not self.isFlying:
             self.move_eye(self.eye_l, self.center_l, mouse_pos)
             self.move_eye(self.eye_r, self.center_r, mouse_pos)
 
@@ -534,7 +533,7 @@ class Cat(Character):
     # ПОЯВЛЕНИЕ КОТА ПОСЛЕ СКРЫТИЯ
     def cat_coming(self, position):
         self.cat_coming_animation.start(),
-        self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 5)==1 else None,
+        self.start_fly() if self.enable_fly and position == CatState.BOTTOM and random.randint(1, 6)==1 else None,
         self.show()
 
     # ФУНКЦИЯ ПОВОРОТА КОТА И ГЛАЗ В ЗАВИСИМОСТИ ОТ ВЫБРАННОГО И ТЕКУЩЕГО ПОЛОЖЕНИЯ КОТА

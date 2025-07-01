@@ -19,7 +19,17 @@ from ui.portal import Portal
 from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
 from ui.switch_button import SwitchButton
+from ui.updates_info_window import UpdateInfoWindow
 from utils.enums import ThemeColor, CharactersList
+
+
+# ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
+def check_is_first_run():
+    flag_file = get_resource_path('resources/first_run.flag')
+    if not flag_file.exists():
+        flag_file.write_text('1', encoding='utf-8')
+        return True
+    return False
 
 
 # ЧИТАЕМ НАСТРОЙКИ ИЗ ПАПКИ APPDATA И СОЗДАЕМ, ЕСЛИ ИХ НЕТ
@@ -139,7 +149,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts.clicked.connect(self.show_contacts)
 
         # ВЕРСИЯ
-        self.version_label = QLabel('v1.0.5', self.root_container)
+        self.version_label = QLabel('v1.0.6', self.root_container)
         self.version_label.setGeometry(10, 568, 70, 30)
         self.version_label.setObjectName('version_label')
 
@@ -152,6 +162,18 @@ class MainMenuWindow(QMainWindow):
         with open(get_resource_path('resources/light-theme.qss'), 'r') as f:
             self.light_style = f.read()
         self.change_theme(is_dark_theme)
+
+        if check_is_first_run():
+            self.show_updates_info()
+
+    # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
+    def show_updates_info(self):
+        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.6!", """Что нового:
+        
+- Исправлены баги
+- Улучшена графика""")
+        updates_info.show()
+
 
     # ПОКАЗЫВАЕТ ОКНО КОНТАКТОВ
     def show_contacts(self):
@@ -359,6 +381,8 @@ class MainMenuWindow(QMainWindow):
         if hasattr(self, 'drag_pos') and self.drag_pos is not None:
             self.move(self.pos() + event.globalPos() - self.drag_pos)
             self.drag_pos = event.globalPos()
+
+
 
 
 if __name__ == "__main__":
