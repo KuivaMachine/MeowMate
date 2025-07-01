@@ -25,9 +25,9 @@ from utils.enums import ThemeColor, CharactersList
 
 # ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
 def check_is_first_run():
-    flag_file = get_resource_path('resources/first_run.flag')
-    if not flag_file.exists():
-        flag_file.write_text('1', encoding='utf-8')
+    flag_file = Path(os.getenv('APPDATA')) / "MeowMate/first_run.flag"
+    if flag_file.read_text(encoding='utf-8')=="1":
+        flag_file.write_text('0', encoding='utf-8')
         return True
     return False
 
