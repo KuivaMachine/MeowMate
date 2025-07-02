@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import winreg
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
@@ -25,11 +26,27 @@ from utils.enums import ThemeColor, CharactersList
 
 # ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
 def check_is_first_run():
-    flag_file = Path(os.getenv('APPDATA')) / "MeowMate/first_run.flag"
-    if flag_file.read_text(encoding='utf-8')=="1":
-        flag_file.write_text('0', encoding='utf-8')
+    # Путь к ключу в реестре
+    reg_path = r"Software\KuivaMachine\MeowMate"
+    key_name = "is_first_run"
+
+    try:
+        # Открываем ключ для чтения (HKEY_CURRENT_USER)
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ) as key:
+            value, reg_type = winreg.QueryValueEx(key, key_name)
+            if value == b'\x01':
+                print("Первый запуск! Меняю значение на 0.")
+                # Переоткрываем ключ для записи
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as w_key:
+                    winreg.SetValueEx(w_key, key_name, 0, winreg.REG_BINARY, b'\x00')  # Записываем 0 (байты)
+                return True
+            else:
+                print(value)
+                return False
+
+    except FileNotFoundError:
+        print("Ключ реестра не найден!")
         return True
-    return False
 
 
 # ЧИТАЕМ НАСТРОЙКИ ИЗ ПАПКИ APPDATA И СОЗДАЕМ, ЕСЛИ ИХ НЕТ
@@ -149,7 +166,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts.clicked.connect(self.show_contacts)
 
         # ВЕРСИЯ
-        self.version_label = QLabel('v1.0.6', self.root_container)
+        self.version_label = QLabel('v1.0.7', self.root_container)
         self.version_label.setGeometry(10, 568, 70, 30)
         self.version_label.setObjectName('version_label')
 
@@ -168,7 +185,7 @@ class MainMenuWindow(QMainWindow):
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):
-        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.6!", """Что нового:
+        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.7!", """Что нового:
         
 - Исправлены баги
 - Улучшена графика""")
