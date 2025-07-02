@@ -7,7 +7,8 @@ from pathlib import Path
 from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtSvg import QSvgWidget
-from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton
+from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton, \
+    QMessageBox
 
 from bongo.bongo import Bongo
 from cat.apricot import Cat
@@ -21,7 +22,11 @@ from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
 from ui.switch_button import SwitchButton
 from ui.updates_info_window import UpdateInfoWindow
+from update_script import UpdatesChecker
 from utils.enums import ThemeColor, CharactersList
+
+
+
 
 
 # ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
@@ -182,6 +187,27 @@ class MainMenuWindow(QMainWindow):
 
         if check_is_first_run():
             self.show_updates_info()
+
+        self.setup_update_checker()
+
+    def setup_update_checker(self):
+        self.update_thread = UpdatesChecker()
+        self.update_thread.update_available.connect(self.show_update_dialog)
+        self.update_thread.start()
+
+    def show_update_dialog(self, download_url):
+        reply = QMessageBox.question(
+            self,
+            "Доступно обновление",
+            f"Версия доступна для загрузки.\nОбновить сейчас?",
+            QMessageBox.Yes | QMessageBox.No
+        )
+
+        if reply == QMessageBox.Yes:
+            self.update_thread.download_and_install(download_url)
+        else:
+            self.update_thread.exit(0)
+
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):

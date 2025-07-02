@@ -3,4 +3,7 @@
 
 pyinstaller app.spec
 
+
+pyinstaller updater.spec
+
 git add .; git commit -m "v1.0.7"; git push -u origin;
