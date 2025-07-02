@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton, \
-    QMessageBox
+    QMessageBox, QProgressDialog
 
 from bongo.bongo import Bongo
 from cat.apricot import Cat
@@ -204,9 +204,17 @@ class MainMenuWindow(QMainWindow):
         )
 
         if reply == QMessageBox.Yes:
-            self.update_thread.download_and_install(download_url)
+            self.download(download_url)
         else:
             self.update_thread.exit(0)
+
+
+    def download(self, download_url):
+        self.progress = QProgressDialog("Загрузка обновления...", "Отмена", 0, 100, self)
+        self.progress.setWindowTitle("Обновление MeowMate")
+        self.progress.setWindowModality(Qt.WindowModal)
+        self.progress.canceled.connect(lambda: print("отмена"))
+        self.update_thread.download_and_install(download_url)
 
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
