@@ -8,7 +8,7 @@ from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
 from PyQt5.QtGui import QFontDatabase
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton, \
-    QMessageBox, QProgressDialog
+    QMessageBox
 
 from bongo.bongo import Bongo
 from cat.apricot import Cat
@@ -22,7 +22,7 @@ from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
 from ui.switch_button import SwitchButton
 from ui.updates_info_window import UpdateInfoWindow
-from update_script import UpdatesChecker
+from utils.update_script import UpdatesChecker, UpdatesDownloader
 from utils.enums import ThemeColor, CharactersList
 
 
@@ -172,7 +172,7 @@ class MainMenuWindow(QMainWindow):
 
         # ВЕРСИЯ
         self.version_label = QLabel('v1.0.7', self.root_container)
-        self.version_label.setGeometry(10, 568, 70, 30)
+        self.version_label.setGeometry(10, 568, 170, 30)
         self.version_label.setObjectName('version_label')
 
         # СПИСОК АКТИВНЫХ ПЕРСОНАЖЕЙ
@@ -204,25 +204,23 @@ class MainMenuWindow(QMainWindow):
         )
 
         if reply == QMessageBox.Yes:
-            self.download(download_url)
-        else:
-            self.update_thread.exit(0)
+            self.downloader = UpdatesDownloader(download_url)
+            self.downloader.start()
+            self.version_label.setText("Скачиваю обновление...")
+
+        self.update_thread.quit()
+        self.update_thread.wait()
 
 
-    def download(self, download_url):
-        self.progress = QProgressDialog("Загрузка обновления...", "Отмена", 0, 100, self)
-        self.progress.setWindowTitle("Обновление MeowMate")
-        self.progress.setWindowModality(Qt.WindowModal)
-        self.progress.canceled.connect(lambda: print("отмена"))
-        self.update_thread.download_and_install(download_url)
+
 
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):
         updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.7!", """Что нового:
-        
 - Исправлены баги
-- Улучшена графика""")
+- Улучшена графика
+""")
         updates_info.show()
 
 
