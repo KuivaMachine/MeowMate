@@ -52,6 +52,7 @@ class UpdatesChecker(QThread):
             with open(update_file, "wb") as f:
                 for chunk in r.iter_content(chunk_size=8192):
                     f.write(chunk)
+        print("Скачал, устанавливаю...")
         subprocess.run([update_file, "/quiet"], shell=True)
         os.remove(update_file)
 
