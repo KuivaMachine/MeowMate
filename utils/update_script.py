@@ -53,7 +53,7 @@ class UpdatesChecker(QThread):
         finally:
             return None
 
-
+#TODO: НАДО СДЕЛАТЬ ПЕРЕУСТАНОВКУ С ПРАВАМИ АДМИНА И СДЕЛАТЬ ДИЗАЙН К ОКНУ
 class UpdatesDownloader(QThread):
     def __init__(self, download_url):
         super().__init__()
@@ -86,7 +86,7 @@ class UpdatesDownloader(QThread):
 
 
         print("Скачал, устанавливаю...")
-        subprocess.run([update_file, "/quiet"], shell=True)
+        subprocess.run([update_file, "/quiet","/norestart"], shell=True)
         print("Закончил")
-        os.remove(update_file)
-        print("Удалил")
+        # os.remove(update_file)
+        # print("Удалил")
