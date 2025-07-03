@@ -17,6 +17,7 @@ from ham.ham import Ham
 from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.developer_contacts_window import ContactWindow
+from ui.download_window import DownloadWindow
 from ui.portal import Portal
 from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
@@ -188,28 +189,33 @@ class MainMenuWindow(QMainWindow):
         if check_is_first_run():
             self.show_updates_info()
 
-        self.setup_update_checker()
-
+        # self.setup_update_checker()
+        self.show_update_dialog( "https://github.com/KuivaMachine/MeowMate/releases/download/v1.0.7/update_v1.0.7.exe")
     def setup_update_checker(self):
         self.update_thread = UpdatesChecker()
         self.update_thread.update_available.connect(self.show_update_dialog)
         self.update_thread.start()
 
     def show_update_dialog(self, download_url):
-        reply = QMessageBox.question(
-            self,
-            "Доступно обновление",
-            f"Версия доступна для загрузки.\nОбновить сейчас?",
-            QMessageBox.Yes | QMessageBox.No
-        )
-
-        if reply == QMessageBox.Yes:
+        # reply = QMessageBox.question(
+        #     self,
+        #     "Доступно обновление",
+        #     f"Версия доступна для загрузки.\nОбновить сейчас?",
+        #     QMessageBox.Yes | QMessageBox.No
+        # )
+        #
+        # if reply == QMessageBox.Yes:
+            self.download_window = DownloadWindow(self.root_container)
+            self.download_window.show()
             self.downloader = UpdatesDownloader(download_url)
-            self.downloader.start()
-            self.version_label.setText("Скачиваю обновление...")
+            self.downloader.progress_updated.connect(self.download_window.update_value)
+            self.downloader.download_finished.connect(self.download_window.finish_download)
+            self.download_window.update_value(50)
+            # self.downloader.start()
 
-        self.update_thread.quit()
-        self.update_thread.wait()
+        # self.update_thread.quit()
+        # self.update_thread.wait()
+
 
 
 

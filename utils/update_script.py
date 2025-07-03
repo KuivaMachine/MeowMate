@@ -25,8 +25,8 @@ class UpdatesChecker(QThread):
         super().__init__()
 
         self.VERSION_URL = "https://raw.githubusercontent.com/KuivaMachine/MeowMate/refs/heads/main/version.json"
-        self.APPDIR = Path(sys.executable).parent
-        # self.APPDIR = "./"
+        # self.APPDIR = Path(sys.executable).parent
+        self.APPDIR = "./"
 
     def run(self):
         print(self.APPDIR)
@@ -55,6 +55,9 @@ class UpdatesChecker(QThread):
 
 #TODO: НАДО СДЕЛАТЬ ПЕРЕУСТАНОВКУ С ПРАВАМИ АДМИНА И СДЕЛАТЬ ДИЗАЙН К ОКНУ
 class UpdatesDownloader(QThread):
+    progress_updated = pyqtSignal(int)
+    download_finished = pyqtSignal(str)
+
     def __init__(self, download_url):
         super().__init__()
         self.download_url = download_url
@@ -67,9 +70,22 @@ class UpdatesDownloader(QThread):
             print(f"Начинаю скачивать в {download_dir}")
             try:
                 with requests.get(self.download_url, stream=True) as r:
+                    r.raise_for_status()
+
+                    # Получаем общий размер файла из заголовков
+                    total_size = int(r.headers.get('content-length', 0))
+                    downloaded_size = 0
+
                     with open(update_file, "wb") as f:
                         for chunk in r.iter_content(chunk_size=8192):
-                            f.write(chunk)
+                            if chunk:
+                                f.write(chunk)
+                                downloaded_size += len(chunk)
+                                if total_size > 0:
+                                    progress = int((downloaded_size / total_size) * 100)
+                                    self.progress_updated.emit(progress)
+
+                    self.download_finished.emit("ВСЕ СКАЧАЛОСЬ")
             except requests.ConnectionError:
                 print("Ошибка подключения")
                 return None
@@ -84,9 +100,10 @@ class UpdatesDownloader(QThread):
                 return None
 
 
-
-        print("Скачал, устанавливаю...")
-        subprocess.run([update_file, "/quiet","/norestart"], shell=True)
-        print("Закончил")
+        else:
+            print("Уже скачано")
+        # print("Устанавливаю...")
+        # subprocess.run([update_file, "/quiet","/norestart"], shell=True)
+        # print("Закончил")
         # os.remove(update_file)
         # print("Удалил")
