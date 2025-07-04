@@ -409,3 +409,93 @@ QPushButton#updates_info_window_ok_button {
         QPushButton#updates_info_window_ok_button:pressed{
             background-color: #FF9C33;
         }
+
+
+
+
+
+/* DOWNLOAD WINDOW */
+QLabel#download_window_root{
+            color: white;
+            border:3px solid white;
+            border-radius:15px;
+            background-color: #666666;
+}
+
+QProgressBar#download_progress_bar {
+  border: 3px solid white;
+  background: #666666;
+  height: 30px;
+  border-radius: 18px;
+}
+QProgressBar#download_progress_bar::chunk {
+  border-radius: 15px;
+  background: #FF006A;
+}
+
+QLabel#download_title{
+  color: white;
+  font-size: 24px;
+  font-weight: light;
+  font-family: 'PT Mono';
+  border:none;
+}
+
+
+/* QUESTION WINDOW */
+   QLabel#question_window_root{
+   border: none;
+   border-radius: 15px;
+   background-color: #666666;
+}
+
+QLabel#question{
+            font-size: 24px;
+            font-weight: light;
+            text-align: center;
+            font-family: 'PT Mono';
+            color: white;
+            border: 3px solid white;
+            border-radius: 15px;
+            background-color: #666666;
+            padding: 10px;
+}
+
+QPushButton#yes_btn{
+            font-size: 24px;
+            font-weight: light;
+            text-align: center;
+            font-family: 'PT Mono';
+            color: white;
+            border: 3px solid white;
+            border-radius:15px;
+            background-color:#666666;
+            padding: 10px;
+            height: 30px;
+        }
+        QPushButton#yes_btn:hover{
+            background-color: #4D4D4D;
+        }
+        QPushButton#yes_btn:pressed{
+            background-color: #333333;
+        }
+
+
+QPushButton#no_btn{
+                    font-size: 24px;
+                    font-weight: light;
+                    text-align: center;
+                    font-family: 'PT Mono';
+                    color: white;
+                    border: 3px solid white;
+                    border-radius:15px;
+                    background-color: #666666;
+                    padding: 10px;
+                    height: 30px;
+                }
+                QPushButton#no_btn:hover{
+                    background-color: #4D4D4D;
+                }
+                QPushButton#no_btn:pressed{
+                    background-color: #333333;
+                }

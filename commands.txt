@@ -6,4 +6,7 @@ pyinstaller app.spec
 
 pyinstaller updater.spec
 
-git add .; git commit -m "new download window"; git push -u origin;
+git add .; git commit -m "stable 1.0.6"; git push -u origin;
+
+
+

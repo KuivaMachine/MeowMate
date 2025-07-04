@@ -1,6 +1,7 @@
 import json
 import os
 import sys
+import time
 import winreg
 from pathlib import Path
 
@@ -19,15 +20,13 @@ from ui.description_plus_buttons_window import DescriptionWindow
 from ui.developer_contacts_window import ContactWindow
 from ui.download_window import DownloadWindow
 from ui.portal import Portal
+from ui.question_for_update_window import QuestionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
 from ui.switch_button import SwitchButton
 from ui.updates_info_window import UpdateInfoWindow
-from utils.update_script import UpdatesChecker, UpdatesDownloader
+from utils.update_script import UpdatesChecker, UpdatesDownloader, UpdatesInstaller
 from utils.enums import ThemeColor, CharactersList
-
-
-
 
 
 # ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
@@ -41,15 +40,14 @@ def check_is_first_run():
         with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ) as key:
             value, reg_type = winreg.QueryValueEx(key, key_name)
             if value == b'\x01':
-                print("Первый запуск! Меняю значение на 0.")
+                print("Первый запуск")
                 # Переоткрываем ключ для записи
                 with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as w_key:
                     winreg.SetValueEx(w_key, key_name, 0, winreg.REG_BINARY, b'\x00')  # Записываем 0 (байты)
                 return True
             else:
-                print(value)
+                print("Не первый запуск")
                 return False
-
     except FileNotFoundError:
         print("Ключ реестра не найден!")
         return True
@@ -94,6 +92,7 @@ def load_settings(path):
         print("Файл настроек не найден или поврежден")
         return None
 
+
 # ЗАГРУЖАЕТ ШРИФТЫ В ЛОКАЛЬНУЮ БАЗУ
 def load_fonts():
     font_db = QFontDatabase()
@@ -109,20 +108,21 @@ def load_fonts():
 
 
 class MainMenuWindow(QMainWindow):
-    resource_path = Path(__file__).parent / 'drawable'                  # ПУТЬ К ПАПКЕ С РЕСУРСАМИ
-    theme_color = ThemeColor.LIGHT                                      # ТЕМА ПО УМОЛЧАНИЮ СВЕТЛАЯ
-    theme_change_signal = pyqtSignal(ThemeColor)                        # СИГНАЛ О СМЕНЕ ТЕМЫ
+    resource_path = Path(__file__).parent / 'drawable'  # ПУТЬ К ПАПКЕ С РЕСУРСАМИ
+    theme_color = ThemeColor.LIGHT  # ТЕМА ПО УМОЛЧАНИЮ СВЕТЛАЯ
+    theme_change_signal = pyqtSignal(ThemeColor)  # СИГНАЛ О СМЕНЕ ТЕМЫ
 
     def __init__(self):
         super().__init__()
-        self.BONGO_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
-        self.FLORK_CAT_MAX_COUNT = 15                                   # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
-        self.APRICOT_CAT_MAX_COUNT = 8                                  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
-        self.CHAM_CAT_MAX_COUNT = 8                                     # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ЛЕНУСИК
-        self.is_contacts_showing = False                                # ПОКАЗЫВАЕТСЯ ЛИ ОКНО КОНТАКТОВ
-        self.drag_pos = None                                            # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
-        self.is_setting_showing = False                                 # ПОКАЗЫВАЕТСЯ ЛИ ОКНО НАСТРОЕК
-        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)           # БЕЗ ГРАНИЦ
+        self.download_window = None
+        self.BONGO_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
+        self.FLORK_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
+        self.APRICOT_CAT_MAX_COUNT = 8  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
+        self.CHAM_CAT_MAX_COUNT = 8  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ЛЕНУСИК
+        self.is_contacts_showing = False  # ПОКАЗЫВАЕТСЯ ЛИ ОКНО КОНТАКТОВ
+        self.drag_pos = None  # НАЧАЛЬНАЯ ПОЗИЦИЯ ОКНА В МОМЕНТ НАЖАТИЯ ПЕРЕД ПЕРЕТАСКИВАНИЕМ
+        self.is_setting_showing = False  # ПОКАЗЫВАЕТСЯ ЛИ ОКНО НАСТРОЕК
+        self.setWindowFlag(Qt.WindowType.FramelessWindowHint)  # БЕЗ ГРАНИЦ
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)  # БЕЗ ФОНА
         self.setFixedSize(800, 600)
 
@@ -186,48 +186,57 @@ class MainMenuWindow(QMainWindow):
             self.light_style = f.read()
         self.change_theme(is_dark_theme)
 
-        if check_is_first_run():
-            self.show_updates_info()
+        # if check_is_first_run():
+        #     self.show_updates_info()
 
-        # self.setup_update_checker()
-        self.show_update_dialog( "https://github.com/KuivaMachine/MeowMate/releases/download/v1.0.7/update_v1.0.7.exe")
+        self.setup_update_checker()
+
+
     def setup_update_checker(self):
-        self.update_thread = UpdatesChecker()
-        self.update_thread.update_available.connect(self.show_update_dialog)
-        self.update_thread.start()
+        self.update_checker_thread = UpdatesChecker()
+        self.update_checker_thread.update_available.connect(self.show_update_dialog)
+        self.update_checker_thread.start()
 
     def show_update_dialog(self, download_url):
-        # reply = QMessageBox.question(
-        #     self,
-        #     "Доступно обновление",
-        #     f"Версия доступна для загрузки.\nОбновить сейчас?",
-        #     QMessageBox.Yes | QMessageBox.No
-        # )
-        #
-        # if reply == QMessageBox.Yes:
-            self.download_window = DownloadWindow(self.root_container)
-            self.download_window.show()
-            self.downloader = UpdatesDownloader(download_url)
-            self.downloader.progress_updated.connect(self.download_window.update_value)
-            self.downloader.download_finished.connect(self.download_window.finish_download)
-            self.download_window.update_value(50)
-            # self.downloader.start()
+        self.update_checker_thread.quit()
+        self.update_checker_thread.wait()
+        self.question_box = QuestionWindow(self.root_container)
+        self.question_box.yes_event.connect(lambda: (
+            self.question_box.close(),
+            self.downloading_updates(download_url)))
+        self.question_box.no_event.connect(self.question_box.close)
+        self.question_box.show()
 
-        # self.update_thread.quit()
-        # self.update_thread.wait()
+    def downloading_updates(self, download_url):
+        self.download_window = DownloadWindow(self.root_container)
+        self.download_window.show()
 
+        self.download_thread = UpdatesDownloader(self, download_url)
+        self.download_thread.progress_updated.connect(self.download_window.update_value)
+        self.download_thread.download_finished.connect(self.start_install_updates)
+        self.download_thread.start()
 
+    def start_install_updates(self, update_file):
+        self.download_window.close(),
+        self.download_thread.quit(),
+        self.download_thread.wait(),
+        self.download_window.finish_download()
 
+        self.updates_installer_thread = UpdatesInstaller(update_file)
+        self.updates_installer_thread.install_finished.connect(self.close_application)
+        self.updates_installer_thread.start()
 
-
+    def close_application(self):
+        if self.windows:
+            for wind in self.windows:
+                wind.close()
+        QApplication.quit()
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):
         updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.6!", """Что нового:
-- НИХЕРА
 """)
         updates_info.show()
-
 
     # ПОКАЗЫВАЕТ ОКНО КОНТАКТОВ
     def show_contacts(self):
@@ -348,7 +357,7 @@ class MainMenuWindow(QMainWindow):
         blink.show()
         QTimer.singleShot(300, blink.deleteLater)
 
-        with open(Path(os.getenv('APPDATA')) / "MeowMate" /"settings/theme_mode.json", "w", encoding='utf-8') as f:
+        with open(Path(os.getenv('APPDATA')) / "MeowMate" / "settings/theme_mode.json", "w", encoding='utf-8') as f:
             json.dump(settings, f, indent=4, ensure_ascii=False)
 
     # ЗАГОЛОВОК
@@ -436,8 +445,9 @@ class MainMenuWindow(QMainWindow):
             self.move(self.pos() + event.globalPos() - self.drag_pos)
             self.drag_pos = event.globalPos()
 
-
-
+    # СРАБАТЫВАЕТ ПРИ ОТПУСКАНИИ
+    def mouseReleaseEvent(self, a0):
+        self.drag_pos = None
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
