@@ -6,7 +6,7 @@ pyinstaller app.spec
 
 pyinstaller updater.spec
 
-git add .; git commit -m "new 1.0.7"; git push -u origin;
+git add .; git commit -m "updated readme.md"; git push -u origin;
 
 
 
