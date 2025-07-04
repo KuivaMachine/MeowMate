@@ -172,7 +172,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts.clicked.connect(self.show_contacts)
 
         # ВЕРСИЯ
-        self.version_label = QLabel('v1.0.6', self.root_container)
+        self.version_label = QLabel('v1.0.7', self.root_container)
         self.version_label.setGeometry(10, 568, 170, 30)
         self.version_label.setObjectName('version_label')
 
@@ -186,8 +186,8 @@ class MainMenuWindow(QMainWindow):
             self.light_style = f.read()
         self.change_theme(is_dark_theme)
 
-        # if check_is_first_run():
-        #     self.show_updates_info()
+        if check_is_first_run():
+            self.show_updates_info()
 
         self.setup_update_checker()
 
@@ -234,7 +234,10 @@ class MainMenuWindow(QMainWindow):
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):
-        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.6!", """Что нового:
+        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.7!", """Что нового:
+- Исправлены баги.
+- Улучшена графика.
+- Добавлена поддержка обновлений.
 """)
         updates_info.show()
 
