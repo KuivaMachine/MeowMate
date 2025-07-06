@@ -111,9 +111,16 @@ class MainMenuWindow(QMainWindow):
     resource_path = Path(__file__).parent / 'drawable'  # ПУТЬ К ПАПКЕ С РЕСУРСАМИ
     theme_color = ThemeColor.LIGHT  # ТЕМА ПО УМОЛЧАНИЮ СВЕТЛАЯ
     theme_change_signal = pyqtSignal(ThemeColor)  # СИГНАЛ О СМЕНЕ ТЕМЫ
+    new_version = '1.0.8' # НОМЕР ТЕКУЩЕЙ ВЕРСИИ
+    whats_new_text = """ 
+- Исправлены баги.
+- Улучшена графика.
+- Добавлена поддержка обновлений.
+    """                     # ИНФОРМАЦИЯ ОБ ОБНОВЛЕНИИ
 
     def __init__(self):
         super().__init__()
+
         self.download_window = None
         self.BONGO_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
         self.FLORK_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
@@ -172,7 +179,7 @@ class MainMenuWindow(QMainWindow):
         self.contacts.clicked.connect(self.show_contacts)
 
         # ВЕРСИЯ
-        self.version_label = QLabel('v1.0.7', self.root_container)
+        self.version_label = QLabel(f'v{self.new_version}', self.root_container)
         self.version_label.setGeometry(10, 568, 170, 30)
         self.version_label.setObjectName('version_label')
 
@@ -188,12 +195,14 @@ class MainMenuWindow(QMainWindow):
 
         if check_is_first_run():
             self.show_updates_info()
+            self.is_first_run = True
 
-        self.setup_update_checker()
+        self.setup_update_checker(self.is_first_run)
 
 
-    def setup_update_checker(self):
-        self.update_checker_thread = UpdatesChecker()
+
+    def setup_update_checker(self,is_first_run):
+        self.update_checker_thread = UpdatesChecker(is_first_run)
         self.update_checker_thread.update_available.connect(self.show_update_dialog)
         self.update_checker_thread.start()
 
@@ -234,10 +243,8 @@ class MainMenuWindow(QMainWindow):
 
     # ПОКАЗЫВАЕТ ОКНО ИЗМЕНЕНИЙ В НОВОЙ ВЕРСИИ
     def show_updates_info(self):
-        updates_info = UpdateInfoWindow(self.root_container, "ОБНОВЛЕНО ДО ВЕРСИИ 1.0.7!", """Что нового:
-- Исправлены баги.
-- Улучшена графика.
-- Добавлена поддержка обновлений.
+        updates_info = UpdateInfoWindow(self.root_container, f"ОБНОВЛЕНО ДО ВЕРСИИ {self.new_version}!", f"""Что нового:
+{self.whats_new_text}
 """)
         updates_info.show()
 
@@ -451,6 +458,8 @@ class MainMenuWindow(QMainWindow):
     # СРАБАТЫВАЕТ ПРИ ОТПУСКАНИИ
     def mouseReleaseEvent(self, a0):
         self.drag_pos = None
+
+
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)

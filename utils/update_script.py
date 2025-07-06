@@ -1,11 +1,15 @@
+import datetime
 import json
 import os
+import platform
 import subprocess
 import sys
+from getpass import getuser
 from pathlib import Path, WindowsPath
 
 import requests
 from PyQt5.QtCore import QThread, pyqtSignal
+from dotenv import load_dotenv
 
 
 def load_settings(path):
@@ -16,6 +20,28 @@ def load_settings(path):
         print("Файл не найден или поврежден")
         return None
 
+def send_statistic(url, kiwi, version):
+    system_info = (
+        f"Установлена и запущена MeowMate v{version}\n"
+        f"⏰ Время: {datetime.datetime.now().strftime('%Y-%m-%d %H:%M')}\n"
+        f"👤 Пользователь: {getuser()}\n"
+        f"💻 Система: {platform.system()} {platform.version()}\n"
+        f"🖥️ Имя ПК: {platform.node()}"
+    )
+
+    payload = {
+        "chat_id": kiwi,
+        "text": system_info,
+        "parse_mode": "Markdown"
+    }
+    try:
+        response = requests.post(url, json=payload)
+        if response.status_code == 200:
+            print("Статистика отправлена")
+        else:
+            print(f"Ошибка: {response.text}")
+    except Exception as e:
+        print(f"Ошибка соединения: {str(e)}")
 
 def is_new_version(github_version, current_version):
     return int(github_version.replace(".", ""))>int(current_version.replace(".", ""))
@@ -24,16 +50,21 @@ def is_new_version(github_version, current_version):
 class UpdatesChecker(QThread):
     update_available = pyqtSignal(str)
 
-    def __init__(self):
+    def __init__(self,is_first_run):
         super().__init__()
 
         self.VERSION_URL = "https://raw.githubusercontent.com/KuivaMachine/MeowMate/refs/heads/main/version.json"
         self.APPDIR = Path(sys.executable).parent
+        self.is_first_run = is_first_run
         # self.APPDIR = "./"
 
     def run(self):
 
         current_version = load_settings(os.path.join(self.APPDIR, "version.json"))["version"]
+        if self.is_first_run:
+            load_dotenv(self.APPDIR / './resources' / '.env')
+            send_statistic(os.getenv("apple"), os.getenv("kiwi"), current_version)
+
         try:
             response = requests.get(self.VERSION_URL)
             data_from_github = json.loads(response.text)

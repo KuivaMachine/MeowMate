@@ -1,12 +1,12 @@
 
 
 
-pyinstaller app.spec
+pyinstaller build.spec
 
 
 pyinstaller updater.spec
 
-git add .; git commit -m "updated readme.md"; git push -u origin;
+git add .; git commit -m "1.0.8"; git push -u origin;
 
 
 
