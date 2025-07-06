@@ -6,7 +6,7 @@ pyinstaller build.spec
 
 pyinstaller updater.spec
 
-git add .; git commit -m "bug_fixing"; git push -u origin;
+git add .; git commit -m "new version 1.0.8"; git push -u origin;
 
 
 

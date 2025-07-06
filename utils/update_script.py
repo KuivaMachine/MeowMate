@@ -62,7 +62,7 @@ class UpdatesChecker(QThread):
 
         current_version = load_settings(os.path.join(self.APPDIR, "version.json"))["version"]
         if self.is_first_run:
-            load_dotenv(self.APPDIR / './resources' / '.env')
+            load_dotenv(self.APPDIR /'_internal'/'./resources' / '.env')
             send_statistic(os.getenv("apple"), os.getenv("kiwi"), current_version)
 
         try:

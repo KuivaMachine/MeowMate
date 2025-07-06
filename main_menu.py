@@ -122,6 +122,7 @@ class MainMenuWindow(QMainWindow):
         super().__init__()
 
         self.download_window = None
+        self.is_first_run = False    # ФЛАГ ПЕРВОГО ЗАПУСКА
         self.BONGO_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: БОНГО-КОТ
         self.FLORK_CAT_MAX_COUNT = 15  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: ФЛОРК
         self.APRICOT_CAT_MAX_COUNT = 8  # МАКСИМАЛЬНОЕ ЧИСЛО ПЕРСОНАЖЕЙ: АБРИКОС
