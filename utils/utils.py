@@ -1,4 +1,9 @@
+import os
+import sys
+import traceback
 import winreg
+from datetime import datetime
+from pathlib import Path
 
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QPainter, QIcon
@@ -9,6 +14,36 @@ from utils.enums import BongoType
 # Константы WinAPI
 ABM_GETTASKBARPOS = 0x00000005
 ABE_BOTTOM = 3
+
+def log_error(message = "", error="", method_prefix=""):
+    """Простой метод логирования ошибок"""
+    try:
+        # Путь к файлу на рабочем столе
+        log_file= Path(sys.executable).parent/ '_internal' /'logs.txt' # ДЛЯ РЕЛИЗА
+        # log_file= "./logs.txt" # ДЛЯ ЛОКАЛЬНОГО ЗАПУСКА
+
+        # Создаем файл если не существует
+        if not os.path.exists(log_file):
+            with open(log_file, 'w', encoding='utf-8') as f:
+                f.write("=== Лог ошибок  ===\n\n")
+
+        # Формируем запись
+        timestamp = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        error_type = type(error).__name__
+        stacktrace = traceback.format_exc()
+
+        log_entry = f"[{timestamp}] | СООБЩЕНИЕ: {message}| МЕТОД: {method_prefix} | \n{error_type}: {str(error)}\n{stacktrace}\n"
+
+        # Записываем в файл
+        with open(log_file, 'a', encoding='utf-8') as f:
+            f.write("=" * 60 + "\n\n")
+            f.write(log_entry)
+            f.write("=" * 60 + "\n\n")
+
+    except Exception as log_e:
+        print(f"Ошибка при логировании: {log_e}")
+
+
 
 # ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
 def check_is_first_run():

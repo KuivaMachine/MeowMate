@@ -2,6 +2,7 @@
 .__pycache__
 build
 dist
+logs.txt
 build_info.txt
 resources/.env
 Установочные пакеты

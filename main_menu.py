@@ -26,7 +26,7 @@ from ui.switch_button import SwitchButton
 from ui.updates_info_window import UpdateInfoWindow
 from utils.enums import ThemeColor, CharactersList
 from utils.update_script import UpdatesChecker, UpdatesDownloader, UpdatesInstaller
-from utils.utils import check_is_first_run
+from utils.utils import check_is_first_run, log_error
 
 
 # ЧИТАЕМ НАСТРОЙКИ ИЗ ПАПКИ APPDATA И СОЗДАЕМ, ЕСЛИ ИХ НЕТ
@@ -473,9 +473,12 @@ class MainMenuWindow(QMainWindow):
 
 
 if __name__ == "__main__":
-    app = QApplication(sys.argv)
-    app.setQuitOnLastWindowClosed(False)
-    check_settings()
-    window = MainMenuWindow()
-    window.show()
-    app.exec()
+    try:
+        app = QApplication(sys.argv)
+        app.setQuitOnLastWindowClosed(False)
+        check_settings()
+        window = MainMenuWindow()
+        window.show()
+        app.exec()
+    except Exception as e:
+        log_error("Ошибка при запуске MainMenuWindow", str(e), "ГЛАВНЫЙ МЕТОД ЗАПУСКА")

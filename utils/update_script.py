@@ -11,6 +11,8 @@ import requests
 from PyQt5.QtCore import QThread, pyqtSignal
 from dotenv import load_dotenv
 
+from utils.utils import log_error
+
 
 def load_settings(path):
     try:
@@ -39,8 +41,10 @@ def send_statistic(url, kiwi, version):
         if response.status_code == 200:
             print("Статистика отправлена")
         else:
+            log_error(response.text, "send_statistic")
             print(f"Ошибка: {response.text}")
     except Exception as e:
+        log_error(str(e), "send_statistic")
         print(f"Ошибка соединения: {str(e)}")
 
 def is_new_version(github_version, current_version):
@@ -61,12 +65,13 @@ class UpdatesChecker(QThread):
     def run(self):
 
         current_version = load_settings(os.path.join(self.APPDIR, "version.json"))["version"]
-        if self.is_first_run:
-            load_dotenv(self.APPDIR / '_internal' / './resources' / '.env')  # ДЛЯ РЕЛИЗА
-            # load_dotenv('./resources/.env') # ДЛЯ ЛОКАЛЬНОГО ЗАПУСКА
-            send_statistic(os.getenv("apple"), os.getenv("kiwi"), current_version)
 
         try:
+            if self.is_first_run:
+                load_dotenv(self.APPDIR / '_internal' / './resources' / '.env')  # ДЛЯ РЕЛИЗА
+                # load_dotenv('./resources/.env') # ДЛЯ ЛОКАЛЬНОГО ЗАПУСКА
+                send_statistic(os.getenv("apple"), os.getenv("kiwi"), current_version)
+
             response = requests.get(self.VERSION_URL)
             data_from_github = json.loads(response.text)
             github_version = data_from_github["version"]
@@ -77,12 +82,16 @@ class UpdatesChecker(QThread):
                 print("Обновлений нет")
                 return None
         except requests.ConnectionError:
+            log_error("Нет интернета", "UpdatesChecker.run")
             print("Нет интернета (requests.ConnectionError)")
         except requests.Timeout:
+            log_error("Таймаут соединения", "UpdatesChecker.run")
             print("Таймаут соединения")
         except requests.HTTPError as e:
+            log_error("HTTP ошибка",e.response.status_code, "UpdatesChecker.run" )
             print(f"HTTP ошибка: {e.response.status_code}")
         except Exception as e:
+            log_error("Ошибка загрузки", str(e), "UpdatesChecker.run" )
             print(f"Ошибка загрузки: {str(e)}")
         finally:
             return None
