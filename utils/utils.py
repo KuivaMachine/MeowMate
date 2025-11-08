@@ -1,3 +1,5 @@
+import winreg
+
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPixmap, QPainter, QIcon
 from PyQt5.QtSvg import QSvgRenderer
@@ -8,6 +10,29 @@ from utils.enums import BongoType
 ABM_GETTASKBARPOS = 0x00000005
 ABE_BOTTOM = 3
 
+# ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
+def check_is_first_run():
+    # Путь к ключу в реестре
+    reg_path = r"Software\KuivaMachine\MeowMate"
+    key_name = "is_first_run"
+
+    try:
+        # Открываем ключ для чтения (HKEY_CURRENT_USER)
+        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ) as key:
+            value, reg_type = winreg.QueryValueEx(key, key_name)
+            print(value)
+            if value == b'\x01':
+                print("Первый запуск")
+                # Переоткрываем ключ для записи
+                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as w_key:
+                    winreg.SetValueEx(w_key, key_name, 0, winreg.REG_BINARY, b'\x00')  # Записываем 0 (байты)
+                return True
+            else:
+                print("Не первый запуск")
+                return False
+    except FileNotFoundError:
+        print("Ключ реестра не найден!")
+        return True
 
 def get_taskbar_height(screen):
     screen_rect = screen.geometry()

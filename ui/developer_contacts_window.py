@@ -36,7 +36,7 @@ class ContactWindow(SettingsWindow):
 
 
         # ТИТУЛЬНИК
-        self.title = QLabel("Связь с\nразработчиком:", self)
+        self.title = QLabel("Напиши отзыв\nразработчику:", self)
         self.title.setObjectName("title")
         self.title.setGeometry(20, 20, 300, 80)
 

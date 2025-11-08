@@ -27,7 +27,8 @@ class Flork(Character):
         self.isAnimationPlaying = False             # ИГРАЕТ ЛИ СЕЙЧАС АНИМАЦИЯ
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint|
+            Qt.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         screen = QApplication.primaryScreen()

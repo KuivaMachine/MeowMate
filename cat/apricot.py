@@ -81,7 +81,9 @@ class Cat(Character):
 
         # НАСТРОЙКИ ОКНА
 
-        self.setWindowFlags(Qt.WindowType.FramelessWindowHint | Qt.WindowType.WindowStaysOnTopHint)
+        self.setWindowFlags(Qt.WindowType.FramelessWindowHint |
+                            Qt.WindowType.WindowStaysOnTopHint|
+                            Qt.Tool)
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(QRect(800, (self.monitor_height - self.cat_window_size) + self.CAT_GAP, self.cat_window_size,
                                self.cat_window_size))

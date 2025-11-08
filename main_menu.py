@@ -1,15 +1,13 @@
 import json
 import os
 import sys
-import time
-import winreg
 from pathlib import Path
 
 from PyQt5.QtCore import Qt, QPoint, QTimer, pyqtSignal
-from PyQt5.QtGui import QFontDatabase
+from PyQt5.QtGui import QFontDatabase, QIcon
 from PyQt5.QtSvg import QSvgWidget
 from PyQt5.QtWidgets import QMainWindow, QWidget, QVBoxLayout, QHBoxLayout, QLabel, QApplication, QPushButton, \
-    QMessageBox
+    QSystemTrayIcon, QMenu, QAction
 
 from bongo.bongo import Bongo
 from cat.apricot import Cat
@@ -19,38 +17,16 @@ from ui.blink import Blinker
 from ui.description_plus_buttons_window import DescriptionWindow
 from ui.developer_contacts_window import ContactWindow
 from ui.download_window import DownloadWindow
+from ui.instruction_window import InstructionWindow
 from ui.portal import Portal
 from ui.question_for_update_window import QuestionWindow
 from ui.scroll_area import CharactersGallery
 from ui.service_button import SvgButton
 from ui.switch_button import SwitchButton
 from ui.updates_info_window import UpdateInfoWindow
-from utils.update_script import UpdatesChecker, UpdatesDownloader, UpdatesInstaller
 from utils.enums import ThemeColor, CharactersList
-
-
-# ИЩЕМ ФЛАГ ПЕРВОГО ЗАПУСКА ДЛЯ ОТОБРАЖЕНИЯ ОКНА ИЗМЕНЕНИЙ
-def check_is_first_run():
-    # Путь к ключу в реестре
-    reg_path = r"Software\KuivaMachine\MeowMate"
-    key_name = "is_first_run"
-
-    try:
-        # Открываем ключ для чтения (HKEY_CURRENT_USER)
-        with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_READ) as key:
-            value, reg_type = winreg.QueryValueEx(key, key_name)
-            if value == b'\x01':
-                print("Первый запуск")
-                # Переоткрываем ключ для записи
-                with winreg.OpenKey(winreg.HKEY_CURRENT_USER, reg_path, 0, winreg.KEY_WRITE) as w_key:
-                    winreg.SetValueEx(w_key, key_name, 0, winreg.REG_BINARY, b'\x00')  # Записываем 0 (байты)
-                return True
-            else:
-                print("Не первый запуск")
-                return False
-    except FileNotFoundError:
-        print("Ключ реестра не найден!")
-        return True
+from utils.update_script import UpdatesChecker, UpdatesDownloader, UpdatesInstaller
+from utils.utils import check_is_first_run
 
 
 # ЧИТАЕМ НАСТРОЙКИ ИЗ ПАПКИ APPDATA И СОЗДАЕМ, ЕСЛИ ИХ НЕТ
@@ -111,11 +87,11 @@ class MainMenuWindow(QMainWindow):
     resource_path = Path(__file__).parent / 'drawable'  # ПУТЬ К ПАПКЕ С РЕСУРСАМИ
     theme_color = ThemeColor.LIGHT  # ТЕМА ПО УМОЛЧАНИЮ СВЕТЛАЯ
     theme_change_signal = pyqtSignal(ThemeColor)  # СИГНАЛ О СМЕНЕ ТЕМЫ
-    new_version = '1.0.8' # НОМЕР ТЕКУЩЕЙ ВЕРСИИ
+    new_version = '1.0.9' # НОМЕР ТЕКУЩЕЙ ВЕРСИИ
     whats_new_text = """ 
-- Исправлены баги.
-- Улучшена графика.
-- Добавлена поддержка обновлений.
+- Персонажи закрываются правой 
+кнопкой мыши, и их иконки не 
+мешаются на панели задач.
     """                     # ИНФОРМАЦИЯ ОБ ОБНОВЛЕНИИ
 
     def __init__(self):
@@ -198,19 +174,48 @@ class MainMenuWindow(QMainWindow):
             self.show_updates_info()
             self.is_first_run = True
 
+        self.init_tray()
         self.setup_update_checker(self.is_first_run)
 
 
+
+    def init_tray(self):
+        # Создаем иконку в системном трее
+        self.tray_icon = QSystemTrayIcon(self)
+        self.tray_icon.setIcon(QIcon(str(get_resource_path("resources/icon.ico"))))
+        self.tray_icon.setToolTip("Нажмите правой кнопкой для закрытия")
+        # Создаем контекстное меню для трея
+        tray_menu = QMenu()
+        quit_action = QAction("Закрыть", self)
+        quit_action.triggered.connect(self.quit_app)
+        tray_menu.addAction(quit_action)
+
+        self.tray_icon.setContextMenu(tray_menu)
+        self.tray_icon.activated.connect(self.tray_icon_activated)
+        self.tray_icon.show()
+
+
+
+    def tray_icon_activated(self, reason):
+        if reason == QSystemTrayIcon.DoubleClick:
+            if self.isVisible():
+                self.hide()
+            else:
+                self.show()
+
+    def quit_app(self):
+        self.tray_icon.hide()
+        QApplication.quit()
 
     def setup_update_checker(self,is_first_run):
         self.update_checker_thread = UpdatesChecker(is_first_run)
         self.update_checker_thread.update_available.connect(self.show_update_dialog)
         self.update_checker_thread.start()
 
-    def show_update_dialog(self, download_url):
+    def show_update_dialog(self, version, download_url):
         self.update_checker_thread.quit()
         self.update_checker_thread.wait()
-        self.question_box = QuestionWindow(self.root_container)
+        self.question_box = QuestionWindow(self.root_container, version)
         self.question_box.yes_event.connect(lambda: (
             self.question_box.close(),
             self.downloading_updates(download_url)))
@@ -259,6 +264,9 @@ class MainMenuWindow(QMainWindow):
     # КНОПКА "ЗАПУСТИТЬ"
     def on_start_button_push(self):
         selected_character = None
+        if self.is_first_run:
+            self.instruction_window = InstructionWindow(self)
+            self.instruction_window.show()
 
         match self.characters_panel.selected_card.character_name:
             case 'БОНГО-КОТ':
@@ -291,6 +299,8 @@ class MainMenuWindow(QMainWindow):
 
         if self.is_setting_showing:
             self.settings_window.close()
+
+
 
     # ПРОВЕРЯЕТ, ЕСТЬ ЛИ ЗАПУЩЕННЫЙ ПЕРСОНАЖ "АБРИКОС"
     def is_cat_exists(self):
@@ -464,6 +474,7 @@ class MainMenuWindow(QMainWindow):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    app.setQuitOnLastWindowClosed(False)
     check_settings()
     window = MainMenuWindow()
     window.show()

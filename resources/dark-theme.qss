@@ -444,7 +444,7 @@ QLabel#download_title{
 
 /* QUESTION WINDOW */
    QLabel#question_window_root{
-   border: none;
+   border: 3px solid white;
    border-radius: 15px;
    background-color: #666666;
 }
