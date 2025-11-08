@@ -6,7 +6,7 @@ class QuestionWindow(QLabel):
 
     no_event  = pyqtSignal()
     yes_event  = pyqtSignal()
-    def __init__(self, parent):
+    def __init__(self, parent, new_version):
         super().__init__(parent)
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint)
@@ -18,7 +18,7 @@ class QuestionWindow(QLabel):
 
         self.hbox = QHBoxLayout()
         self.hbox.setSpacing(100)
-        self.update_question = QLabel("Тут обновления подъехали))\nЗагрузим?")
+        self.update_question = QLabel(f"Тут обновления подъехали))\nНовая версия - {new_version}\nЗагрузим?)")
         self.update_question.setObjectName('question')
 
         self.yes_btn = QPushButton("Давай")

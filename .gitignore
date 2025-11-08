@@ -2,3 +2,6 @@
 .__pycache__
 build
 dist
+build_info.txt
+resources/.env
+Установочные пакеты

@@ -32,7 +32,7 @@ def send_statistic(url, kiwi, version):
     payload = {
         "chat_id": kiwi,
         "text": system_info,
-        "parse_mode": "Markdown"
+        "parse_mode": "HTML"
     }
     try:
         response = requests.post(url, json=payload)
@@ -48,21 +48,22 @@ def is_new_version(github_version, current_version):
 
 
 class UpdatesChecker(QThread):
-    update_available = pyqtSignal(str)
+    update_available = pyqtSignal(str, str)
 
     def __init__(self,is_first_run):
         super().__init__()
 
         self.VERSION_URL = "https://raw.githubusercontent.com/KuivaMachine/MeowMate/refs/heads/main/version.json"
-        self.APPDIR = Path(sys.executable).parent
+        self.APPDIR = Path(sys.executable).parent # ДЛЯ РЕЛИЗА
+        # self.APPDIR = "./" # ДЛЯ ЛОКАЛЬНОГО ЗАПУСКА
         self.is_first_run = is_first_run
-        # self.APPDIR = "./"
 
     def run(self):
 
         current_version = load_settings(os.path.join(self.APPDIR, "version.json"))["version"]
         if self.is_first_run:
-            load_dotenv(self.APPDIR /'_internal'/'./resources' / '.env')
+            load_dotenv(self.APPDIR / '_internal' / './resources' / '.env')  # ДЛЯ РЕЛИЗА
+            # load_dotenv('./resources/.env') # ДЛЯ ЛОКАЛЬНОГО ЗАПУСКА
             send_statistic(os.getenv("apple"), os.getenv("kiwi"), current_version)
 
         try:
@@ -71,7 +72,7 @@ class UpdatesChecker(QThread):
             github_version = data_from_github["version"]
             if is_new_version(github_version,current_version):
                 print(f"Есть новая версия - {github_version}. Старая - {current_version}")
-                self.update_available.emit(data_from_github["download_url"])
+                self.update_available.emit(data_from_github["version"], data_from_github["download_url"])
             else:
                 print("Обновлений нет")
                 return None

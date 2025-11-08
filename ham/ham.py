@@ -23,7 +23,8 @@ class Ham(Character):
         self.is_first_frame = False                     # ФЛАГ ДЛЯ ПЕРВОГО КАДРА ГИФКИ
         self.setWindowFlags(
             Qt.WindowType.FramelessWindowHint |
-            Qt.WindowType.WindowStaysOnTopHint
+            Qt.WindowType.WindowStaysOnTopHint|
+            Qt.Tool
         )
         self.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.setGeometry(500, 500, int(self.size*1.78), self.size)
